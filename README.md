@@ -1,2 +1,6 @@
-# projet_l3_s6
-jeux réseaux
+# Projet semestre 6 - Licence 3 informatique
+
+#### Bathily Yahaya - Angonkoui Rachelle
+
+
+Jeux de combat multijoueur
