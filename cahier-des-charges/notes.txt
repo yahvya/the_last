@@ -4,7 +4,9 @@ partie 5 :
         Le code / produit sous format zip
         
     Tâches:
-
+        Réfléchir au design
+        Récupérer les images représentant les caractères du jeux 
+        (https://luizmelo.itch.io/)
     Planning:
 
     Communication:
@@ -13,3 +15,4 @@ partie 5 :
 
         L'éditeur utilisé sera vscode avec l'aide son extension liveshare qui permet d'éditer les mêmes fichiers tout en étant en appel ou en discussion par chat
         
+    
