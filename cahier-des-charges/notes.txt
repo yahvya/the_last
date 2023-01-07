@@ -1,0 +1,14 @@
+partie 5 :
+
+    Livrabes:
+        Le code / produit sous format zip
+        
+    Tâches:
+
+    Planning:
+
+    Communication:
+
+        Le partage et versionnage du code se fait via un dépôt git commun
+
+        L'éditeur utilisé sera vscode avec l'aide son extension liveshare qui permet d'éditer les mêmes fichiers tout en étant en appel ou en discussion par chat
