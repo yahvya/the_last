@@ -1,18 +1,25 @@
-partie 5 :
-
-    Livrabes:
-        Le code / produit sous format zip
-        
-    Tâches:
-        Réfléchir au design
-        Récupérer les images représentant les caractères du jeux 
-        (https://luizmelo.itch.io/)
-    Planning:
-
-    Communication:
-
-        Le partage et versionnage du code se fait via un dépôt git commun
-
-        L'éditeur utilisé sera vscode avec l'aide son extension liveshare qui permet d'éditer les mêmes fichiers tout en étant en appel ou en discussion par chat
-        
+2.1:
     
+2.2
+    De qui vient se projet à trouver ?
+    On souhaite créer un jeux de combat 1 contre 1 personnalisable pouvant être joué via un réseau local.
+    Le joueur devrait donc pouvoir lancer une partie qui pourra être rejoint par un autre sur le même réseau ainsi que de créer ses propres personnages.
+
+2.3
+    Bathily Yahaya ?
+    Agonkoui Rachelle ?
+
+3.1 
+    L'utilisateur du produit peut être toute personne en âge d'utiliser et appréciant les jeux de combat
+
+    Fonctionnalités:
+        choisir un personnage
+        importer ses personnages
+        lancer une partie
+        sauvegarder et continuer une partie sauvegarder
+    
+3.2
+   Partie
+        Joueur
+            pseudo
+            
