@@ -19,7 +19,18 @@
         sauvegarder et continuer une partie sauvegarder
     
 3.2
-   Partie
-        Joueur
-            pseudo
+   FIchier
+
+3.3
+    Nous allons partir sur 
+        l'utilisation de Java
+        la librairie java JavaFx pour l'interface
+        la libraire Gson pour le transformation de nos fichiers de configurations
+
+3.4
+    A voir
+    
+
+
+    
             
