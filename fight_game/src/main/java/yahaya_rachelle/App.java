@@ -1,7 +1,5 @@
 package yahaya_rachelle;
 
-import javafx.application.Application;
-
 class App
 {
     /**
