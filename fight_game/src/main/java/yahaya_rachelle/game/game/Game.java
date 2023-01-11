@@ -12,7 +12,9 @@ public class Game extends Application {
 
     public static final String GAME_NAME = "Rachelle - Yahaya | Nom du jeux";
     public static final String DEFAULT_FAVICON_PATH = "/images/app/favicon.png";
-    public static final String DEFAUT_COLOR_ON_FAVICON = "white";
+    public static final String DEFAULT_LOADING_POSTER = "/images/app/loading-poster.png";
+    public static final String DEFAULT_LOADING_FONT = "/fonts/basic.ttf";
+    public static final String DEFAUT_COLOR_ON_FAVICON = "#a0714bdb";
 
     private Stage window;
 

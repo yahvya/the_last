@@ -8,10 +8,12 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 import yahaya_rachelle.game.exception.KeyNotExist;
 import yahaya_rachelle.game.game.Game;
@@ -55,30 +57,41 @@ public class LoadingScene extends GameScene{
      */
     public void putBackgroundImage(GraphicsContext pen) throws KeyNotExist
     {
-        pen.drawImage(new Image(this.getClass().getResource(Game.DEFAULT_FAVICON_PATH).toString() ),0,0,Game.GAME_WINDOW_WIDTH,Game.GAME_WINDOW_HEIGHT);
+        pen.drawImage(new Image(this.getClass().getResource(Game.DEFAULT_LOADING_POSTER).toString() ),0,0,Game.GAME_WINDOW_WIDTH,Game.GAME_WINDOW_HEIGHT);
     }
    
     /**
-     * ajoute le cercle de chargement
+     * ajoute les animations de chargements
      * @param list
      * @throws KeyNotExist
      */
     public void addLoadingAnimation(ObservableList<Node> list) throws KeyNotExist
-    {
+    {   
+        Paint color = Paint.valueOf(Game.DEFAUT_COLOR_ON_FAVICON);
+
         final int circle_raduis = 15;
         final int rotationSpeed = 95;
+        final int yTranslation = 110;
+
+        Label loadingText = new Label("Chargement des ressources");
+
+        Font font = Font.loadFont(this.getClass().getResource(Game.DEFAULT_LOADING_FONT).toString(),25);
+
+        loadingText.setFont(font);
+        loadingText.setTextFill(color);
+        loadingText.setTranslateY(yTranslation);
 
         Circle loadingCircle = new Circle();
 
         loadingCircle.setFill(null);
         loadingCircle.setRadius(circle_raduis);
-        loadingCircle.setStroke(Paint.valueOf(Game.DEFAUT_COLOR_ON_FAVICON) );
+        loadingCircle.setStroke(color);
         loadingCircle.setStrokeWidth(5);
         loadingCircle.getStrokeDashArray().add(15d);
-        loadingCircle.setTranslateX(Game.GAME_WINDOW_WIDTH / 2 - circle_raduis - 30);
-        loadingCircle.setTranslateY(Game.GAME_WINDOW_HEIGHT / 2 - circle_raduis - 30);
+        loadingCircle.setTranslateY(yTranslation + 60);
 
         this.loadingAnimationTimeline = new Timeline(new KeyFrame(Duration.millis(rotationSpeed),e -> {
+
             double currentRotation = loadingCircle.getRotate();
 
             loadingCircle.setRotate(currentRotation + 30);
@@ -86,8 +99,9 @@ public class LoadingScene extends GameScene{
 
         this.loadingAnimationTimeline.setCycleCount(Animation.INDEFINITE);
         this.loadingAnimationTimeline.play();
-        
+
         list.add(loadingCircle);
+        list.add(loadingText);
     }
 
     /**
