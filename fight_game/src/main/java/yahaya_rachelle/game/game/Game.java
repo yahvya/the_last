@@ -1,15 +1,9 @@
 package yahaya_rachelle.game.game;
 
-import java.net.URL;
-import java.util.HashMap;
-
 import javafx.application.Application;
 import javafx.scene.image.Image;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
-import yahaya_rachelle.game.exception.KeyNotExist;
-import yahaya_rachelle.game.scene.HomeScene;
+import yahaya_rachelle.game.scene.LoadingScene;
 
 public class Game extends Application {
 
@@ -17,96 +11,50 @@ public class Game extends Application {
     public static final int GAME_WINDOW_HEIGHT = 450;
 
     public static final String GAME_NAME = "Rachelle - Yahaya | Nom du jeux";
-
-    private HashMap<String,String> resourcesPathMap;
+    public static final String DEFAULT_FAVICON_PATH = "/images/app/favicon.png";
+    public static final String DEFAUT_COLOR_ON_FAVICON = "white";
 
     private Stage window;
+
+    private GameDataManager gameDataManager;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.window = primaryStage;
-        this.resourcesPathMap = new HashMap<String,String>();
+        this.gameDataManager = new GameDataManager();
 
-        this.fillPathMap();
         this.setWindowStyle();
-        this.addBackgroundSound();
 
-        HomeScene homePage = new HomeScene(this);
+        // affichage de la page de chargement du jeux
+        LoadingScene loadingPage = new LoadingScene(this);
 
-        homePage.putSceneInWindow(null);
+        loadingPage.putSceneInWindow();
 
         primaryStage.show();
         primaryStage.centerOnScreen();
+
+        this.gameDataManager.loadDatas();
+
+        // loadingPage.destroyScene();
     }
     
     /**
      * définis l'apparence de base de la fenêtre
      * @param primaryStage
      */
-    public void setWindowStyle(){
+    private void setWindowStyle(){
         this.window.setWidth(Game.GAME_WINDOW_WIDTH);
         this.window.setHeight(Game.GAME_WINDOW_HEIGHT);
         this.window.setResizable(false);
         this.window.setTitle(Game.GAME_NAME);
-        try
-        {
-            this.window.getIcons().add(new Image(this.getResource("app_images","app-icon.png").toString() ) );
-        }
-        catch(KeyNotExist e){}
+        this.window.getIcons().add(new Image(this.getClass().getResource(Game.DEFAULT_FAVICON_PATH).toString() ) );
     }
-
-    /**
-     * joue la musique de fond du jeux
-     */
-    public void addBackgroundSound() throws KeyNotExist
-    {
-        Media sound = new Media(this.getResource("app_songs","home.mp3").toString() );
-        MediaPlayer soundPlayer = new MediaPlayer(sound);
-
-        soundPlayer.play();
-    }
-
-    /**
-     * rempli la hashmap avec les chemin des différentes resources
-     */
-    public void fillPathMap(){
-        this.resourcesPathMap.put("characters","/characters/");
-        this.resourcesPathMap.put("app_images","/images/app/");
-        this.resourcesPathMap.put("app_items","/images/items/");
-        this.resourcesPathMap.put("app_scenes","/images/scenes/");
-        this.resourcesPathMap.put("app_songs","/songs/app/");
-        this.resourcesPathMap.put("game_songs","/songs/game/");
-        this.resourcesPathMap.put("fonts","/fonts/");
-    }
-
-    /**
-     * 
-     * @param key
-     * @param resourcePath
-     * @return l'URL d'une resource à partir de la map
-     * @throws KeyNotExist
-     */
-    public URL getResource(String key,String resourcePath) throws KeyNotExist{
-        if(!this.resourcesPathMap.containsKey(key) )
-            throw new KeyNotExist();
-
-        return this.getClass().getResource(this.resourcesPathMap.get(key) + resourcePath);
-    }
-
-    /**
-     * 
-     * @return la map des chemins des sources
-     */
-    public HashMap<String,String> getResourcesPathMap(){
-        return this.resourcesPathMap;
-    }
-
-    /**
-     * 
-     * @return la fenêtre principale
-     */
-    public Stage getWindow()
-    {
+    
+    public Stage getWindow(){
         return this.window;
+    }
+
+    public GameDataManager getGameDataManager() {
+        return this.gameDataManager;
     }
 }

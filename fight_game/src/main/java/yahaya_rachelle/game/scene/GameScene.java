@@ -2,37 +2,40 @@ package yahaya_rachelle.game.scene;
 
 import javafx.scene.Scene;
 import yahaya_rachelle.game.game.Game;
+import yahaya_rachelle.game.game.GameDataManager;
 
 public abstract class GameScene {
 
     protected Game game;
+    protected GameDataManager gameDataManager;
 
     protected Scene page;
 
     public GameScene(Game game)
     {
         this.game = game;
+        this.gameDataManager = game.getGameDataManager();
         this.page = null;
     }
 
     /**
      * permet d'afficher la page sur la fenêtre
      */
-    public void putSceneInWindow(SceneData sceneData,boolean update)
+    public void putSceneInWindow(boolean update)
     {
-        this.game.getWindow().setScene(this.page == null || update ? this.buildPage(sceneData) : this.page);
+        this.game.getWindow().setScene(this.page == null || update ? this.buildPage() : this.page);
     }
 
     /**
      * permet d'afficher la page sur la fenêtre
      */
-    public void putSceneInWindow(SceneData sceneData)
+    public void putSceneInWindow()
     {
-        this.putSceneInWindow(sceneData,false);
+        this.putSceneInWindow(false);
     }
 
     /**
      * permet de construire la scène
      */
-    protected abstract Scene buildPage(SceneData sceneData);
+    protected abstract Scene buildPage();
 }

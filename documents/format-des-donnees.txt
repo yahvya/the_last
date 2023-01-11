@@ -1,0 +1,4 @@
+les clés à utiliser dans les maps partagés sont à définir dans l'énumération Key
+
+format du nom d'une clé : PREFIX_NOM_REEL
+exemple pour une clé de chemin: PATH_FONTS
