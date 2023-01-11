@@ -35,14 +35,15 @@ public class Game extends Application {
         primaryStage.show();
         primaryStage.centerOnScreen();
 
-        this.gameDataManager.loadDatas();
+        // chargement des données et action à exécuter après chargement
+        this.gameDataManager.loadDatas(() -> {
 
-        // loadingPage.destroyScene();
+            // loadingPage.destroyScene();
+        });
     }
     
     /**
      * définis l'apparence de base de la fenêtre
-     * @param primaryStage
      */
     private void setWindowStyle(){
         this.window.setWidth(Game.GAME_WINDOW_WIDTH);

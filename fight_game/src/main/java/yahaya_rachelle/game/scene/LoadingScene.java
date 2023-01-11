@@ -61,7 +61,7 @@ public class LoadingScene extends GameScene{
     }
    
     /**
-     * ajoute les animations de chargements
+     * ajoute les animations de chargement
      * @param list
      * @throws KeyNotExist
      */

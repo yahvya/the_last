@@ -8,6 +8,7 @@ import javafx.scene.media.Media;
 import javafx.scene.text.Font;
 import yahaya_rachelle.game.exception.KeyNotExist;
 import yahaya_rachelle.game.game.GameLoader.Key;
+import yahaya_rachelle.game.utils.GameCallback;
 
 public class GameDataManager {
     private HashMap<Key,String> resourcesPathMap;
@@ -18,8 +19,19 @@ public class GameDataManager {
     /**
      * charge les donées du jeux
      */
-    public void loadDatas(){
-        new GameLoader(this);
+    public void loadDatas(GameCallback toCall){
+        GameDataManager manager = this;
+
+        Thread loadingThread = new Thread(){
+            @Override
+            public void run()
+            {   
+                new GameLoader(manager);
+                toCall.action();;
+            }
+        };
+
+        loadingThread.start();
     }
 
     /**
@@ -68,5 +80,4 @@ public class GameDataManager {
     public void setItemsMap(HashMap<Key,Image> itemsMap) {
         this.itemsMap = itemsMap;
     }
-    
 }

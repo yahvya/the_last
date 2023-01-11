@@ -5,7 +5,7 @@ import java.util.HashMap;
 import javafx.scene.text.Font;
 import yahaya_rachelle.game.exception.KeyNotExist;
 
-public class GameLoader {
+public class GameLoader{
 
     GameDataManager gameDataManager;
 
@@ -44,8 +44,7 @@ public class GameLoader {
     /**
      * rempli la map avec les polices
      */
-    public void fillFonts()
-    {
+    public void fillFonts(){
         HashMap<Key,Font> fontsMap = new HashMap<Key,Font>();
 
         try
@@ -61,10 +60,9 @@ public class GameLoader {
     /**
      * rempli la map des images (items) de jeux
      */
-    public void fillGameItems()
-    {
+    public void fillGameItems(){
         
-    }
+    }   
 
     /**
      * représente la liste des clés des map de données du jeux
