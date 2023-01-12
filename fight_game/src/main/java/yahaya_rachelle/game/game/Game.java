@@ -3,8 +3,8 @@ package yahaya_rachelle.game.game;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import yahaya_rachelle.game.scene.HomeScene;
-import yahaya_rachelle.game.scene.LoadingScene;
+import yahaya_rachelle.game.scene.scene.HomeScene;
+import yahaya_rachelle.game.scene.scene.LoadingScene;
 
 public class Game extends Application {
 
