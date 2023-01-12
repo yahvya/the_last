@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import javafx.scene.image.Image;
 import javafx.scene.media.Media;
-import javafx.scene.text.Font;
 import yahaya_rachelle.game.exception.KeyNotExist;
 
 public class GameLoader{
@@ -49,12 +48,12 @@ public class GameLoader{
      * rempli la map avec les polices
      */
     public void fillFonts(){
-        HashMap<Key,Font> fontsMap = new HashMap<Key,Font>();
+        HashMap<Key,String> fontsMap = new HashMap<Key,String>();
 
         try
         {
-            fontsMap.put(Key.FONT_NORMAL,Font.loadFont(this.gameDataManager.getResource(Key.PATH_FONTS,"basic.ttf").toString(),25) );
-            fontsMap.put(Key.FONT_SPECIAL,Font.loadFont(this.gameDataManager.getResource(Key.PATH_FONTS,"special.ttf").toString(),25) );
+            fontsMap.put(Key.FONT_NORMAL,this.gameDataManager.getResource(Key.PATH_FONTS,"basic.ttf").toString() );
+            fontsMap.put(Key.FONT_SPECIAL,this.gameDataManager.getResource(Key.PATH_FONTS,"special.ttf").toString() );
         }
         catch(KeyNotExist e){}
 
@@ -70,6 +69,8 @@ public class GameLoader{
         try
         {
             gameItems.put(Key.ITEM_PARCHMENT,new Image(gameDataManager.getResource(Key.PATH_APP_ITEMS,"parchment.png").toString() ) );
+            gameItems.put(Key.ITEM_PARCHMENT_TEXTURE,new Image(gameDataManager.getResource(Key.PATH_APP_ITEMS,"parchment-texture.png").toString() ) );
+            gameItems.put(Key.ITEM_PARCHMENT_D_TEXTURE,new Image(gameDataManager.getResource(Key.PATH_APP_ITEMS,"parchment-d-texture.png").toString() ) );
         }
         catch(KeyNotExist e){}
 
@@ -102,7 +103,7 @@ public class GameLoader{
         // clé des polices
         FONT_SPECIAL,FONT_NORMAL,
         // clé des items
-        ITEM_PARCHMENT,
+        ITEM_PARCHMENT,ITEM_PARCHMENT_TEXTURE,ITEM_PARCHMENT_D_TEXTURE,
         // clé des sons
         SONG_APP_HOME,SONG_REFUSED_ACTION
     };

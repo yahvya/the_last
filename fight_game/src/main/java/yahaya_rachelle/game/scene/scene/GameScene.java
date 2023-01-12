@@ -18,6 +18,10 @@ public abstract class GameScene {
         this.page = null;
     }
 
+    public GameDataManager getGameDataManager(){
+        return this.gameDataManager;
+    }
+
     /**
      * permet d'afficher la page sur la fenêtre
      */

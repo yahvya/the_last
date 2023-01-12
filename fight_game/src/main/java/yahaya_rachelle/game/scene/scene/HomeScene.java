@@ -21,6 +21,7 @@ import javafx.util.Duration;
 import yahaya_rachelle.game.exception.KeyNotExist;
 import yahaya_rachelle.game.game.Game;
 import yahaya_rachelle.game.game.GameLoader.Key;
+import yahaya_rachelle.game.scene.popup.CreatePlayer;
 
 public class HomeScene extends GameScene{
 
@@ -75,7 +76,6 @@ public class HomeScene extends GameScene{
         final int width = 280;
         final int height = 350;
         
-
         menu.setMinWidth(width);
         menu.setMaxWidth(width);
         menu.setMinHeight(height);
@@ -91,7 +91,7 @@ public class HomeScene extends GameScene{
         Label loadGame = new Label("Charger une partie");
         Label startGame = new Label("Lancer une partie");
 
-        Font font = this.gameDataManager.getFontsMap().get(Key.FONT_NORMAL);
+        Font font = Font.loadFont(this.gameDataManager.getFontsMap().get(Key.FONT_NORMAL),25);
 
         // on coupe le texte s'il est trop grand
         createPlayer.setWrapText(true);
@@ -104,7 +104,7 @@ public class HomeScene extends GameScene{
         startGame.setFont(font);
 
         // ajout des évenements sur les actions
-        this.eventOnCreateNewPlayer(createPlayer);
+        this.eventOnCreateNewPlayer(createPlayer,container);
         this.eventOnLoadGame(loadGame);
         this.eventOnStartGame(startGame);
 
@@ -130,7 +130,7 @@ public class HomeScene extends GameScene{
 
         Label gameName = new Label(Game.GAME_NAME);
 
-        gameName.setFont(this.gameDataManager.getFontsMap().get(Key.FONT_SPECIAL) );
+        gameName.setFont(Font.loadFont(this.gameDataManager.getFontsMap().get(Key.FONT_SPECIAL),25) );
         gameName.setTranslateX(20);
         gameName.setTranslateY(10);
         gameName.setTextFill(Paint.valueOf("brown") );
@@ -165,13 +165,21 @@ public class HomeScene extends GameScene{
      * place l'évenement pour la création d'un joueur
      * @param createPlayer
      */
-    public void eventOnCreateNewPlayer(Label createPlayer){
+    public void eventOnCreateNewPlayer(Label createPlayer,AnchorPane container){
         createPlayer.setOnMouseClicked((e) ->  {
             if(this.canDoAction() )
             {
                 this.someActionIsPerforming = true;
 
-                System.out.println("on veut crée un joueur");
+                ObservableList<Node> children = container.getChildren();
+
+                // crée la zone de création d'un personnage
+                VBox creationBox = (VBox) new CreatePlayer(this,(box,isCanceled) -> {
+                    children.remove(box);
+                    this.someActionIsPerforming = false;
+                }).getPopup();
+
+                children.add(creationBox);
             }
                 
         });

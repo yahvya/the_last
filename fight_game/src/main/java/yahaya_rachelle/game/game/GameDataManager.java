@@ -6,14 +6,13 @@ import java.util.HashMap;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.media.Media;
-import javafx.scene.text.Font;
 import yahaya_rachelle.game.exception.KeyNotExist;
 import yahaya_rachelle.game.game.GameLoader.Key;
 import yahaya_rachelle.game.utils.GameCallback;
 
 public class GameDataManager {
     private HashMap<Key,String> resourcesPathMap;
-    private HashMap<Key,Font> fontsMap;
+    private HashMap<Key,String> fontsMap;
     private HashMap<Key,Media> songsMap;
     private HashMap<Key,Image> itemsMap;  
 
@@ -65,11 +64,11 @@ public class GameDataManager {
         this.resourcesPathMap = resourcesPathMap;
     }
 
-    public HashMap<Key,Font> getFontsMap() {
+    public HashMap<Key,String> getFontsMap() {
         return this.fontsMap;
     }
 
-    public void setFontsMap(HashMap<Key,Font> fontsMap) {
+    public void setFontsMap(HashMap<Key,String> fontsMap) {
         this.fontsMap = fontsMap;
     }
 
