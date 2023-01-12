@@ -90,7 +90,7 @@ public class LoadingScene extends GameScene{
         loadingCircle.getStrokeDashArray().add(15d);
         loadingCircle.setTranslateY(yTranslation + 60);
 
-        this.loadingAnimationTimeline = new Timeline(new KeyFrame(Duration.millis(rotationSpeed),e -> {
+        this.loadingAnimationTimeline = new Timeline(new KeyFrame(Duration.millis(rotationSpeed),(e) -> {
 
             double currentRotation = loadingCircle.getRotate();
 

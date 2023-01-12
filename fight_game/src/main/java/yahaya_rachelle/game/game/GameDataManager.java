@@ -3,6 +3,7 @@ package yahaya_rachelle.game.game;
 import java.net.URL;
 import java.util.HashMap;
 
+import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.media.Media;
 import javafx.scene.text.Font;
@@ -17,7 +18,7 @@ public class GameDataManager {
     private HashMap<Key,Image> itemsMap;  
 
     /**
-     * charge les donées du jeux
+     * charge les données du jeux
      */
     public void loadDatas(GameCallback toCall){
         GameDataManager manager = this;
@@ -27,7 +28,14 @@ public class GameDataManager {
             public void run()
             {   
                 new GameLoader(manager);
-                toCall.action();;
+                
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        toCall.action();
+                    }
+                });
             }
         };
 
