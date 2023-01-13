@@ -1,7 +1,9 @@
 package yahaya_rachelle.game.scene.popup;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -31,6 +33,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import yahaya_rachelle.game.game.Game;
 import yahaya_rachelle.game.game.GameDataManager;
@@ -46,6 +49,8 @@ public class CreatePlayer extends ScenePopup{
     private double width;
     private double height;
 
+    private ReentrantLock locker;
+
     public CreatePlayer(GameScene linkedScene,GameContainerCallback toDoOnConfirm) {
         super(linkedScene,toDoOnConfirm);
     }
@@ -55,16 +60,21 @@ public class CreatePlayer extends ScenePopup{
         this.actionsSequences = new HashMap<PlayerAction,ArrayList<Image> >();
         this.width = Game.GAME_WINDOW_WIDTH;
         this.height = Game.GAME_WINDOW_HEIGHT;
+        this.locker = new ReentrantLock();
         
         GameDataManager manager = this.linkedScene.getGameDataManager();
 
         VBox container = new VBox(20);
 
         container.setPadding(new Insets(10,20,10,20) );
-        container.setPrefSize(width,height);
         container.setBackground(new Background(new BackgroundImage(manager.getItemsMap().get(Key.ITEM_PARCHMENT_TEXTURE),BackgroundRepeat.REPEAT,BackgroundRepeat.REPEAT,BackgroundPosition.DEFAULT,BackgroundSize.DEFAULT) ) );
 
         ObservableList<Node> children = container.getChildren();
+
+        ScrollPane scrollableZone = new ScrollPane(container);
+
+        scrollableZone.setVbarPolicy(ScrollBarPolicy.NEVER);
+        scrollableZone.setMaxHeight(this.height - 30);
 
         Font specialNormal = Font.loadFont(manager.getFontsMap().get(Key.FONT_NORMAL),14);
 
@@ -78,17 +88,13 @@ public class CreatePlayer extends ScenePopup{
 
         this.addAttackZone(specialNormal,children,manager);
         this.addSuperAttackZone(specialNormal,children,manager);
-        // this.addRunZone(specialNormal,children,manager);
-        // this.addDeathZone(specialNormal,children,manager);
-        // this.addFallZone(specialNormal,children,manager);
-        // this.addJumpZone(specialNormal,children,manager);
-        // this.addStaticZone(specialNormal,children,manager);
-        // this.addTakeHitZone(specialNormal,children,manager);
+        this.addRunZone(specialNormal,children,manager);
+        this.addDeathZone(specialNormal,children,manager);
+        this.addFallZone(specialNormal,children,manager);
+        this.addJumpZone(specialNormal,children,manager);
+        this.addStaticZone(specialNormal,children,manager);
+        this.addTakeHitZone(specialNormal,children,manager);
         this.addConfirmation(specialNormal,children,message,manager);
-
-        ScrollPane scrollableZone = new ScrollPane(container);
-
-        scrollableZone.setVbarPolicy(ScrollBarPolicy.NEVER);
 
         return new VBox(scrollableZone);
     }
@@ -129,8 +135,6 @@ public class CreatePlayer extends ScenePopup{
         scrollableZone.setPadding(new Insets(5,2,10,5) );
         scrollableZone.setVbarPolicy(ScrollBarPolicy.NEVER);
 
-        // imagesListContainer.getChildren().addAll(new Label("bonjour"),new Label("bonjour"),new Label("bonjour"),new Label("bonjour"),new Label("bonjour"),new Label("bonjour"),new Label("bonjour"),new Label("bonjour"),new Label("bonjour"),new Label("bonjour") );
-
         children.add(scrollableZone);
 
         // ajout de la zone d'ajout et de preview
@@ -143,14 +147,18 @@ public class CreatePlayer extends ScenePopup{
 
         StackPane previewContainer = new StackPane();
 
-        ObservableList<Node> previewContainerChildren = previewContainer.getChildren();
-        
-        previewContainerChildren.add(new Label() );
-
         final double imageWidth = size / 2;
 
-        previewContainer.setMinSize(imageWidth,90);
-        previewContainer.setMaxSize(imageWidth,90);
+        // afficheur de l'image
+        ImageView imageView = new ImageView();
+
+        imageView.setFitWidth(imageWidth);
+        imageView.setFitHeight(90);
+        
+        previewContainer.getChildren().add(imageView);
+
+        previewContainer.setMinSize(imageWidth,130);
+        previewContainer.setMaxSize(imageWidth,130);
         
         apZone.getChildren().addAll(previewContainer,addButton);
         apZone.setAlignment(Pos.CENTER_LEFT);
@@ -162,30 +170,96 @@ public class CreatePlayer extends ScenePopup{
         container.setMinHeight(90);
         container.setAlignment(Pos.CENTER_LEFT);
 
-        imageList.add(new Image(this.getClass().getResource("/characters/1/death_1.png").toString() ) );
-        imageList.add(new Image(this.getClass().getResource("/characters/1/death_2.png").toString() ) );
-        imageList.add(new Image(this.getClass().getResource("/characters/1/death_3.png").toString() ) );
-        imageList.add(new Image(this.getClass().getResource("/characters/1/death_4.png").toString() ) );
+        ArrayList<Image> previewImageList = new ArrayList<Image>();
 
         Timeline previewTimeline = new Timeline(new KeyFrame(Duration.millis(100),(e) -> {
-            previewContainerChildren.remove(0);
-            
-            Image image = imageList.remove(0);
+            // on bloque l'accès à la liste d'images
+            this.locker.lock();
 
-            ImageView imageView = new ImageView(image);
+            try
+            {   
+                Image image = previewImageList.remove(0);
 
-            imageView.setFitWidth(imageWidth);
-            imageView.setFitHeight(90);
+                imageView.setImage(image);
+                
+                previewImageList.add(image);
+            }
+            catch(IndexOutOfBoundsException boundException){}
 
-            previewContainerChildren.add(imageView);
-            
-            imageList.add(image);
+            // on remet l'accès
+            this.locker.unlock();
         }) );
 
         previewTimeline.setCycleCount(Animation.INDEFINITE);
-        previewTimeline.play(); 
+
+        // ajout de l'ajout d'images
+        this.addNewImageZone(addButton,imageList,previewImageList,imagesListContainer,PlayerAction.ATTACK,manager,imageWidth,previewTimeline);
 
         return container;
+    }
+
+    public void addNewImageZone(Button addButton,ArrayList<Image> imageList,ArrayList<Image> previewList,HBox imagesListContainer,PlayerAction actionType,GameDataManager manager,final double imageWidth,Timeline previewTimeline)
+    {
+        addButton.setOnMouseClicked((e) -> {
+
+            // on lance la timeline de preview à la première image
+            if(imageList.size() == 0)
+                previewTimeline.play();
+
+            
+            // on crée la boxe conteneur de l'image
+            VBox addZone = new VBox(10);
+
+            ImageView imageView = new ImageView();
+
+            imageView.setFitWidth(90);
+            imageView.setFitHeight(90);
+
+            Button chooser = new Button("Choisir");
+
+            addZone.setAlignment(Pos.CENTER_LEFT);
+            addZone.getChildren().addAll(imageView,chooser);
+            addZone.setMaxSize(imageWidth,100);
+            addZone.setMinSize(imageWidth,100);
+            
+            imagesListContainer.getChildren().add(addZone);
+
+            FileChooser fileChooser = new FileChooser();
+
+            PreviewHelper helper = new PreviewHelper();
+
+            // évenement d'ajout d'image
+            chooser.setOnMouseClicked((clickEvent) -> {
+                File choosedFile = fileChooser.showOpenDialog(this.linkedScene.getGame().getWindow() );
+
+                if(choosedFile == null)
+                    return;
+
+                Image choosedImage = new Image(choosedFile.getAbsolutePath() );
+
+                this.locker.lock();
+
+                // alors l'image avait déjà été ajouté à la liste, on modifie
+                if(!helper.imageIsSet() )
+                {
+                    imageList.add(choosedImage);
+                    previewList.add(choosedImage);
+                }
+                else 
+                {
+                    Image previousImage = helper.getImage();
+
+                    imageList.set(imageList.indexOf(previousImage),choosedImage);
+                    previewList.set(previewList.indexOf(previousImage),choosedImage);
+                }
+
+                helper.setImage(choosedImage);
+
+                imageView.setImage(choosedImage);
+
+                this.locker.unlock();
+            });
+        });
     }
 
     /**
@@ -220,7 +294,11 @@ public class CreatePlayer extends ScenePopup{
      * @param children
      */
     public void addRunZone(Font font,ObservableList<Node> children,GameDataManager manager){
+        // création de la liste d'image de course pour la preview
+        ArrayList<Image> imageList = new ArrayList<Image>();
+        this.actionsSequences.put(PlayerAction.RUN,imageList);
 
+        children.add(this.createZone(font,"Course",imageList,manager) );
     }
 
     /**
@@ -229,7 +307,11 @@ public class CreatePlayer extends ScenePopup{
      * @param children
      */
     public void addDeathZone(Font font,ObservableList<Node> children,GameDataManager manager){
+        // création de la liste d'image de la mort pour la preview
+        ArrayList<Image> imageList = new ArrayList<Image>();
+        this.actionsSequences.put(PlayerAction.DEATH,imageList);
 
+        children.add(this.createZone(font,"Mort",imageList,manager) );
     }
 
     /**
@@ -238,7 +320,11 @@ public class CreatePlayer extends ScenePopup{
      * @param children
      */
     public void addJumpZone(Font font,ObservableList<Node> children,GameDataManager manager){
+        // création de la liste d'image des sauts pour la preview
+        ArrayList<Image> imageList = new ArrayList<Image>();
+        this.actionsSequences.put(PlayerAction.JUMP,imageList);
 
+        children.add(this.createZone(font,"Saut",imageList,manager) );
     }
 
     /**
@@ -247,7 +333,11 @@ public class CreatePlayer extends ScenePopup{
      * @param children
      */
     public void addFallZone(Font font,ObservableList<Node> children,GameDataManager manager){
+        // création de la liste d'image de descente pour la preview
+        ArrayList<Image> imageList = new ArrayList<Image>();
+        this.actionsSequences.put(PlayerAction.FALL,imageList);
 
+        children.add(this.createZone(font,"Descente",imageList,manager) );
     }
 
     /**
@@ -256,8 +346,12 @@ public class CreatePlayer extends ScenePopup{
      * @param children
      */
     public void addStaticZone(Font font,ObservableList<Node> children,GameDataManager manager){
+        // création de la liste d'image statiques pour la preview
+        ArrayList<Image> imageList = new ArrayList<Image>();
+        this.actionsSequences.put(PlayerAction.STATIC,imageList);
 
-    }
+        children.add(this.createZone(font,"Statique",imageList,manager) );
+    }   
 
     /**
      * ajout de la zone d'ajout des images de réception de dégâts
@@ -265,7 +359,11 @@ public class CreatePlayer extends ScenePopup{
      * @param children
      */
     public void addTakeHitZone(Font font,ObservableList<Node> children,GameDataManager manager){
+        // création de la liste d'image des dégats pour la preview
+        ArrayList<Image> imageList = new ArrayList<Image>();
+        this.actionsSequences.put(PlayerAction.TAKE_HIT,imageList);
 
+        children.add(this.createZone(font,"Dégâts",imageList,manager) );
     }
 
     /**
@@ -317,5 +415,34 @@ public class CreatePlayer extends ScenePopup{
         });
 
         return button;
+    }
+
+    class PreviewHelper
+    {
+        private Image image = null;
+
+        /**
+         * 
+         * @return si l'image a été affecté
+         */
+        public boolean imageIsSet(){
+            return this.image != null;
+        }
+
+        /**
+         * 
+         * @return l'image
+         */
+        public Image getImage(){
+            return this.image;
+        }
+
+        /**
+         * affecte l'image
+         * @param image
+         */
+        public void setImage(Image image){
+            this.image = image;
+        }
     }
 }

@@ -38,6 +38,15 @@ public abstract class GameScene {
         this.putSceneInWindow(false);
     }
 
+    
+    /**
+     * 
+     * @return le jeux lié
+     */
+    public Game getGame(){
+        return this.game;
+    }
+
     /**
      * permet de construire la scène
      */

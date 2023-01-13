@@ -69,8 +69,8 @@ public class GameLoader{
         try
         {
             gameItems.put(Key.ITEM_PARCHMENT,new Image(gameDataManager.getResource(Key.PATH_APP_ITEMS,"parchment.png").toString() ) );
-            gameItems.put(Key.ITEM_PARCHMENT_TEXTURE,new Image(gameDataManager.getResource(Key.PATH_APP_ITEMS,"parchment-texture.png").toString() ) );
             gameItems.put(Key.ITEM_PARCHMENT_D_TEXTURE,new Image(gameDataManager.getResource(Key.PATH_APP_ITEMS,"parchment-d-texture.png").toString() ) );
+            gameItems.put(Key.ITEM_PARCHMENT_TEXTURE,new Image(gameDataManager.getResource(Key.PATH_APP_ITEMS,"parchment-texture.png").toString() ) );
         }
         catch(KeyNotExist e){}
 
