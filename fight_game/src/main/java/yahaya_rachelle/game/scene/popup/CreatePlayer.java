@@ -1,10 +1,15 @@
 package yahaya_rachelle.game.scene.popup;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -12,9 +17,13 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -198,8 +207,18 @@ public class CreatePlayer extends ScenePopup{
         return container;
     }
 
-    public void addNewImageZone(Button addButton,ArrayList<Image> imageList,ArrayList<Image> previewList,HBox imagesListContainer,PlayerAction actionType,GameDataManager manager,final double imageWidth,Timeline previewTimeline)
-    {
+    /**
+     * ajoute la zone d'ajout d'images
+     * @param addButton
+     * @param imageList
+     * @param previewList
+     * @param imagesListContainer
+     * @param actionType
+     * @param manager
+     * @param imageWidth
+     * @param previewTimeline
+     */
+    public void addNewImageZone(Button addButton,ArrayList<Image> imageList,ArrayList<Image> previewList,HBox imagesListContainer,PlayerAction actionType,GameDataManager manager,final double imageWidth,Timeline previewTimeline){
         addButton.setOnMouseClicked((e) -> {
 
             // on lance la timeline de preview à la première image
@@ -363,7 +382,7 @@ public class CreatePlayer extends ScenePopup{
         ArrayList<Image> imageList = new ArrayList<Image>();
         this.actionsSequences.put(PlayerAction.TAKE_HIT,imageList);
 
-        children.add(this.createZone(font,"Dégâts",imageList,manager) );
+        children.add(this.createZone(font,"Degats",imageList,manager) );
     }
 
     /**
@@ -377,7 +396,7 @@ public class CreatePlayer extends ScenePopup{
         Button confirmationButton = this.getCustomButton("Ajouter mon personnage",font);
 
         confirmationButton.setOnMouseClicked((e) -> {
-            this.tryToConfirmCreation(message);
+            this.tryToConfirmCreation(message,manager);
         });
 
         children.add(confirmationButton);
@@ -386,8 +405,120 @@ public class CreatePlayer extends ScenePopup{
     /**
      * essaie de créer le personnage
      */
-    public void tryToConfirmCreation(Label messageDisplayer){
-        this.toDoOnConfirm.action(this.getPopup(),false);
+    public void tryToConfirmCreation(Label messageDisplayer,GameDataManager manager){
+        
+        boolean isOk = true;
+
+        // on vérifie que chaque action à au moins une image associé
+        for(Map.Entry<PlayerAction,ArrayList<Image> > entry : this.actionsSequences.entrySet() )
+        {
+            if(entry.getValue().size() < 2)
+            {
+                isOk = false;
+
+                break;
+            }
+        }   
+
+        if(isOk)
+        {
+            try
+            {
+                // récupération du numéro de dossier du nouveau personnage
+                File file = new File(manager.getResource(Key.PATH_CUSTOM_CHARACTERS,"index.txt").toURI() );
+
+                Scanner scanner = new Scanner(file);
+
+                String folderId = Integer.toString(scanner.nextInt() + 1);
+
+                scanner.close();
+
+                FileWriter writer = new FileWriter(file);
+
+                writer.write(folderId);
+
+                writer.close();
+
+                // création du dossier de destination
+                File folder = new File(this.getClass().getResource(manager.getResourcesPathMap().get(Key.PATH_CUSTOM_CHARACTERS) ).getPath().concat(folderId + "/") );
+
+                folder.mkdirs();
+
+                // création des images
+                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.ATTACK),folderId,"attack_state");
+                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.DEATH),folderId,"death");
+                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.FALL),folderId,"fall");
+                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.JUMP),folderId,"jump");
+                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.RUN),folderId,"run");
+                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.STATIC),folderId,"static");
+                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.SUPER_ATTACK),folderId,"super_attack");
+                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.TAKE_HIT),folderId,"take_hit");
+
+                this.toDoOnConfirm.action(this.getPopup(),false);
+            }
+            catch(Exception e)
+            {
+                messageDisplayer.setText("Une erreur s'est produite veuillez retenter");
+            }
+        }
+        else
+        {
+            ButtonType continueButton = new ButtonType("Continuer",ButtonData.YES);
+            ButtonType quitButton = new ButtonType("Quitter",ButtonData.NO);
+
+            Alert alert = new Alert(AlertType.CONFIRMATION,null,continueButton,quitButton);
+
+            alert.setTitle("Erreur de création");
+            alert.setHeaderText("Veuillez entrez toutes les images ou quitter la zone de création");
+            
+            messageDisplayer.setText("Veuillez entrez toutes les images ou quitter la zone de création");
+
+            Optional<ButtonType> choosedButton = alert.showAndWait();
+
+            if(choosedButton.get() == quitButton)
+                this.toDoOnConfirm.action(this.getPopup(),true);
+        }
+    }
+
+    /**
+     * ajoute dans le dossier le groupe d'image selon l'action
+     * @param manager
+     * @param imageList
+     * @param folderId
+     * @param actionName
+     */
+    public void createActionFileGroup(GameDataManager manager,ArrayList<Image> imageList,String folderId,String actionName){
+        int id = 1;
+
+        for(Image image : imageList)
+        {
+            try
+            {
+                String url = image.getUrl();
+
+                String[] parts = url.split("\\.");
+
+                String extension = parts[parts.length - 1];
+
+                String pathStart = this.getClass().getResource(manager.getResourcesPathMap().get(Key.PATH_CUSTOM_CHARACTERS) ).getPath().concat(folderId).substring(1);
+
+                Files.copy(
+                    Path.of(url),
+                    Path.of(
+                        String.join("/",
+                            pathStart,
+                            String.join(".",
+                                String.join("_",actionName,Integer.toString(id) ),
+                                extension
+                            )
+                        )
+                    ) 
+                );
+
+                id++;
+            }
+            catch(Exception e){}
+        }
     }
     
     /**

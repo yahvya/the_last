@@ -34,11 +34,13 @@ public class GameLoader{
         HashMap<Key,String> resourcesPathMap = new HashMap<Key,String>();
 
         resourcesPathMap.put(Key.PATH_CHARACTERS,"/characters/");
+        resourcesPathMap.put(Key.PATH_CUSTOM_CHARACTERS,"/custom-characters/");
         resourcesPathMap.put(Key.PATH_APP_IMAGES,"/images/app/");
         resourcesPathMap.put(Key.PATH_APP_ITEMS,"/images/items/");
         resourcesPathMap.put(Key.PATH_APP_SCENES,"/images/scenes/");
         resourcesPathMap.put(Key.PATH_APP_SONGS,"/songs/app/");
         resourcesPathMap.put(Key.PATH_GAME_SONGS,"/songs/game/");
+        resourcesPathMap.put(Key.PATH_FONTS,"/fonts/");
         resourcesPathMap.put(Key.PATH_FONTS,"/fonts/");
 
         this.gameDataManager.setResourcesPathMap(resourcesPathMap);
@@ -99,7 +101,7 @@ public class GameLoader{
      */
     public enum Key{
         // clés des chemins
-        PATH_CHARACTERS,PATH_APP_IMAGES,PATH_APP_ITEMS,PATH_APP_SCENES,PATH_APP_SONGS,PATH_GAME_SONGS,PATH_FONTS,
+        PATH_CHARACTERS,PATH_APP_IMAGES,PATH_APP_ITEMS,PATH_APP_SCENES,PATH_APP_SONGS,PATH_GAME_SONGS,PATH_FONTS,PATH_CUSTOMl,PATH_CUSTOM_CHARACTERS,
         // clé des polices
         FONT_SPECIAL,FONT_NORMAL,
         // clé des items
