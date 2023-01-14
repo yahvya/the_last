@@ -20,7 +20,7 @@ public class Game extends Configurable{
         try{
             // lecture du fichier de configuration et lancement du chargement
             this.window = primaryStage;
-            this.gameDataManager = new GameDataManager();
+            this.gameDataManager = new GameDataManager(this);
 
             this.setConfig();
             this.setWindowStyle();

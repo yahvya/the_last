@@ -14,7 +14,9 @@ public abstract class Config {
         LOADING_POSTER_PATH("loading_poster"),
         LOADING_FONT_PATH("loading_font"),
         LOADING_ON_COLOR("loading_on_color"),
-        CUSTOM_CHARACTERS_PATH("custom_characters_path");
+        CHARACTERS_PATH("characters_path"),
+        CUSTOM_CHARACTERS_PATH("custom_characters_path"),
+        CUSTOM_CHARACTERS_INDEX_FILENAME("custom_characters_index_file_name");
 
         public final String key;
 

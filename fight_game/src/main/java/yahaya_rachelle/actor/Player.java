@@ -1,4 +1,4 @@
-package yahaya_rachelle.player;
+package yahaya_rachelle.actor;
 
 public class Player {
    

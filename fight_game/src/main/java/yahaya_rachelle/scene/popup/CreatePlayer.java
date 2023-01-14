@@ -45,10 +45,10 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+import yahaya_rachelle.actor.Player.PlayerAction;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.data.GameDataManager;
-import yahaya_rachelle.player.Player.PlayerAction;
 import yahaya_rachelle.scene.scene.GameScene;
 import yahaya_rachelle.utils.GameContainerCallback;
 

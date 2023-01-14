@@ -6,5 +6,7 @@
     "loading_poster" : "/images/app/loading-poster.png",
     "loading_font" : "/fonts/basic.ttf",
     "loading_on_color" : "#a0714bdb",
-    "custom_characters_path" : "/custom-characters/"
+    "characters_path" : "/characters/",
+    "custom_characters_path" : "/custom-characters/",
+    "custom_characters_index_file_name" : "index.txt"
 }

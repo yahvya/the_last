@@ -1,7 +1,13 @@
 package yahaya_rachelle.data;
 
 
+import java.util.ArrayList;
+
 import javafx.application.Platform;
+import yahaya_rachelle.actor.Character;
+import yahaya_rachelle.configuration.Config;
+import yahaya_rachelle.configuration.Configurable.ConfigGetter;
+import yahaya_rachelle.game.Game;
 import yahaya_rachelle.utils.GameCallback;
 
 public class GameDataManager {
@@ -13,7 +19,14 @@ public class GameDataManager {
     private GameSongs gameSongs;
 
     private Items items;
-    
+
+    private ArrayList<Character> characters;
+
+    private Game linkedGame;
+
+    public GameDataManager(Game linkedGame){
+        this.linkedGame = linkedGame;
+    }
     
     /**
      * charge les données du jeux
@@ -33,6 +46,12 @@ public class GameDataManager {
                     manager.appSongs = new AppSongs();
                     manager.gameSongs = new GameSongs();
                     manager.items = new Items();
+
+                    // récupération et ajout des personnages du jeux
+                    ConfigGetter<String> configStringGetter = new ConfigGetter<String>(manager.linkedGame);
+
+                    manager.characters = Character.loadCharacters(manager.getClass(),configStringGetter.getValueOf(Config.App.CHARACTERS_PATH.key) );
+                    manager.characters.addAll(Character.loadCharacters(manager.getClass(),configStringGetter.getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key) ) );
 
                     // lancement de l'action callback de succès
                     Platform.runLater(new Runnable() {
@@ -75,4 +94,11 @@ public class GameDataManager {
         return this.items;
     }
 
+    public ArrayList<Character> getCharacters(){
+        return this.characters;
+    }
+
+    public Game getLinkedGame(){
+        return this.linkedGame;
+    }
 }
