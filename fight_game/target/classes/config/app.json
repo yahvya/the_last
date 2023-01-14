@@ -1,0 +1,10 @@
+{
+    "window_width" : 900,
+    "window_height" : 550,
+    "game_name" : "The last game",
+    "favicon" : "/images/app/favicon.png",
+    "loading_poster" : "/images/app/loading-poster.png",
+    "loading_font" : "/fonts/basic.ttf",
+    "loading_on_color" : "#a0714bdb",
+    "custom_characters_path" : "/custom-characters/"
+}
