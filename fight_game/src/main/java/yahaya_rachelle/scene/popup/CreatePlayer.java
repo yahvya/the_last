@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -488,6 +489,7 @@ public class CreatePlayer extends ScenePopup{
                 configFileMap.put(Config.Character.COUNT_OF_TAKE_HIT_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.TAKE_HIT),folderId,PlayerAction.TAKE_HIT.key) );
 
                 configFileMap.put(Config.Character.NAME.key,playerName);
+                configFileMap.put(Config.Character.FORCE.key,new Random().nextInt(50,100) );
 
                 // création du fichier de configuration du personnage
 

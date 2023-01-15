@@ -1,5 +1,7 @@
 package yahaya_rachelle.scene.popup;
 
+import java.util.ArrayList;
+
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -12,6 +14,7 @@ import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.VBox;
+import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.data.GameDataManager;
@@ -59,6 +62,8 @@ public class PlayerChooser extends ScenePopup{
      */
     public ScrollPane createCharactersChooserZone(){
         ScrollPane scrollableZone = new ScrollPane();
+
+        ArrayList<Character> characters = this.linkedScene.getGameDataManager().getCharacters();
 
         
 
