@@ -10,19 +10,19 @@ import java.util.HashMap;
 import org.json.simple.parser.ParseException;
 
 import javafx.scene.image.Image;
-import yahaya_rachelle.actor.Player.PlayerAction;
-import yahaya_rachelle.configuration.Configurable;
 import yahaya_rachelle.configuration.Config;
+import yahaya_rachelle.configuration.Configurable;
+import yahaya_rachelle.game.Game;
 
 public class Character extends Configurable{
-    private HashMap<PlayerAction,ArrayList<Image> > actionsMap;
+    private HashMap<Config.PlayerAction,ArrayList<Image> > actionsMap;
 
-    private String directory;
+    private String configFilePath;
 
-    public Character(String directory) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
-        this.directory = directory;
+    public Character(String configFilePath) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
+        this.configFilePath = configFilePath;
         
-        // this.setConfig();
+        this.setConfig();
     }   
 
     /**
@@ -30,13 +30,13 @@ public class Character extends Configurable{
      * @param action
      * @return la liste des images décrivant l'action donnée
      */
-    public ArrayList<Image> getActionSequence(PlayerAction action){
+    public ArrayList<Image> getActionSequence(Config.PlayerAction action){
         return this.actionsMap.get(action);
     }
 
     @Override
     protected String getConfigFilePath() {
-        return this.directory + "config.json";
+        return this.configFilePath;
     } 
 
     /**
@@ -47,15 +47,20 @@ public class Character extends Configurable{
      * @throws ParseException
      * @throws FileNotFoundException
      */
-    public static ArrayList<Character> loadCharacters(Class<?> usableClass,String rootFolderPath)  throws NullPointerException, URISyntaxException, FileNotFoundException, ParseException, IOException{
+    public static ArrayList<Character> loadCharacters(Class<?> usableClass,String rootFolderPath,Game linkedGame)  throws NullPointerException, URISyntaxException, FileNotFoundException, ParseException, IOException{
         ArrayList<Character> list = new ArrayList<Character>();
 
         File directory = new File(usableClass.getResource(rootFolderPath).toURI() );
 
+        ConfigGetter<String> configStringGetter = new ConfigGetter<String>(linkedGame);
+    
+        String toIgnore = configStringGetter.getValueOf(Config.App.CUSTOM_CHARACTERS_INDEX_FILENAME.key);
+        String charactersConfigFileName = configStringGetter.getValueOf(Config.App.CHARACTERS_CONFIG_FILENAME.key);
+
         for(String subDirectory : directory.list() )
         {
-            if(subDirectory != Config.App.CUSTOM_CHARACTERS_INDEX_FILENAME.key)
-                list.add(new Character(rootFolderPath + subDirectory) );
+            if(!subDirectory.equals(toIgnore) )
+                list.add(new Character(String.join("/",rootFolderPath + subDirectory,charactersConfigFileName) ) );
         }
 
         return list;

@@ -50,8 +50,8 @@ public class GameDataManager {
                     // récupération et ajout des personnages du jeux
                     ConfigGetter<String> configStringGetter = new ConfigGetter<String>(manager.linkedGame);
 
-                    manager.characters = Character.loadCharacters(manager.getClass(),configStringGetter.getValueOf(Config.App.CHARACTERS_PATH.key) );
-                    manager.characters.addAll(Character.loadCharacters(manager.getClass(),configStringGetter.getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key) ) );
+                    manager.characters = Character.loadCharacters(manager.getClass(),configStringGetter.getValueOf(Config.App.CHARACTERS_PATH.key),manager.linkedGame);
+                    manager.characters.addAll(Character.loadCharacters(manager.getClass(),configStringGetter.getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key),manager.linkedGame) );
 
                     // lancement de l'action callback de succès
                     Platform.runLater(new Runnable() {

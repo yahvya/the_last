@@ -24,6 +24,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
@@ -45,8 +46,8 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-import yahaya_rachelle.actor.Player.PlayerAction;
 import yahaya_rachelle.configuration.Config;
+import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.scene.scene.GameScene;
@@ -54,16 +55,9 @@ import yahaya_rachelle.utils.GameContainerCallback;
 
 public class CreatePlayer extends ScenePopup{
 
-    public static final String ATTACK = "attack_state"; 
-    public static final String SUPER_ATTACK = "super_attack"; 
-    public static final String DEATH = "death"; 
-    public static final String FALL = "fall"; 
-    public static final String JUMP = "jump"; 
-    public static final String STATIC_PLACE = "static"; 
-    public static final String RUN = "run"; 
-    public static final String TAKE_HIT = "take_hit"; 
-
     private HashMap<PlayerAction,ArrayList<Image> > actionsSequences;
+
+    private TextField playerNameContainer;
 
     private double width;
     private double height;
@@ -97,25 +91,34 @@ public class CreatePlayer extends ScenePopup{
         scrollableZone.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollableZone.setMaxHeight(this.height - 30);
 
-        Font specialNormal = manager.getFonts().getFont(Config.Fonts.BASIC.key,14);
+        Font normalFont = manager.getFonts().getFont(Config.Fonts.BASIC.key,14);
 
         Label title = new Label("Creer un personnage");
-        Label message = new Label("Veuillez entrez les images");
+        Label message = new Label("Veuillez entrez les données du joueur, la puissance sera généré");
 
         title.setFont(manager.getFonts().getFont(Config.Fonts.SPECIAL.key,25) );
+        title.setWrapText(true);
         message.setFont(Font.font(null,FontWeight.NORMAL,FontPosture.ITALIC, 13) );
 
-        children.addAll(title,message);
+        this.playerNameContainer = new TextField();
 
-        this.addAttackZone(specialNormal,children,manager);
-        this.addSuperAttackZone(specialNormal,children,manager);
-        this.addRunZone(specialNormal,children,manager);
-        this.addDeathZone(specialNormal,children,manager);
-        this.addFallZone(specialNormal,children,manager);
-        this.addJumpZone(specialNormal,children,manager);
-        this.addStaticZone(specialNormal,children,manager);
-        this.addTakeHitZone(specialNormal,children,manager);
-        this.addConfirmation(specialNormal,children,message,manager);
+        double width = 300 > this.width / 2 ? this.width / 2 : 300;
+
+        this.playerNameContainer.setPromptText("Entrez le nom du joueur");
+        this.playerNameContainer.setMaxWidth(width);
+        this.playerNameContainer.setMinWidth(width);
+
+        children.addAll(title,message,this.playerNameContainer);
+
+        this.addAttackZone(normalFont,children,manager);
+        this.addSuperAttackZone(normalFont,children,manager);
+        this.addRunZone(normalFont,children,manager);
+        this.addDeathZone(normalFont,children,manager);
+        this.addFallZone(normalFont,children,manager);
+        this.addJumpZone(normalFont,children,manager);
+        this.addStaticZone(normalFont,children,manager);
+        this.addTakeHitZone(normalFont,children,manager);
+        this.addConfirmation(normalFont,children,message,scrollableZone);
 
         return scrollableZone;
     }
@@ -377,7 +380,7 @@ public class CreatePlayer extends ScenePopup{
     public void addStaticZone(Font font,ObservableList<Node> children,GameDataManager manager){
         // création de la liste d'image statiques pour la preview
         ArrayList<Image> imageList = new ArrayList<Image>();
-        this.actionsSequences.put(PlayerAction.STATIC,imageList);
+        this.actionsSequences.put(PlayerAction.STATIC_POSITION,imageList);
 
         children.add(this.createZone(font,"Statique",imageList,manager) );
     }   
@@ -402,11 +405,11 @@ public class CreatePlayer extends ScenePopup{
      * @param message
      * @param manager
      */
-    public void addConfirmation(Font font,ObservableList<Node> children,Label message,GameDataManager manager){
+    public void addConfirmation(Font font,ObservableList<Node> children,Label message,ScrollPane scrollableZone){
         Button confirmationButton = this.getCustomButton("Ajouter mon personnage",font);
 
         confirmationButton.setOnMouseClicked((e) -> {
-            this.tryToConfirmCreation(message,manager);
+            this.tryToConfirmCreation(message,scrollableZone);
         });
 
         children.add(confirmationButton);
@@ -415,14 +418,26 @@ public class CreatePlayer extends ScenePopup{
     /**
      * essaie de créer le personnage
      */
-    public void tryToConfirmCreation(Label messageDisplayer,GameDataManager manager){
+    public void tryToConfirmCreation(Label messageDisplayer,ScrollPane scrollableZone){
         
         boolean isOk = true;
+        final int minimumStep = 2;
+
+        String playerName = this.playerNameContainer.getText();
+
+        if(playerName.length() < 2)
+        {       
+            messageDisplayer.setText("Le nom du joueur doit avoir au moins deux caractères");
+
+            scrollableZone.setVvalue(0);
+
+            return;
+        }
 
         // on vérifie que chaque action à au moins une image associé
         for(Map.Entry<PlayerAction,ArrayList<Image> > entry : this.actionsSequences.entrySet() )
         {
-            if(entry.getValue().size() < 2)
+            if(entry.getValue().size() < minimumStep)
             {
                 isOk = false;
 
@@ -456,15 +471,16 @@ public class CreatePlayer extends ScenePopup{
 
                 folder.mkdirs();
 
-                // création des images
-                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.ATTACK),folderId,CreatePlayer.ATTACK);
-                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.DEATH),folderId,CreatePlayer.DEATH);
-                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.FALL),folderId,CreatePlayer.FALL);
-                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.JUMP),folderId,CreatePlayer.JUMP);
-                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.RUN),folderId,CreatePlayer.RUN);
-                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.STATIC),folderId,CreatePlayer.STATIC_PLACE);
-                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.SUPER_ATTACK),folderId,CreatePlayer.SUPER_ATTACK);
-                this.createActionFileGroup(manager,this.actionsSequences.get(PlayerAction.TAKE_HIT),folderId,CreatePlayer.TAKE_HIT);
+                // du fichier de configration et des images
+                // this.
+                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.ATTACK),folderId,PlayerAction.ATTACK.key);
+                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.DEATH),folderId,PlayerAction.DEATH.key);
+                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.FALL),folderId,PlayerAction.FALL.key);
+                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.JUMP),folderId,PlayerAction.JUMP.key);
+                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.RUN),folderId,PlayerAction.RUN.key);
+                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.STATIC_POSITION),folderId,PlayerAction.STATIC_POSITION.key);
+                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.SUPER_ATTACK),folderId,PlayerAction.SUPER_ATTACK.key);
+                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.TAKE_HIT),folderId,PlayerAction.TAKE_HIT.key);
 
                 this.toDoOnConfirm.action(this.getPopup(),false);
             }
@@ -474,6 +490,8 @@ public class CreatePlayer extends ScenePopup{
         }
         else
         {
+            scrollableZone.setVvalue(0);
+
             ButtonType continueButton = new ButtonType("Continuer",ButtonData.YES);
             ButtonType quitButton = new ButtonType("Quitter",ButtonData.NO);
 
@@ -498,10 +516,13 @@ public class CreatePlayer extends ScenePopup{
      * @param folderId
      * @param actionName
      */
-    public void createActionFileGroup(GameDataManager manager,ArrayList<Image> imageList,String folderId,String actionName){
+    public void createActionFileGroup(ArrayList<Image> imageList,String folderId,String actionName){
         int id = 1;
 
-        String customPath = String.join("",this.getClass().getResource(new ConfigGetter<String>(this.linkedScene.getGame() ).getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key) ).toString(),folderId,"/");
+        String customPath = String.join("",this.getClass().getResource(new ConfigGetter<String>(this.linkedScene.getGame() ).getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key) ).getPath(),folderId);
+
+        if(customPath.startsWith("/") || customPath.startsWith("\\") )
+            customPath = customPath.substring(1);
 
         for(Image image : imageList)
         {
@@ -513,13 +534,11 @@ public class CreatePlayer extends ScenePopup{
 
                 String extension = parts[parts.length - 1];
 
-                String pathStart = customPath + folderId;
-
                 Files.copy(
                     Path.of(url),
                     Path.of(
                         String.join("/",
-                            pathStart,
+                            customPath,
                             String.join(".",
                                 String.join("_",actionName,Integer.toString(id) ),
                                 extension

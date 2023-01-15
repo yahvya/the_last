@@ -2,3 +2,5 @@ les clés à utiliser dans les maps partagés sont à définir dans l'énumérat
 
 format du nom d'une clé : PREFIX_NOM_REEL
 exemple pour une clé de chemin: PATH_FONTS
+
+les joueurs ont une force en pourcentage sur une limite définis dans le jeux
