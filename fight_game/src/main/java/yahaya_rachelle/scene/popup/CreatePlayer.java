@@ -426,7 +426,7 @@ public class CreatePlayer extends ScenePopup{
     public void tryToConfirmCreation(Label messageDisplayer,ScrollPane scrollableZone){
         
         boolean isOk = true;
-        final int minimumStep = 2;
+        final int minimumStep = 0;
 
         String playerName = this.playerNameContainer.getText();
 
@@ -493,11 +493,11 @@ public class CreatePlayer extends ScenePopup{
 
                 // création du fichier de configuration du personnage
 
-                String chracterConfigFilePath = String.join("",this.getClass().getResource(new ConfigGetter<String>(this.linkedScene.getGame() ).getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key) ).getPath(),folderId);
+                String characterConfigFilePath = String.join("",this.getClass().getResource(new ConfigGetter<String>(this.linkedScene.getGame() ).getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key) ).getPath(),folderId);
 
-                chracterConfigFilePath += "/" + new ConfigGetter<String>(this.linkedScene.getGame() ).getValueOf(Config.App.CHARACTERS_CONFIG_FILENAME.key);
+                characterConfigFilePath += "/" + new ConfigGetter<String>(this.linkedScene.getGame() ).getValueOf(Config.App.CHARACTERS_CONFIG_FILENAME.key);
 
-                File characterConfigFile = new File(chracterConfigFilePath);
+                File characterConfigFile = new File(characterConfigFilePath);
 
                 characterConfigFile.createNewFile();
 
@@ -507,14 +507,10 @@ public class CreatePlayer extends ScenePopup{
 
                 writer.close();
 
-                try{
-                    this.linkedScene.getGameDataManager().addCharacter(new Character(chracterConfigFilePath) );
-                }
-                catch(Exception e){
-                    Alert infoAlert = new Alert(AlertType.INFORMATION);
+                Alert infoAlert = new Alert(AlertType.INFORMATION);
 
-                    infoAlert.setHeaderText("Veuillez relancer le jeux pour utiliser votre personnage");
-                }
+                infoAlert.setHeaderText("Veuillez relancer le jeux pour utiliser votre personnage");
+                infoAlert.show();
 
                 this.toDoOnConfirm.action(this.getPopup(),false);
             }

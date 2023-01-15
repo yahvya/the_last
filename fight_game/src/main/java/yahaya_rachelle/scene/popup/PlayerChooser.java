@@ -57,7 +57,7 @@ public class PlayerChooser extends ScenePopup{
 
         zoneTitle.setFont(manager.getFonts().getFont(Config.Fonts.BASIC.key,15) );
 
-        children.addAll(zoneTitle,this.createCharactersChooserZone(container),this.addExitButton(container) );
+        children.addAll(zoneTitle,this.createCharactersChooserZone(container,height),this.addExitButton(container) );
 
         return container;
     }
@@ -66,7 +66,7 @@ public class PlayerChooser extends ScenePopup{
      * 
      * @return la zone scrollable d'affichage des personnages
      */
-    private ScrollPane createCharactersChooserZone(VBox parent){
+    private ScrollPane createCharactersChooserZone(VBox parent,double height){
         ArrayList<Character> characters = this.linkedScene.getGameDataManager().getCharacters();
 
         HBox container = new HBox(10);
@@ -76,6 +76,9 @@ public class PlayerChooser extends ScenePopup{
         characters.forEach(character -> this.addNewCharacter(parent,children,character) );          
 
         ScrollPane scrollableZone = new ScrollPane(container);
+
+        scrollableZone.setPadding(new Insets(10,5,10,5) );
+        scrollableZone.setPrefHeight(height / 2.5);
 
         return scrollableZone;
     }
