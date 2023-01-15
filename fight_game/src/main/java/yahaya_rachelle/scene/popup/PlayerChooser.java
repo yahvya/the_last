@@ -6,14 +6,20 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
 import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
@@ -51,7 +57,7 @@ public class PlayerChooser extends ScenePopup{
 
         zoneTitle.setFont(manager.getFonts().getFont(Config.Fonts.BASIC.key,15) );
 
-        children.addAll(zoneTitle,this.createCharactersChooserZone() );
+        children.addAll(zoneTitle,this.createCharactersChooserZone(container),this.addExitButton(container) );
 
         return container;
     }
@@ -60,13 +66,91 @@ public class PlayerChooser extends ScenePopup{
      * 
      * @return la zone scrollable d'affichage des personnages
      */
-    public ScrollPane createCharactersChooserZone(){
-        ScrollPane scrollableZone = new ScrollPane();
-
+    private ScrollPane createCharactersChooserZone(VBox parent){
         ArrayList<Character> characters = this.linkedScene.getGameDataManager().getCharacters();
 
-        
+        HBox container = new HBox(10);
+
+        ObservableList<Node> children = container.getChildren();
+
+        characters.forEach(character -> this.addNewCharacter(parent,children,character) );          
+
+        ScrollPane scrollableZone = new ScrollPane(container);
 
         return scrollableZone;
+    }
+
+    /**
+     * crée le boutton d'annulation
+     * @return
+     */
+    private Button addExitButton(VBox container){
+        Button button = new Button("Quitter");
+
+        button.setOnMouseClicked((e) -> this.toDoOnConfirm.action(new ChoosedData(container),true) );
+
+        String color = "#C77F4F";
+        String hoverColor = "#98572c";
+
+        // design du boutton
+        button.setBackground(new Background(new BackgroundFill(Paint.valueOf(color),CornerRadii.EMPTY,Insets.EMPTY) ) );
+        button.setFont(this.linkedScene.getGameDataManager().getFonts().getFont(Config.Fonts.BASIC.key,15) );
+        button.setWrapText(true);
+        button.setOnMouseExited((e) -> {
+            button.setBackground(new Background(new BackgroundFill(Paint.valueOf(color),CornerRadii.EMPTY,Insets.EMPTY) ) );
+        });
+        button.setOnMouseEntered((e) -> {
+            button.setBackground(new Background(new BackgroundFill(Paint.valueOf(hoverColor),CornerRadii.EMPTY,Insets.EMPTY) ) );
+        });
+
+        return button;
+    }
+
+    /**
+     * ajoute un personnsage dans la zone de choix 
+     * @param children
+     * @param character
+     */
+    private void addNewCharacter(VBox container,ObservableList<Node> children,Character character){
+        ImageView imageViewer = new ImageView(character.getActionSequence(Config.PlayerAction.STATIC_POSITION).get(0) );
+
+        imageViewer.setFitWidth(70);
+        imageViewer.setFitHeight(70);
+
+        imageViewer.setOnMouseEntered((e) -> {
+            imageViewer.setOpacity(0.7);
+        });
+
+        imageViewer.setOnMouseExited((e) -> {
+            imageViewer.setOpacity(1);
+        });
+
+        // confirmation de choix au click
+        imageViewer.setOnMouseClicked((e) -> this.toDoOnConfirm.action(new ChoosedData(container,character), false) );
+
+        children.add(imageViewer);
+    }
+
+    public class ChoosedData{
+        private VBox container;
+        
+        private Character choosedCharacter;
+
+        public ChoosedData(VBox container){
+            this.container = container;
+        }
+
+        public ChoosedData(VBox container,Character choosedCharacter){
+            this(container);
+            this.choosedCharacter = choosedCharacter;
+        }
+
+        public VBox getContainer(){
+            return this.container;
+        }
+
+        public Character getChoosedCharacter(){
+            return this.choosedCharacter;
+        }
     }
 }

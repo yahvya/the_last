@@ -7,6 +7,6 @@
     "count_of_jump_state" : 2,
     "count_of_run_state" : 6,
     "count_of_static_state" : 4,
-    "count_of_super_attack" : 4,
+    "count_of_super_attack_state" : 4,
     "count_of_take_hit_state" : 3
 }

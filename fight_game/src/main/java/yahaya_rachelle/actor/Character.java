@@ -18,12 +18,58 @@ public class Character extends Configurable{
     private HashMap<Config.PlayerAction,ArrayList<Image> > actionsMap;
 
     private String configFilePath;
+    private String directory;
 
     public Character(String configFilePath) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.configFilePath = configFilePath;
+        this.actionsMap = new HashMap<Config.PlayerAction,ArrayList<Image> >();
+
+        File directoryObject = new File(this.configFilePath).getParentFile();
+        
+        this.directory = directoryObject.toString() + "/";
         
         this.setConfig();
-    }   
+
+        ConfigGetter<Long> configLongReader = new ConfigGetter<Long>(this);
+
+        String[] childsList = new File(this.getClass().getResource(directoryObject.getPath().replace("\\","/") ).toURI() ).list();
+
+        // chargement des images du personnage
+        this.loadImagesFor(Config.PlayerAction.ATTACK,configLongReader.getValueOf(Config.Character.COUNT_OF_ATTACK_STATE.key).intValue(),childsList);
+        this.loadImagesFor(Config.PlayerAction.DEATH,configLongReader.getValueOf(Config.Character.COUNT_OF_DEATH_STATE.key).intValue(),childsList);
+        this.loadImagesFor(Config.PlayerAction.JUMP,configLongReader.getValueOf(Config.Character.COUNT_OF_JUMP_STATE.key).intValue(),childsList);
+        this.loadImagesFor(Config.PlayerAction.RUN,configLongReader.getValueOf(Config.Character.COUNT_OF_RUN_STATE.key).intValue(),childsList);
+        this.loadImagesFor(Config.PlayerAction.STATIC_POSITION,configLongReader.getValueOf(Config.Character.COUNT_OF_STATIC_STATE.key).intValue(),childsList);
+        this.loadImagesFor(Config.PlayerAction.SUPER_ATTACK,configLongReader.getValueOf(Config.Character.COUNT_OF_SUPER_ATTACK_STATE.key).intValue(),childsList);
+        this.loadImagesFor(Config.PlayerAction.TAKE_HIT,configLongReader.getValueOf(Config.Character.COUNT_OF_TAKE_HIT_STATE.key).intValue(),childsList);
+    } 
+    
+    /**
+     * charge les images de ce joueur
+     * @param action
+     * @param countOfImages
+     */
+    private void loadImagesFor(Config.PlayerAction action,int countOfImages,String[] filesList) throws NullPointerException,IllegalArgumentException{
+        ArrayList<Image> imageList = new ArrayList<Image>();
+
+        int filesListLength = filesList.length;
+
+        // récupération des images
+        for(; countOfImages > 0; countOfImages--)
+        {
+            for(int index = 0; index < filesListLength; index++)
+            {
+                if(filesList[index].startsWith(action.key) )
+                {
+                    imageList.add(new Image(this.directory + filesList[index]) );
+
+                    break;
+                }
+            }
+        }
+
+        this.actionsMap.put(action,imageList);
+    }
 
     /**
      * 
