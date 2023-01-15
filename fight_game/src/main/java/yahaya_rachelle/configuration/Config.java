@@ -98,7 +98,7 @@ public abstract class Config {
         COUNT_OF_RUN_STATE("count_of_run_state"),
         COUNT_OF_STATIC_STATE("count_of_static_state"),
         COUNT_OF_SUPER_ATTACK_STATE("count_of_super_attack_state"),
-        COUNT_OF_SUPER_TAKE_HIT_STATE("count_of_take_hit_state");
+        COUNT_OF_TAKE_HIT_STATE("count_of_take_hit_state");
 
         public final String key;
 

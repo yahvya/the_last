@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.json.simple.JSONObject;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -46,6 +49,7 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
@@ -469,18 +473,46 @@ public class CreatePlayer extends ScenePopup{
                 //création du dossier de destination
                 File folder = new File(URI.create(String.join("",this.getClass().getResource(configStringGetter.getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key) ).toURI().toString(),folderId,"/") ) );
 
+                HashMap<String,Object> configFileMap = new HashMap<String,Object>();
+
                 folder.mkdirs();
 
-                // du fichier de configration et des images
-                // this.
-                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.ATTACK),folderId,PlayerAction.ATTACK.key);
-                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.DEATH),folderId,PlayerAction.DEATH.key);
-                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.FALL),folderId,PlayerAction.FALL.key);
-                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.JUMP),folderId,PlayerAction.JUMP.key);
-                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.RUN),folderId,PlayerAction.RUN.key);
-                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.STATIC_POSITION),folderId,PlayerAction.STATIC_POSITION.key);
-                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.SUPER_ATTACK),folderId,PlayerAction.SUPER_ATTACK.key);
-                this.createActionFileGroup(this.actionsSequences.get(PlayerAction.TAKE_HIT),folderId,PlayerAction.TAKE_HIT.key);
+                // remplissage du dossier personnsages par les images de séquences
+                configFileMap.put(Config.Character.COUNT_OF_ATTACK_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.ATTACK),folderId,PlayerAction.ATTACK.key) );
+                configFileMap.put(Config.Character.COUNT_OF_DEATH_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.DEATH),folderId,PlayerAction.DEATH.key) );
+                configFileMap.put(Config.Character.COUNT_OF_FALL_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.FALL),folderId,PlayerAction.FALL.key) );
+                configFileMap.put(Config.Character.COUNT_OF_JUMP_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.JUMP),folderId,PlayerAction.JUMP.key) );
+                configFileMap.put(Config.Character.COUNT_OF_RUN_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.RUN),folderId,PlayerAction.RUN.key) );
+                configFileMap.put(Config.Character.COUNT_OF_STATIC_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.STATIC_POSITION),folderId,PlayerAction.STATIC_POSITION.key) );
+                configFileMap.put(Config.Character.COUNT_OF_SUPER_ATTACK_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.SUPER_ATTACK),folderId,PlayerAction.SUPER_ATTACK.key) );
+                configFileMap.put(Config.Character.COUNT_OF_TAKE_HIT_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.TAKE_HIT),folderId,PlayerAction.TAKE_HIT.key) );
+
+                configFileMap.put(Config.Character.NAME.key,playerName);
+
+                // création du fichier de configuration du personnage
+
+                String chracterConfigFilePath = String.join("",this.getClass().getResource(new ConfigGetter<String>(this.linkedScene.getGame() ).getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key) ).getPath(),folderId);
+
+                chracterConfigFilePath += "/" + new ConfigGetter<String>(this.linkedScene.getGame() ).getValueOf(Config.App.CHARACTERS_CONFIG_FILENAME.key);
+
+                File characterConfigFile = new File(chracterConfigFilePath);
+
+                characterConfigFile.createNewFile();
+
+                writer = new FileWriter(characterConfigFile);
+
+                writer.write(JSONObject.toJSONString(configFileMap) );
+
+                writer.close();
+
+                try{
+                    this.linkedScene.getGameDataManager().addCharacter(new Character(chracterConfigFilePath) );
+                }
+                catch(Exception e){
+                    Alert infoAlert = new Alert(AlertType.INFORMATION);
+
+                    infoAlert.setHeaderText("Veuillez relancer le jeux pour utiliser votre personnage");
+                }
 
                 this.toDoOnConfirm.action(this.getPopup(),false);
             }
@@ -516,7 +548,7 @@ public class CreatePlayer extends ScenePopup{
      * @param folderId
      * @param actionName
      */
-    public void createActionFileGroup(ArrayList<Image> imageList,String folderId,String actionName){
+    public int createActionFileGroup(ArrayList<Image> imageList,String folderId,String actionName){
         int id = 1;
 
         String customPath = String.join("",this.getClass().getResource(new ConfigGetter<String>(this.linkedScene.getGame() ).getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key) ).getPath(),folderId);
@@ -551,6 +583,8 @@ public class CreatePlayer extends ScenePopup{
             }
             catch(Exception e){}
         }
+
+        return imageList.size();
     }
     
     /**

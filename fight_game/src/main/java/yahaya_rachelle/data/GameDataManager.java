@@ -78,6 +78,14 @@ public class GameDataManager {
         loadingThread.start();
     }
 
+    /**
+     * ajoute un personnsage à la liste
+     * @param character
+     */
+    public void addCharacter(Character character){
+        this.characters.add(character);
+    }
+
     public AppSongs getAppSongs() {
         return this.appSongs;
     }

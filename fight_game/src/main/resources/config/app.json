@@ -8,5 +8,6 @@
     "loading_on_color" : "#a0714bdb",
     "characters_path" : "/characters/",
     "custom_characters_path" : "/custom-characters/",
-    "custom_characters_index_file_name" : "index.txt"
+    "custom_characters_index_file_name" : "index.txt",
+    "characters_config_file_name" : "config.json"
 }
