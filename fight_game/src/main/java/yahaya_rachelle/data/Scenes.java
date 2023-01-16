@@ -54,7 +54,7 @@ public class Scenes extends Configurable{
         return this.scenes;
     }
 
-    class Scene extends ImageDatas{
+    public class Scene extends ImageDatas{
         private Image sceneImage;
 
         public Scene(JSONObject sceneObject){
@@ -74,5 +74,4 @@ public class Scenes extends Configurable{
             return null;
         }
     }
-    
 }

@@ -1,22 +1,22 @@
 {
     "scenes" : [
         {
-            "image" : "/scenes/1.gif"
+            "image" : "/images/scenes/1.gif"
         },
         {
-            "image" : "/scenes/2.gif"
+            "image" : "/images/scenes/2.gif"
         },
         {
-            "image" : "/scenes/3.gif"
+            "image" : "/images/scenes/3.gif"
         },
         {
-            "image" : "/scenes/4.gif"
+            "image" : "/images/scenes/4.gif"
         },
         {
-            "image" : "/scenes/5.gif"
+            "image" : "/images/scenes/5.gif"
         },
         {
-            "image" : "/scenes/6.gif"
+            "image" : "/images/scenes/6.gif"
         }
     ]   
 }

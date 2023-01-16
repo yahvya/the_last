@@ -27,7 +27,10 @@ public abstract class GameScene {
      */
     public void putSceneInWindow(boolean update)
     {
-        this.game.getWindow().setScene(this.page == null || update ? this.buildPage() : this.page);
+        if(this.page == null || update)
+            this.page = this.buildPage();
+            
+        this.game.getWindow().setScene(this.page);
     }
 
     /**
@@ -45,6 +48,13 @@ public abstract class GameScene {
      */
     public Game getGame(){
         return this.game;
+    }
+
+    public Scene getPage(){
+        if(this.page == null)
+            this.page = this.buildPage();
+
+        return this.page;
     }
 
     /**

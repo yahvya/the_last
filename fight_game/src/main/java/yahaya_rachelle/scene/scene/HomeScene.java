@@ -243,8 +243,8 @@ public class HomeScene extends GameScene{
      */
     public void startNewGame(Character choosedCharacter,String choosedPseudo,AnchorPane container){
 
-        ConfigGetter<String> configStringGetter = new ConfigGetter<String>(this.getGame() );
-        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.getGame() );
+        ConfigGetter<String> configStringGetter = new ConfigGetter<String>(this.game);
+        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.game);
 
         // ajout de l'animation de chargement
 
@@ -263,7 +263,9 @@ public class HomeScene extends GameScene{
         loadingCircle.setTranslateX(configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key) - (circle_raduis * 2) - 10 );
         loadingCircle.setTranslateY(configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key) - (circle_raduis * 2) - 20);
 
-        container.getChildren().add(loadingCircle);
+        ObservableList<Node> children = container.getChildren();
+        
+        children.add(loadingCircle);
 
         Timeline loadingAnimationTimeline = new Timeline(new KeyFrame(Duration.millis(rotationSpeed),(e) -> {
 
@@ -276,11 +278,9 @@ public class HomeScene extends GameScene{
         loadingAnimationTimeline.play();
 
         try{
-            GameSession session = new GameSession(game,choosedCharacter,choosedPseudo);
+            GameSession session = new GameSession(game,choosedCharacter,choosedPseudo,this);
 
-            session.searchOpponent(() -> {
-                System.out.println("adversaire trouvé");
-            });
+            session.searchOpponent(() -> children.remove(loadingCircle) );
         }
         catch(Exception e){
             Alert errorAlert = new Alert(AlertType.ERROR);
