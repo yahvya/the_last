@@ -9,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -53,11 +54,17 @@ public class PlayerChooser extends ScenePopup{
 
         ObservableList<Node> children = container.getChildren();
 
-        Label zoneTitle = new Label("Choisir le personnage");
+        Label zoneTitle = new Label("Choisissez un pseudo et votre personnage");
 
         zoneTitle.setFont(manager.getFonts().getFont(Config.Fonts.BASIC.key,15) );
 
-        children.addAll(zoneTitle,this.createCharactersChooserZone(container,height),this.addExitButton(container) );
+        TextField pseudoChooser = new TextField();
+
+        pseudoChooser.setPromptText("Choisir un pseudo");
+        pseudoChooser.setMaxWidth(width / 4);
+        pseudoChooser.setMinWidth(width / 4);
+
+        children.addAll(zoneTitle,pseudoChooser,this.createCharactersChooserZone(container,pseudoChooser),this.addExitButton(container) );
 
         return container;
     }
@@ -66,19 +73,19 @@ public class PlayerChooser extends ScenePopup{
      * 
      * @return la zone scrollable d'affichage des personnages
      */
-    private ScrollPane createCharactersChooserZone(VBox parent,double height){
+    private ScrollPane createCharactersChooserZone(VBox parent,TextField pseudoChooser){
         ArrayList<Character> characters = this.linkedScene.getGameDataManager().getCharacters();
 
         HBox container = new HBox(10);
 
         ObservableList<Node> children = container.getChildren();
 
-        characters.forEach(character -> this.addNewCharacter(parent,children,character) );          
+        characters.forEach(character -> this.addNewCharacter(parent,children,character,pseudoChooser) );        
 
         ScrollPane scrollableZone = new ScrollPane(container);
 
         scrollableZone.setPadding(new Insets(10,5,10,5) );
-        scrollableZone.setPrefHeight(height / 2.5);
+        scrollableZone.setMinHeight(130);
 
         return scrollableZone;
     }
@@ -114,7 +121,13 @@ public class PlayerChooser extends ScenePopup{
      * @param children
      * @param character
      */
-    private void addNewCharacter(VBox container,ObservableList<Node> children,Character character){
+    private void addNewCharacter(VBox container,ObservableList<Node> children,Character character,TextField pseudoChooser){
+        VBox characterContainer = new VBox(10);
+
+        Label nameLabel = new Label(character.getName() );
+
+        nameLabel.setFont(this.linkedScene.getGameDataManager().getFonts().getFont(Config.Fonts.BASIC.key,12) );
+
         ImageView imageViewer = new ImageView(character.getActionSequence(Config.PlayerAction.STATIC_POSITION).get(0) );
 
         imageViewer.setFitWidth(70);
@@ -129,23 +142,35 @@ public class PlayerChooser extends ScenePopup{
         });
 
         // confirmation de choix au click
-        imageViewer.setOnMouseClicked((e) -> this.toDoOnConfirm.action(new ChoosedData(container,character), false) );
+        imageViewer.setOnMouseClicked((e) -> {
+            String choosedPseudo = pseudoChooser.getText();
 
-        children.add(imageViewer);
+            if(choosedPseudo.length() < 2)
+                return;
+
+            this.toDoOnConfirm.action(new ChoosedData(container,character,choosedPseudo), false);
+        });
+
+        characterContainer.getChildren().addAll(imageViewer,nameLabel); 
+
+        children.add(characterContainer);
     }
 
     public class ChoosedData{
         private VBox container;
         
         private Character choosedCharacter;
+        
+        private String choosedPseudo;
 
         public ChoosedData(VBox container){
             this.container = container;
         }
 
-        public ChoosedData(VBox container,Character choosedCharacter){
+        public ChoosedData(VBox container,Character choosedCharacter,String choosedPseudo){
             this(container);
             this.choosedCharacter = choosedCharacter;
+            this.choosedPseudo = choosedPseudo;
         }
 
         public VBox getContainer(){
@@ -154,6 +179,10 @@ public class PlayerChooser extends ScenePopup{
 
         public Character getChoosedCharacter(){
             return this.choosedCharacter;
+        }
+
+        public String getChoosedPseudo(){
+            return this.choosedPseudo;
         }
     }
 }

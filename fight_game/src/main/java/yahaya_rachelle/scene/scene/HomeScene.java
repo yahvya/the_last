@@ -1,12 +1,17 @@
 package yahaya_rachelle.scene.scene;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
@@ -16,14 +21,17 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.game.Game;
+import yahaya_rachelle.game.GameSession;
 import yahaya_rachelle.scene.popup.CreatePlayer;
 import yahaya_rachelle.scene.popup.PlayerChooser;
 import yahaya_rachelle.scene.popup.PlayerChooser.ChoosedData;
+import yahaya_rachelle.actor.Character;
 
 public class HomeScene extends GameScene{
 
@@ -222,14 +230,64 @@ public class HomeScene extends GameScene{
 
                     // si l'action non annulé alors on démarre une nouvelle partie
                     if(!isCanceled)
-                    {
-                        System.out.println(choiceResult.getChoosedCharacter() );
-                    }
+                        this.startNewGame(choiceResult.getChoosedCharacter(),choiceResult.getChoosedPseudo(),container );
                 }).getPopup();
 
                 children.add(chooser);
             }
         });
+    }
+
+    /**
+     * lance une nouvelle partie
+     */
+    public void startNewGame(Character choosedCharacter,String choosedPseudo,AnchorPane container){
+
+        ConfigGetter<String> configStringGetter = new ConfigGetter<String>(this.getGame() );
+        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.getGame() );
+
+        // ajout de l'animation de chargement
+
+        Paint color = Paint.valueOf(configStringGetter.getValueOf(Config.App.LOADING_ON_COLOR.key) );
+
+        final int circle_raduis = 20;
+        final int rotationSpeed = 95;
+
+        Circle loadingCircle = new Circle();
+
+        loadingCircle.setFill(null);
+        loadingCircle.setRadius(circle_raduis);
+        loadingCircle.setStroke(color);
+        loadingCircle.setStrokeWidth(5);
+        loadingCircle.getStrokeDashArray().add(15d);
+        loadingCircle.setTranslateX(configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key) - (circle_raduis * 2) - 10 );
+        loadingCircle.setTranslateY(configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key) - (circle_raduis * 2) - 20);
+
+        container.getChildren().add(loadingCircle);
+
+        Timeline loadingAnimationTimeline = new Timeline(new KeyFrame(Duration.millis(rotationSpeed),(e) -> {
+
+            double currentRotation = loadingCircle.getRotate();
+
+            loadingCircle.setRotate(currentRotation + 30);
+        }) );
+
+        loadingAnimationTimeline.setCycleCount(Animation.INDEFINITE);
+        loadingAnimationTimeline.play();
+
+        try{
+            GameSession session = new GameSession(game,choosedCharacter,choosedPseudo);
+
+            session.searchOpponent(() -> {
+                System.out.println("adversaire trouvé");
+            });
+        }
+        catch(Exception e){
+            Alert errorAlert = new Alert(AlertType.ERROR);
+
+            errorAlert.setHeaderText("Echec du lancement de la partie");
+            errorAlert.show();
+        } 
     }
 
     /**

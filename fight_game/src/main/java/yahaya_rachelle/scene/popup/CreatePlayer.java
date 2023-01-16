@@ -50,7 +50,6 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
@@ -426,7 +425,7 @@ public class CreatePlayer extends ScenePopup{
     public void tryToConfirmCreation(Label messageDisplayer,ScrollPane scrollableZone){
         
         boolean isOk = true;
-        final int minimumStep = 0;
+        final int minimumStep = 2;
 
         String playerName = this.playerNameContainer.getText();
 

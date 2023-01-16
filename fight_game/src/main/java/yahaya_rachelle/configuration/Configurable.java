@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
@@ -11,7 +12,7 @@ import yahaya_rachelle.utils.JsonReader;
 
 public abstract class Configurable {
 
-    private JSONObject config;
+    protected JSONObject config;
 
     /**
      * récupère le fichier de configuration

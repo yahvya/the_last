@@ -14,6 +14,8 @@ public abstract class ImageDatas extends Configurable {
         this.setConfig();   
     }
 
+    public ImageDatas(boolean dontLoad){}
+
     /**
      * 
      * @param key

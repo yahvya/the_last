@@ -20,6 +20,8 @@ public class GameDataManager {
 
     private Items items;
 
+    private Scenes scenes;
+
     private ArrayList<Character> characters;
 
     private Game linkedGame;
@@ -46,6 +48,7 @@ public class GameDataManager {
                     manager.appSongs = new AppSongs();
                     manager.gameSongs = new GameSongs();
                     manager.items = new Items();
+                    manager.scenes = new Scenes();
 
                     // récupération et ajout des personnages du jeux
                     ConfigGetter<String> configStringGetter = new ConfigGetter<String>(manager.linkedGame);
@@ -108,5 +111,9 @@ public class GameDataManager {
 
     public Game getLinkedGame(){
         return this.linkedGame;
+    }
+
+    public Scenes getScenes(){
+        return this.scenes;
     }
 }

@@ -106,4 +106,15 @@ public abstract class Config {
             this.key = key;
         }
     }
+
+    public enum Scenes{
+        SCENES("scenes"),
+        IMAGE("image");
+
+        public final String key;
+        
+        private Scenes(String key){
+            this.key = key;
+        }
+    }
 }

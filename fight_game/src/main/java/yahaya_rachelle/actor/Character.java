@@ -19,6 +19,7 @@ public class Character extends Configurable{
 
     private String configFilePath;
     private String directory;
+    private String name;
 
     public Character(String configFilePath) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.configFilePath = configFilePath;
@@ -31,6 +32,9 @@ public class Character extends Configurable{
         this.setConfig();
 
         ConfigGetter<Long> configLongReader = new ConfigGetter<Long>(this);
+        ConfigGetter<String> configStringReader = new ConfigGetter<String>(this);
+
+        this.name = configStringReader.getValueOf(Config.Character.NAME.key);
 
         String[] childsList = new File(this.getClass().getResource(directoryObject.getPath().replace("\\","/") ).toURI() ).list();
 
@@ -78,6 +82,10 @@ public class Character extends Configurable{
      */
     public ArrayList<Image> getActionSequence(Config.PlayerAction action){
         return this.actionsMap.get(action);
+    }
+
+    public String getName(){
+        return this.name;
     }
 
     @Override
