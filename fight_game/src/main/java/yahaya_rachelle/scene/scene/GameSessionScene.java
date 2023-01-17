@@ -30,4 +30,12 @@ public class GameSessionScene extends GameScene{
 
         return new Scene(container);
     }
+
+    /**
+     * 
+     * @return la valeur minimum du y utilisateur
+     */
+    public int getMinY(){
+        return 100;   
+    }
 }

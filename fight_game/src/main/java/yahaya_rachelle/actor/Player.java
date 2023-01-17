@@ -1,16 +1,63 @@
 package yahaya_rachelle.actor;
 
-public class Player {
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import org.json.simple.parser.ParseException;
+
+import yahaya_rachelle.configuration.Config;
+import yahaya_rachelle.configuration.Configurable;
+import yahaya_rachelle.configuration.Config.PlayerAction;
+
+public class Player extends Configurable{
     private Character character;
 
     private String pseudo;
 
     private Position playerPosition;
 
-    public Player(Character character,String pseudo,Position defaultPosition){
+    private double width;
+    private double height;
+
+    public Player(Character character,String pseudo) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
+        this.setConfig();
         this.character = character;
         this.pseudo = pseudo;
-        this.playerPosition = defaultPosition;
+        
+        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this);
+
+        this.width = configLongGetter.getValueOf(Config.Player.PLAYER_WIDTH.key).doubleValue();
+        this.height = configLongGetter.getValueOf(Config.Player.PLAYER_HEIGHT.key).doubleValue();
+    }
+
+    /**
+     * définis la position du joueur, doit être appellé avant un getPosition
+     * @param position
+     */
+    public void setPosition(Position playerPosition){
+        this.playerPosition = playerPosition;
+    }
+
+    public Position getPosition(){
+        return this.playerPosition;
+    }
+
+    public Character getCharacter() {
+        return this.character;
+    }
+
+    public String getPseudo() {
+        return this.pseudo;
+    }
+
+    public Position getPlayerPosition() {
+        return this.playerPosition;
+    }
+
+    @Override
+    protected String getConfigFilePath() {
+        return "/config/player.json";
     }
 
     public class Position{
@@ -89,4 +136,5 @@ public class Player {
             this.moveToY(this.currentY - toRemove);
         }
     }
+
 }

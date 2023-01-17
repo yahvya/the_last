@@ -73,7 +73,7 @@ public abstract class Config {
     }
 
     public enum PlayerAction{
-        ATTACK("attack_state"),
+        ATTACK("attack"),
         SUPER_ATTACK("super_attack"),
         DEATH("death"),
         FALL("fall"),
@@ -114,6 +114,17 @@ public abstract class Config {
         public final String key;
         
         private Scenes(String key){
+            this.key = key;
+        }
+    }
+
+    public enum Player{
+        PLAYER_WIDTH("player_width"),
+        PLAYER_HEIGHT("player_height");
+
+        public final String key;
+
+        private Player(String key){
             this.key = key;
         }
     }

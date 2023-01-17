@@ -26,9 +26,10 @@ public class GameSession extends Configurable{
     private Player playerOne;
     private Player playerTwo;
 
-    public GameSession(Game linkedGame,Character character,String pseudo,HomeScene homeScene){
+    public GameSession(Game linkedGame,Character character,String pseudo,HomeScene homeScene) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.linkedGame = linkedGame;
         this.homeScene = homeScene;
+        this.playerOne = new Player(character,pseudo);
     }
 
     /**
