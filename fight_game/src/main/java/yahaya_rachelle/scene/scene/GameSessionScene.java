@@ -53,10 +53,7 @@ public class GameSessionScene extends GameScene{
         this.playerOneView = new ImageView();
         this.playerTwoView = new ImageView();
         this.playerOneTimeLine = new Timeline();
-        this.playerTwoTimeLine = new Timeline();
-
-        this.playerOneView.setPreserveRatio(true);
-        this.playerTwoView.setPreserveRatio(true);
+        this.playerTwoTimeLine = new Timeline();;
 
         this.playerOneCurrentAction = null;
 
@@ -75,9 +72,12 @@ public class GameSessionScene extends GameScene{
     public void updatePlayerOne(Config.PlayerAction action,GameCallback toDoOnEnd){
         Player.Position playerPosition = this.playerOne.getPosition();
 
-        // mise à jour de la direction si nécessaire
+        // mise à jour de la position et de la direction
 
-        Player.Position.Direction currentDirection = playerPosition.getDirection();
+        this.playerOneView.setTranslateX(playerPosition.getCurrentX() );
+        this.playerOneView.setTranslateY(playerPosition.getCurrentY() );
+
+        Player.Position.Direction currentDirection = playerPosition.getCurrentDirection();
 
         if(currentDirection != this.playerOneCurrentDirection){
             switch(currentDirection){
@@ -102,11 +102,6 @@ public class GameSessionScene extends GameScene{
         ArrayList<Image> sequence = new ArrayList<Image>(this.playerOne.getCharacter().getActionSequence(action) );
 
         int sequenceSize = sequence.size();
-
-        // mise à jour de la position du joueur
-
-        this.playerOneView.setTranslateX(playerPosition.getCurrentX() );
-        this.playerOneView.setTranslateY(playerPosition.getCurrentY() );
 
         // arrêt de l'animation précédente
         this.playerOneTimeLine.setOnFinished(null);;
@@ -162,7 +157,7 @@ public class GameSessionScene extends GameScene{
      */
     public void setPlayerOne(Player playerOne){
         this.playerOne = playerOne;
-        this.playerOneCurrentDirection = this.playerOne.getPosition().getDirection();
+        this.playerOneCurrentDirection = this.playerOne.getPosition().getCurrentDirection();
         this.playerOneView.setFitWidth(this.playerOne.getWidth() );
         this.playerOneView.setFitHeight(this.playerOne.getHeight() );
     }

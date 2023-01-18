@@ -118,9 +118,9 @@ public class GameSession extends Configurable{
         // affichage de la scène
         this.gameSessionScene.putSceneInWindow();
         // placement des joueurs sur la scène;
-        // ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
+        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
 
-        this.playerOne.setPosition(new Player.Position(30,30) );
+        this.playerOne.setPosition(new Player.Position(30,30,configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue(),configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
         this.gameSessionScene.setPlayerOne(this.playerOne);
         this.gameSessionScene.updatePlayerOne(Config.PlayerAction.STATIC_POSITION,null);
     }  
@@ -135,8 +135,20 @@ public class GameSession extends Configurable{
 
         this
             .madeActionIf(code,KeyCode.SPACE,PlayerAction.ATTACK,toDoAfter)  
-            .madeActionIf(code,KeyCode.RIGHT,PlayerAction.RUN,toDoAfter,() -> this.playerOne.getPosition().setDirection(Player.Position.Direction.RIGHT) )  
-            .madeActionIf(code,KeyCode.LEFT,PlayerAction.RUN,toDoAfter,() -> this.playerOne.getPosition().setDirection(Player.Position.Direction.LEFT) );  
+            .madeActionIf(code,KeyCode.RIGHT,PlayerAction.RUN,toDoAfter,() -> {
+                Player.Position position = this.playerOne.getPosition();
+                
+                position
+                    .setCurrentDirection(Player.Position.Direction.RIGHT)
+                    .moveOnCurrentDirection(5);
+            })  
+            .madeActionIf(code,KeyCode.LEFT,PlayerAction.RUN,toDoAfter,() -> {
+                Player.Position position = this.playerOne.getPosition();
+                
+                position
+                    .setCurrentDirection(Player.Position.Direction.LEFT)
+                    .moveOnCurrentDirection(5);
+            }) ; 
     }
 
     /**
