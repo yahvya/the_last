@@ -14,7 +14,6 @@ import java.net.URISyntaxException;
 import org.json.simple.parser.ParseException;
 
 import javafx.application.Platform;
-import javafx.scene.control.skin.TextInputControlSkin.Direction;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import yahaya_rachelle.actor.Character;
@@ -30,7 +29,6 @@ public class GameSession extends Configurable{
     private GameCallback toCallOnEnd;
 
     private Player playerOne;
-    private Player playerTwo;
 
     public GameSession(Game linkedGame,Character character,String pseudo,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.linkedGame = linkedGame;
@@ -121,8 +119,8 @@ public class GameSession extends Configurable{
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
 
         this.playerOne.setPosition(new Player.Position(30,30,configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue(),configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
-        this.gameSessionScene.setPlayerOne(this.playerOne);
-        this.gameSessionScene.updatePlayerOne(Config.PlayerAction.STATIC_POSITION,null);
+        this.gameSessionScene.addPlayer(this.playerOne);
+        this.gameSessionScene.updatePlayer(this.playerOne,Config.PlayerAction.STATIC_POSITION,null);
     }  
 
     /**
@@ -131,7 +129,7 @@ public class GameSession extends Configurable{
     private void manageKeyEvent(KeyEvent keyData){
         KeyCode code = keyData.getCode();
 
-        GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayerOne(Config.PlayerAction.STATIC_POSITION,null);
+        GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayer(this.playerOne,Config.PlayerAction.STATIC_POSITION,null);
 
         this
             .madeActionIf(code,KeyCode.SPACE,PlayerAction.ATTACK,toDoAfter)  
@@ -161,7 +159,7 @@ public class GameSession extends Configurable{
             if(toDoBeforeIfMatch != null)
                 toDoBeforeIfMatch.action();
 
-            this.gameSessionScene.updatePlayerOne(action,toDoAfter); 
+            this.gameSessionScene.updatePlayer(this.playerOne,action,toDoAfter); 
         }
 
         return this;
