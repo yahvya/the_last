@@ -19,7 +19,7 @@ public abstract class ScenePopup{
 
     /**
      * 
-     * @return la popul
+     * @return la popup
      */
     public Parent getPopup(){
         return this.popup;

@@ -96,7 +96,7 @@ public class HomeScene extends GameScene{
 
         // création des textes actions
         Label createPlayer = new Label("Creer un personnage");
-        Label loadGame = new Label("Charger une partie");
+        Label loadGame = new Label("Reprendre une partie");
         Label startGame = new Label("Lancer une partie");
 
         Font font = this.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,25);
@@ -226,11 +226,10 @@ public class HomeScene extends GameScene{
                     ChoosedData choiceResult = (ChoosedData) result;
 
                     children.remove(choiceResult.getContainer() );
-                    this.someActionIsPerforming = false;
 
                     // si l'action non annulé alors on démarre une nouvelle partie
                     if(!isCanceled)
-                        this.startNewGame(choiceResult.getChoosedCharacter(),choiceResult.getChoosedPseudo(),container );
+                        this.startNewGame(choiceResult.getChoosedCharacter(),choiceResult.getChoosedPseudo(),container);
                 }).getPopup();
 
                 children.add(chooser);
@@ -278,16 +277,26 @@ public class HomeScene extends GameScene{
         loadingAnimationTimeline.play();
 
         try{
-            GameSession session = new GameSession(game,choosedCharacter,choosedPseudo,this);
+            GameSession session = new GameSession(this.game,choosedCharacter,choosedPseudo,() -> {
+                this.someActionIsPerforming = false;
+                this.putSceneInWindow();
+            });
 
-            session.searchOpponent(() -> children.remove(loadingCircle) );
+            session.searchOpponent(() -> children.remove(loadingCircle),() -> this.showStartGameFailure() );
         }
         catch(Exception e){
-            Alert errorAlert = new Alert(AlertType.ERROR);
-
-            errorAlert.setHeaderText("Echec du lancement de la partie");
-            errorAlert.show();
+            this.showStartGameFailure();
         } 
+    }
+
+    /**
+     * affiche l'alerte d'échec de lancement
+     */
+    public void showStartGameFailure(){
+        Alert errorAlert = new Alert(AlertType.ERROR);
+
+        errorAlert.setHeaderText("Echec du lancement de la partie");
+        errorAlert.show();
     }
 
     /**

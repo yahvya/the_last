@@ -51,7 +51,6 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import yahaya_rachelle.configuration.Config;
-import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.scene.scene.GameScene;
@@ -59,7 +58,7 @@ import yahaya_rachelle.utils.GameContainerCallback;
 
 public class CreatePlayer extends ScenePopup{
 
-    private HashMap<PlayerAction,ArrayList<Image> > actionsSequences;
+    private HashMap<Config.PlayerAction,ArrayList<Image> > actionsSequences;
 
     private TextField playerNameContainer;
 
@@ -76,7 +75,7 @@ public class CreatePlayer extends ScenePopup{
     protected Parent buildPopup() {
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedScene.getGame() );
 
-        this.actionsSequences = new HashMap<PlayerAction,ArrayList<Image> >();
+        this.actionsSequences = new HashMap<Config.PlayerAction,ArrayList<Image> >();
         this.width = configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
         this.height = configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue();
         this.locker = new ReentrantLock();
@@ -219,7 +218,7 @@ public class CreatePlayer extends ScenePopup{
         previewTimeline.setCycleCount(Animation.INDEFINITE);
 
         // ajout de l'ajout d'images
-        this.addNewImageZone(addButton,imageList,previewImageList,imagesListContainer,PlayerAction.ATTACK,manager,imageWidth,previewTimeline);
+        this.addNewImageZone(addButton,imageList,previewImageList,imagesListContainer,Config.PlayerAction.ATTACK,manager,imageWidth,previewTimeline);
 
         return container;
     }
@@ -235,7 +234,7 @@ public class CreatePlayer extends ScenePopup{
      * @param imageWidth
      * @param previewTimeline
      */
-    public void addNewImageZone(Button addButton,ArrayList<Image> imageList,ArrayList<Image> previewList,HBox imagesListContainer,PlayerAction actionType,GameDataManager manager,final double imageWidth,Timeline previewTimeline){
+    public void addNewImageZone(Button addButton,ArrayList<Image> imageList,ArrayList<Image> previewList,HBox imagesListContainer,Config.PlayerAction actionType,GameDataManager manager,final double imageWidth,Timeline previewTimeline){
         addButton.setOnMouseClicked((e) -> {
 
             // on lance la timeline de preview à la première image
@@ -306,7 +305,7 @@ public class CreatePlayer extends ScenePopup{
     public void addAttackZone(Font font,ObservableList<Node> children,GameDataManager manager){
         // création de la liste d'image des attaques pour la preview
         ArrayList<Image> imageList = new ArrayList<Image>();
-        this.actionsSequences.put(PlayerAction.ATTACK,imageList);
+        this.actionsSequences.put(Config.PlayerAction.ATTACK,imageList);
 
         children.add(this.createZone(font,"Attaque",imageList,manager) );
     }
@@ -319,7 +318,7 @@ public class CreatePlayer extends ScenePopup{
     public void addSuperAttackZone(Font font,ObservableList<Node> children,GameDataManager manager){
         // création de la liste d'image des supers attaques pour la preview
         ArrayList<Image> imageList = new ArrayList<Image>();
-        this.actionsSequences.put(PlayerAction.SUPER_ATTACK,imageList);
+        this.actionsSequences.put(Config.PlayerAction.SUPER_ATTACK,imageList);
 
         children.add(this.createZone(font,"Super attaque",imageList,manager) );
     }
@@ -332,7 +331,7 @@ public class CreatePlayer extends ScenePopup{
     public void addRunZone(Font font,ObservableList<Node> children,GameDataManager manager){
         // création de la liste d'image de course pour la preview
         ArrayList<Image> imageList = new ArrayList<Image>();
-        this.actionsSequences.put(PlayerAction.RUN,imageList);
+        this.actionsSequences.put(Config.PlayerAction.RUN,imageList);
 
         children.add(this.createZone(font,"Course",imageList,manager) );
     }
@@ -345,7 +344,7 @@ public class CreatePlayer extends ScenePopup{
     public void addDeathZone(Font font,ObservableList<Node> children,GameDataManager manager){
         // création de la liste d'image de la mort pour la preview
         ArrayList<Image> imageList = new ArrayList<Image>();
-        this.actionsSequences.put(PlayerAction.DEATH,imageList);
+        this.actionsSequences.put(Config.PlayerAction.DEATH,imageList);
 
         children.add(this.createZone(font,"Mort",imageList,manager) );
     }
@@ -358,7 +357,7 @@ public class CreatePlayer extends ScenePopup{
     public void addJumpZone(Font font,ObservableList<Node> children,GameDataManager manager){
         // création de la liste d'image des sauts pour la preview
         ArrayList<Image> imageList = new ArrayList<Image>();
-        this.actionsSequences.put(PlayerAction.JUMP,imageList);
+        this.actionsSequences.put(Config.PlayerAction.JUMP,imageList);
 
         children.add(this.createZone(font,"Saut",imageList,manager) );
     }
@@ -371,7 +370,7 @@ public class CreatePlayer extends ScenePopup{
     public void addFallZone(Font font,ObservableList<Node> children,GameDataManager manager){
         // création de la liste d'image de descente pour la preview
         ArrayList<Image> imageList = new ArrayList<Image>();
-        this.actionsSequences.put(PlayerAction.FALL,imageList);
+        this.actionsSequences.put(Config.PlayerAction.FALL,imageList);
 
         children.add(this.createZone(font,"Descente",imageList,manager) );
     }
@@ -384,7 +383,7 @@ public class CreatePlayer extends ScenePopup{
     public void addStaticZone(Font font,ObservableList<Node> children,GameDataManager manager){
         // création de la liste d'image statiques pour la preview
         ArrayList<Image> imageList = new ArrayList<Image>();
-        this.actionsSequences.put(PlayerAction.STATIC_POSITION,imageList);
+        this.actionsSequences.put(Config.PlayerAction.STATIC_POSITION,imageList);
 
         children.add(this.createZone(font,"Statique",imageList,manager) );
     }   
@@ -397,7 +396,7 @@ public class CreatePlayer extends ScenePopup{
     public void addTakeHitZone(Font font,ObservableList<Node> children,GameDataManager manager){
         // création de la liste d'image des dégats pour la preview
         ArrayList<Image> imageList = new ArrayList<Image>();
-        this.actionsSequences.put(PlayerAction.TAKE_HIT,imageList);
+        this.actionsSequences.put(Config.PlayerAction.TAKE_HIT,imageList);
 
         children.add(this.createZone(font,"Degats",imageList,manager) );
     }
@@ -439,7 +438,7 @@ public class CreatePlayer extends ScenePopup{
         }
 
         // on vérifie que chaque action à au moins une image associé
-        for(Map.Entry<PlayerAction,ArrayList<Image> > entry : this.actionsSequences.entrySet() )
+        for(Map.Entry<Config.PlayerAction,ArrayList<Image> > entry : this.actionsSequences.entrySet() )
         {
             if(entry.getValue().size() < minimumStep)
             {
@@ -478,14 +477,14 @@ public class CreatePlayer extends ScenePopup{
                 folder.mkdirs();
 
                 // remplissage du dossier personnsages par les images de séquences
-                configFileMap.put(Config.Character.COUNT_OF_ATTACK_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.ATTACK),folderId,PlayerAction.ATTACK.key) );
-                configFileMap.put(Config.Character.COUNT_OF_DEATH_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.DEATH),folderId,PlayerAction.DEATH.key) );
-                configFileMap.put(Config.Character.COUNT_OF_FALL_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.FALL),folderId,PlayerAction.FALL.key) );
-                configFileMap.put(Config.Character.COUNT_OF_JUMP_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.JUMP),folderId,PlayerAction.JUMP.key) );
-                configFileMap.put(Config.Character.COUNT_OF_RUN_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.RUN),folderId,PlayerAction.RUN.key) );
-                configFileMap.put(Config.Character.COUNT_OF_STATIC_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.STATIC_POSITION),folderId,PlayerAction.STATIC_POSITION.key) );
-                configFileMap.put(Config.Character.COUNT_OF_SUPER_ATTACK_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.SUPER_ATTACK),folderId,PlayerAction.SUPER_ATTACK.key) );
-                configFileMap.put(Config.Character.COUNT_OF_TAKE_HIT_STATE.key,this.createActionFileGroup(this.actionsSequences.get(PlayerAction.TAKE_HIT),folderId,PlayerAction.TAKE_HIT.key) );
+                configFileMap.put(Config.Character.COUNT_OF_ATTACK_STATE.key,this.createActionFileGroup(this.actionsSequences.get(Config.PlayerAction.ATTACK),folderId,Config.PlayerAction.ATTACK.key) );
+                configFileMap.put(Config.Character.COUNT_OF_DEATH_STATE.key,this.createActionFileGroup(this.actionsSequences.get(Config.PlayerAction.DEATH),folderId,Config.PlayerAction.DEATH.key) );
+                configFileMap.put(Config.Character.COUNT_OF_FALL_STATE.key,this.createActionFileGroup(this.actionsSequences.get(Config.PlayerAction.FALL),folderId,Config.PlayerAction.FALL.key) );
+                configFileMap.put(Config.Character.COUNT_OF_JUMP_STATE.key,this.createActionFileGroup(this.actionsSequences.get(Config.PlayerAction.JUMP),folderId,Config.PlayerAction.JUMP.key) );
+                configFileMap.put(Config.Character.COUNT_OF_RUN_STATE.key,this.createActionFileGroup(this.actionsSequences.get(Config.PlayerAction.RUN),folderId,Config.PlayerAction.RUN.key) );
+                configFileMap.put(Config.Character.COUNT_OF_STATIC_STATE.key,this.createActionFileGroup(this.actionsSequences.get(Config.PlayerAction.STATIC_POSITION),folderId,Config.PlayerAction.STATIC_POSITION.key) );
+                configFileMap.put(Config.Character.COUNT_OF_SUPER_ATTACK_STATE.key,this.createActionFileGroup(this.actionsSequences.get(Config.PlayerAction.SUPER_ATTACK),folderId,Config.PlayerAction.SUPER_ATTACK.key) );
+                configFileMap.put(Config.Character.COUNT_OF_TAKE_HIT_STATE.key,this.createActionFileGroup(this.actionsSequences.get(Config.PlayerAction.TAKE_HIT),folderId,Config.PlayerAction.TAKE_HIT.key) );
 
                 configFileMap.put(Config.Character.NAME.key,playerName);
                 configFileMap.put(Config.Character.FORCE.key,new Random().nextInt(50,100) );

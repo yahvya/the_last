@@ -59,11 +59,11 @@ public class Character extends Configurable{
         int filesListLength = filesList.length;
 
         // récupération des images
-        for(; countOfImages > 0; countOfImages--)
+        for(int count = 1;count <= countOfImages; count++)
         {
             for(int index = 0; index < filesListLength; index++)
             {
-                if(filesList[index].startsWith(action.key) )
+                if(filesList[index].startsWith(String.join("_",action.key,Integer.toString(count) ) ) )
                 {
                     imageList.add(new Image(this.directory + filesList[index]) );
 

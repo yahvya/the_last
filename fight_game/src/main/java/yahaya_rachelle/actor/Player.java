@@ -8,7 +8,6 @@ import org.json.simple.parser.ParseException;
 
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable;
-import yahaya_rachelle.configuration.Config.PlayerAction;
 
 public class Player extends Configurable{
     private Character character;
@@ -55,86 +54,47 @@ public class Player extends Configurable{
         return this.playerPosition;
     }
 
+    public double getWidth(){
+        return this.width;
+    }
+
+    public double getHeight(){
+        return this.height;
+    }
+
     @Override
     protected String getConfigFilePath() {
         return "/config/player.json";
     }
 
-    public class Position{
-        private int minX;
-        private int maxX;
-        private int minY;
-        private int maxY;
+    public static class Position{
         private int currentX;
         private int currentY;
+        private Direction direction;
 
-        public Position(int minX,int minY,int maxX,int maxY,int currentX,int currentY){
-            this.minX = minX;
-            this.minY = minY;
-            this.maxX = maxX;
-            this.maxY = maxY;
+        public Position(int currentX,int currentY){
             this.currentX = currentX;
-            this.currentY = currentY;
-        }  
-        
-        /**
-         * tente de bouger la position à x
-         * @param x
-         */
-        public void moveToX(int x){
-            if(this.minX > x)
-                this.currentX = this.minX;
-            else if (this.maxX < x)
-                this.currentX = this.maxX;
-            else
-                this.currentX = x;
+            this.currentY = currentY;         
+            this.direction = Direction.RIGHT;   
         }
 
-        /**
-         * tente de bouger la position à y
-         * @param y
-         */
-        public void moveToY(int y){
-            if(this.minY > y)
-                this.currentY = this.minY;
-            else if (this.maxY < y)
-                this.currentY = this.maxY;
-            else
-                this.currentY = y;
-        }   
-
-
-        /**
-         * tente d'ajouter à x
-         * @param toAdd
-         */
-        public void addToX(int toAdd){
-            this.moveToX(this.currentX + toAdd);
+        public void setDirection(Direction direction){
+            this.direction = direction;
         }
 
-        /**
-         * tente d'ajouter à Y
-         * @param toAdd
-         */
-        public void addToY(int toAdd){
-            this.moveToY(this.currentY + toAdd);
+        public Direction getDirection(){
+            return this.direction;
         }
 
-        /**
-         * tente de retirer à x
-         * @param toRemove
-         */
-        public void removeToX(int toRemove){
-            this.moveToY(this.currentX - toRemove);
+        public int getCurrentX(){
+            return this.currentX;
         }
 
-        /**
-         * tente de retirer à y
-         * @param toRemove
-         */
-        public void removeToY(int toRemove){
-            this.moveToY(this.currentY - toRemove);
+        public int getCurrentY(){
+            return this.currentY;
         }
+
+        public static enum Direction{RIGHT,LEFT};
     }
 
 }

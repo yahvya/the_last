@@ -1,6 +1,8 @@
 package yahaya_rachelle.game;
 
+import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable;
+import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.scene.scene.GameSessionScene;
 import yahaya_rachelle.scene.scene.HomeScene;
 import yahaya_rachelle.utils.GameCallback;
@@ -11,6 +13,9 @@ import java.net.URISyntaxException;
 
 import org.json.simple.parser.ParseException;
 
+import javafx.application.Platform;
+import javafx.scene.control.skin.TextInputControlSkin.Direction;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
@@ -20,15 +25,16 @@ public class GameSession extends Configurable{
 
     private String saveGameFilePath;
 
-    private HomeScene homeScene;
     private GameSessionScene gameSessionScene;
+
+    private GameCallback toCallOnEnd;
 
     private Player playerOne;
     private Player playerTwo;
 
-    public GameSession(Game linkedGame,Character character,String pseudo,HomeScene homeScene) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
+    public GameSession(Game linkedGame,Character character,String pseudo,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.linkedGame = linkedGame;
-        this.homeScene = homeScene;
+        this.toCallOnEnd = toCallOnEnd;
         this.playerOne = new Player(character,pseudo);
     }
 
@@ -40,29 +46,56 @@ public class GameSession extends Configurable{
      * @throws ParseException
      * @throws FileNotFoundException
      */
-    public GameSession(String saveGameFilePath,HomeScene homeScene) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
+    public GameSession(String saveGameFilePath,HomeScene homeScene,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.saveGameFilePath = saveGameFilePath;
-        this.homeScene = homeScene;
-        
+        this.toCallOnEnd = toCallOnEnd;
+
         this.setConfig();
     }
 
     /**
      * cherche un adversaire et lance le jeux
      */
-    public void searchOpponent(GameCallback toCallAfterFind){
-        // recherche d'un adversaire
+    public void searchOpponent(GameCallback toCallAfterFind,GameCallback toCallOnFailure){
 
-        toCallAfterFind.action();
+        Thread searchThread = new Thread(){
+            @Override
+            public void run(){
+                try{
+                    // recherche d'un adversaire
 
-        this.startGame();
+                    Platform.runLater(new Runnable(){
+                        @Override 
+                        public void run(){
+                            // préviens du fait qu'il ait été trouvé
+                            toCallAfterFind.action();
+
+                            // lance la partie
+                            startGame();
+                        }
+                    });
+                }
+                catch(Exception e){
+                    
+                    Platform.runLater(new Runnable(){
+                        @Override
+                        public void run(){
+                            // préviens d'une échec de recherche ou de création des joueurs
+                            toCallOnFailure.action();
+                        }
+                    });
+                }
+            }
+        };
+
+        searchThread.start();
     }
 
     /**
      * finis le jeux et retourne à la page d'accueil
      */
     public void endGame(){
-        this.homeScene.putSceneInWindow();
+        this.toCallOnEnd.action();
     }
 
     /**
@@ -84,14 +117,49 @@ public class GameSession extends Configurable{
         this.gameSessionScene.getPage().setOnKeyPressed((keyData) -> this.manageKeyEvent(keyData) );
         // affichage de la scène
         this.gameSessionScene.putSceneInWindow();
-        // placement des joueurs sur la scène
+        // placement des joueurs sur la scène;
+        // ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
+
+        this.playerOne.setPosition(new Player.Position(30,30) );
+        this.gameSessionScene.setPlayerOne(this.playerOne);
+        this.gameSessionScene.updatePlayerOne(Config.PlayerAction.STATIC_POSITION,null);
     }  
 
     /**
      * gère les événements du clavier
      */
     private void manageKeyEvent(KeyEvent keyData){
+        KeyCode code = keyData.getCode();
 
+        GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayerOne(Config.PlayerAction.STATIC_POSITION,null);
+
+        this
+            .madeActionIf(code,KeyCode.SPACE,PlayerAction.ATTACK,toDoAfter)  
+            .madeActionIf(code,KeyCode.RIGHT,PlayerAction.RUN,toDoAfter,() -> this.playerOne.getPosition().setDirection(Player.Position.Direction.RIGHT) )  
+            .madeActionIf(code,KeyCode.LEFT,PlayerAction.RUN,toDoAfter,() -> this.playerOne.getPosition().setDirection(Player.Position.Direction.LEFT) );  
+    }
+
+    /**
+     * lance l'exécution d'unae action
+     * @return this
+     */
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch){
+        if(code.compareTo(toCheck) == 0)
+        {
+            if(toDoBeforeIfMatch != null)
+                toDoBeforeIfMatch.action();
+
+            this.gameSessionScene.updatePlayerOne(action,toDoAfter); 
+        }
+
+        return this;
+    }
+
+    /*
+     * alias
+     */
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter){
+        return this.madeActionIf(code,toCheck,action,toDoAfter,null);
     }
 
     public Game getLinkedGame(){
