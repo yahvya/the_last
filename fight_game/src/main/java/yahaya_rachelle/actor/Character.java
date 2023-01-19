@@ -20,8 +20,11 @@ public class Character extends Configurable{
     private String configFilePath;
     private String directory;
     private String name;
+    
+    private double force;
+    private double superForce;
 
-    public Character(String configFilePath) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
+    public Character(String configFilePath,double maxForce,double superAttackAdding) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.configFilePath = configFilePath;
         this.actionsMap = new HashMap<Config.PlayerAction,ArrayList<Image> >();
 
@@ -34,7 +37,10 @@ public class Character extends Configurable{
         ConfigGetter<Long> configLongReader = new ConfigGetter<Long>(this);
         ConfigGetter<String> configStringReader = new ConfigGetter<String>(this);
 
+        // récupération du nom et de la force du personnage (pourcentage de force par rapport à la force maximale)
         this.name = configStringReader.getValueOf(Config.Character.NAME.key);
+        this.force = (maxForce / 100) * configLongReader.getValueOf(Config.Character.FORCE.key).doubleValue();
+        this.superForce = this.force + superAttackAdding;
 
         String[] childsList = new File(this.getClass().getResource(directoryObject.getPath().replace("\\","/") ).toURI() ).list();
 
@@ -88,6 +94,14 @@ public class Character extends Configurable{
         return this.name;
     }
 
+    public double getForce(){
+        return this.force;
+    }
+
+    public double getSuperForce(){
+        return this.superForce;
+    }
+
     @Override
     protected String getConfigFilePath() {
         return this.configFilePath;
@@ -107,14 +121,19 @@ public class Character extends Configurable{
         File directory = new File(usableClass.getResource(rootFolderPath).toURI() );
 
         ConfigGetter<String> configStringGetter = new ConfigGetter<String>(linkedGame);
+
+        // récupération des données sur les personnsages
+        double charactersMaxForce = new ConfigGetter<Long>(linkedGame).getValueOf(Config.App.CHARACTERS_MAX_FORCE.key).doubleValue();
+        double charactersSuperAddingForce = new ConfigGetter<Long>(linkedGame).getValueOf(Config.App.CHARACTERS_SUPER_ATTACK_ADDING.key).doubleValue();
     
         String toIgnore = configStringGetter.getValueOf(Config.App.CUSTOM_CHARACTERS_INDEX_FILENAME.key);
         String charactersConfigFileName = configStringGetter.getValueOf(Config.App.CHARACTERS_CONFIG_FILENAME.key);
 
+        // parcours du nom des éléments du dossuer
         for(String subDirectory : directory.list() )
         {
             if(!subDirectory.equals(toIgnore) )
-                list.add(new Character(String.join("/",rootFolderPath + subDirectory,charactersConfigFileName) ) );
+                list.add(new Character(String.join("/",rootFolderPath + subDirectory,charactersConfigFileName),charactersMaxForce,charactersSuperAddingForce) );
         }
 
         return list;

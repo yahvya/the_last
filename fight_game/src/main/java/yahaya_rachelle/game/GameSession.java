@@ -9,14 +9,16 @@ import yahaya_rachelle.utils.GameCallback;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URISyntaxException;
 
 import org.json.simple.parser.ParseException;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.util.Duration;
 import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
 
@@ -31,12 +33,18 @@ public class GameSession extends Configurable{
 
     private GameCallback toCallOnEnd;
 
-    private Player playerOne;
+    private Player linkedPlayer;
+
+    private boolean canDoSuperAttack;
+
+    private int blockTime;
 
     public GameSession(Game linkedGame,Character character,String pseudo,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.linkedGame = linkedGame;
         this.toCallOnEnd = toCallOnEnd;
-        this.playerOne = new Player(character,pseudo);
+        this.linkedPlayer = new Player(character,pseudo,this);
+        this.canDoSuperAttack = true;
+        this.blockTime = new ConfigGetter<Long>(linkedGame).getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
     }
 
     /**
@@ -123,9 +131,9 @@ public class GameSession extends Configurable{
         // placement des joueurs sur la scène;
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
 
-        this.playerOne.setPosition(new Player.Position(30,30,configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue(),configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
-        this.gameSessionScene.addPlayer(this.playerOne);
-        this.gameSessionScene.updatePlayer(this.playerOne,Config.PlayerAction.STATIC_POSITION,null);
+        this.linkedPlayer.setPosition(new Player.Position(30,30,configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue(),configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
+        this.gameSessionScene.addPlayer(this.linkedPlayer);
+        this.gameSessionScene.updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
     }  
 
     /**
@@ -134,37 +142,48 @@ public class GameSession extends Configurable{
     private void manageKeyEvent(KeyEvent keyData){
         KeyCode code = keyData.getCode();
 
-        GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayer(this.playerOne,Config.PlayerAction.STATIC_POSITION,null);
+        GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
 
         this
-            .madeActionIf(code,KeyCode.SPACE,PlayerAction.ATTACK,toDoAfter)  
+            .madeActionIf(code,KeyCode.F,PlayerAction.ATTACK,toDoAfter)  
+            .madeActionIf(code,KeyCode.D,PlayerAction.SUPER_ATTACK,toDoAfter,() -> {
+                // on bloque la super attaque pendant x temps
+                this.canDoSuperAttack = false;
+
+                // timeline pour débloquer la super attaque
+                Timeline unlockTimeline = new Timeline(new KeyFrame(Duration.ONE,(e) -> this.canDoSuperAttack = true) );
+
+                unlockTimeline.setCycleCount(1);
+                unlockTimeline.setDelay(Duration.millis(this.blockTime) );
+                unlockTimeline.play();
+            },this.canDoSuperAttack)
             .madeActionIf(code,KeyCode.RIGHT,PlayerAction.RUN,toDoAfter,() -> {
-                Player.Position position = this.playerOne.getPosition();
+                Player.Position position = this.linkedPlayer.getPosition();
                 
                 position
                     .setCurrentDirection(Player.Position.Direction.RIGHT)
                     .moveOnCurrentDirection(GameSession.X_SPEED);
             })  
             .madeActionIf(code,KeyCode.LEFT,PlayerAction.RUN,toDoAfter,() -> {
-                Player.Position position = this.playerOne.getPosition();
+                Player.Position position = this.linkedPlayer.getPosition();
                 
                 position
                     .setCurrentDirection(Player.Position.Direction.LEFT)
                     .moveOnCurrentDirection(GameSession.X_SPEED);
-            }) ; 
+            });
     }
 
     /**
      * lance l'exécution d'unae action
      * @return this
      */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch){
-        if(code.compareTo(toCheck) == 0)
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck){
+        if(code.compareTo(toCheck) == 0 && conditionToCheck)
         {
             if(toDoBeforeIfMatch != null)
                 toDoBeforeIfMatch.action();
 
-            this.gameSessionScene.updatePlayer(this.playerOne,action,toDoAfter); 
+            this.gameSessionScene.updatePlayer(this.linkedPlayer,action,toDoAfter); 
         }
 
         return this;
@@ -174,7 +193,14 @@ public class GameSession extends Configurable{
      * alias
      */
     public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter){
-        return this.madeActionIf(code,toCheck,action,toDoAfter,null);
+        return this.madeActionIf(code,toCheck,action,toDoAfter,null,true);
+    }
+
+     /*
+     * alias
+     */
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch){
+        return this.madeActionIf(code,toCheck,action,toDoAfter,toDoBeforeIfMatch,true);
     }
 
     public Game getLinkedGame(){

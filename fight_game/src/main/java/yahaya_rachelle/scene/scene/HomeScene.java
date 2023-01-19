@@ -251,7 +251,7 @@ public class HomeScene extends GameScene{
 
         Paint color = Paint.valueOf(configStringGetter.getValueOf(Config.App.LOADING_ON_COLOR.key) );
 
-        final int circle_raduis = 20;
+        final int circle_raduis = 15;
         final int rotationSpeed = 95;
 
         Circle loadingCircle = new Circle();
@@ -261,8 +261,8 @@ public class HomeScene extends GameScene{
         loadingCircle.setStroke(color);
         loadingCircle.setStrokeWidth(5);
         loadingCircle.getStrokeDashArray().add(15d);
-        loadingCircle.setTranslateX(configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key) - (circle_raduis * 2) - 10 );
-        loadingCircle.setTranslateY(configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key) - (circle_raduis * 2) - 20);
+        loadingCircle.setTranslateX(configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key) - (circle_raduis * 2) - 20);
+        loadingCircle.setTranslateY(configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key) - (circle_raduis * 2) - 30);
 
         ObservableList<Node> children = container.getChildren();
         
@@ -284,9 +284,15 @@ public class HomeScene extends GameScene{
                 this.putSceneInWindow();
             });
 
-            session.searchOpponent(() -> children.remove(loadingCircle),() -> this.showStartGameFailure() );
+            session.searchOpponent(() -> children.remove(loadingCircle),() -> {
+                System.out.println("c'est ici que je suis");
+                this.someActionIsPerforming = false;
+                this.showStartGameFailure();
+            });
         }
         catch(Exception e){
+            e.printStackTrace();
+            this.someActionIsPerforming = false;
             this.showStartGameFailure();
         } 
     }

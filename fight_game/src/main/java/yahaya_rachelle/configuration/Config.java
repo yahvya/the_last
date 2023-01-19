@@ -16,7 +16,11 @@ public abstract class Config {
         CHARACTERS_PATH("characters_path"),
         CUSTOM_CHARACTERS_PATH("custom_characters_path"),
         CUSTOM_CHARACTERS_INDEX_FILENAME("custom_characters_index_file_name"),
-        CHARACTERS_CONFIG_FILENAME("characters_config_file_name");
+        CHARACTERS_CONFIG_FILENAME("characters_config_file_name"),
+        PLAYERS_LIFE("players_life"),
+        CHARACTERS_MAX_FORCE("characters_max_force"),
+        CHARACTERS_SUPER_ATTACK_ADDING("characters_super_attack_adding"),
+        CHARACTERS_SUPPER_ATTACK_BLOCK_TIME("characters_super_attack_block_time_ms");
 
         public final String key;
 

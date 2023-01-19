@@ -9,5 +9,9 @@
     "characters_path" : "/characters/",
     "custom_characters_path" : "/custom-characters/",
     "custom_characters_index_file_name" : "index.txt",
-    "characters_config_file_name" : "config.json"
+    "characters_config_file_name" : "config.json",
+    "players_life" : 1000,
+    "characters_max_force" : 80,
+    "characters_super_attack_adding" : 20,
+    "characters_super_attack_block_time_ms" : 4000
 }

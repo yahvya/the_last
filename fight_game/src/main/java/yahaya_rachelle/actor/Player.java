@@ -8,6 +8,7 @@ import org.json.simple.parser.ParseException;
 
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable;
+import yahaya_rachelle.game.GameSession;
 
 public class Player extends Configurable{
     private Character character;
@@ -18,8 +19,9 @@ public class Player extends Configurable{
 
     private double width;
     private double height;
+    private double currentLife;
 
-    public Player(Character character,String pseudo) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
+    public Player(Character character,String pseudo,GameSession linkedGameSession) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.setConfig();
         this.character = character;
         this.pseudo = pseudo;
@@ -28,6 +30,10 @@ public class Player extends Configurable{
 
         this.width = configLongGetter.getValueOf(Config.Player.PLAYER_WIDTH.key).doubleValue();
         this.height = configLongGetter.getValueOf(Config.Player.PLAYER_HEIGHT.key).doubleValue();
+
+        configLongGetter = new ConfigGetter<Long>(linkedGameSession.getLinkedGame() );
+
+        this.currentLife = configLongGetter.getValueOf(Config.App.PLAYERS_LIFE.key).doubleValue();
     }
 
     /**
@@ -54,6 +60,36 @@ public class Player extends Configurable{
         return this.pseudo;
     }
 
+    /**
+     * prend un coup du personnage par son attaque basique
+     * @param opponent
+     * @return this
+     */
+    public Player receiveHitFromAttackOf(Player opponent){
+        this.currentLife -= opponent.getCharacter().getForce();
+
+        return this;
+    }
+
+    /**
+     * prend un coup du personnsage par sa super attaque
+     * @param opponent
+     * @return this
+     */
+    public Player takeHitFromSuperAttackOf(Player opponent){
+        this.currentLife -= opponent.getCharacter().getSuperForce();
+
+        return this;
+    }
+
+    /**
+     * 
+     * @return si le joueur est mort
+     */
+    public boolean isDead(){
+        return this.currentLife <= 0;
+    }
+
     public Position getposition() {
         return this.position;
     }
@@ -64,6 +100,10 @@ public class Player extends Configurable{
 
     public double getHeight(){
         return this.height;
+    }
+
+    public double getCurrentLife(){
+        return this.currentLife;
     }
 
     @Override
@@ -170,5 +210,4 @@ public class Player extends Configurable{
 
         public static enum Direction{RIGHT,LEFT};
     }
-
 }
