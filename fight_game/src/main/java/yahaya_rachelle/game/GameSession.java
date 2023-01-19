@@ -23,7 +23,8 @@ import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
 
 public class GameSession extends Configurable{
-    private static final int X_SPEED = 7;
+    public static final int X_SPEED = 9;
+    public static final int JUMP_HEIGHT = 230;
 
     private Game linkedGame;
 
@@ -36,6 +37,7 @@ public class GameSession extends Configurable{
     private Player linkedPlayer;
 
     private boolean canDoSuperAttack;
+    private boolean isInJumpingSession;
 
     private int blockTime;
 
@@ -44,6 +46,7 @@ public class GameSession extends Configurable{
         this.toCallOnEnd = toCallOnEnd;
         this.linkedPlayer = new Player(character,pseudo,this);
         this.canDoSuperAttack = true;
+        this.isInJumpingSession = false;
         this.blockTime = new ConfigGetter<Long>(linkedGame).getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
     }
 
@@ -145,7 +148,7 @@ public class GameSession extends Configurable{
         GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
 
         this
-            .madeActionIf(code,KeyCode.F,PlayerAction.ATTACK,toDoAfter)  
+            .madeActionIf(code,KeyCode.F,PlayerAction.ATTACK,toDoAfter)
             .madeActionIf(code,KeyCode.D,PlayerAction.SUPER_ATTACK,toDoAfter,() -> {
                 // on bloque la super attaque pendant x temps
                 this.canDoSuperAttack = false;
@@ -157,6 +160,16 @@ public class GameSession extends Configurable{
                 unlockTimeline.setDelay(Duration.millis(this.blockTime) );
                 unlockTimeline.play();
             },this.canDoSuperAttack)
+            .madeActionIf(code,KeyCode.SPACE,PlayerAction.JUMP,() -> {
+                // à la fin de la séquence de saut, on lance la séquence de descente
+                this.gameSessionScene.updatePlayer(this.linkedPlayer,Config.PlayerAction.FALL,() -> {
+                    // quand la décente est terminé on débloque les autres actions
+                    this.isInJumpingSession = false;
+                    toDoAfter.action();
+                });
+            },() -> {
+                this.isInJumpingSession = true;
+            })
             .madeActionIf(code,KeyCode.RIGHT,PlayerAction.RUN,toDoAfter,() -> {
                 Player.Position position = this.linkedPlayer.getPosition();
                 
@@ -178,6 +191,11 @@ public class GameSession extends Configurable{
      * @return this
      */
     public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck){
+        
+        // aucune action n'est possible durant
+        if(this.isInJumpingSession)
+            return this;
+
         if(code.compareTo(toCheck) == 0 && conditionToCheck)
         {
             if(toDoBeforeIfMatch != null)

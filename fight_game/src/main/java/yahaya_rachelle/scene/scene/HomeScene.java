@@ -285,13 +285,11 @@ public class HomeScene extends GameScene{
             });
 
             session.searchOpponent(() -> children.remove(loadingCircle),() -> {
-                System.out.println("c'est ici que je suis");
                 this.someActionIsPerforming = false;
                 this.showStartGameFailure();
             });
         }
         catch(Exception e){
-            e.printStackTrace();
             this.someActionIsPerforming = false;
             this.showStartGameFailure();
         } 

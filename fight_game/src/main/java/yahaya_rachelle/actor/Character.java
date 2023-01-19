@@ -52,6 +52,7 @@ public class Character extends Configurable{
         this.loadImagesFor(Config.PlayerAction.STATIC_POSITION,configLongReader.getValueOf(Config.Character.COUNT_OF_STATIC_STATE.key).intValue(),childsList);
         this.loadImagesFor(Config.PlayerAction.SUPER_ATTACK,configLongReader.getValueOf(Config.Character.COUNT_OF_SUPER_ATTACK_STATE.key).intValue(),childsList);
         this.loadImagesFor(Config.PlayerAction.TAKE_HIT,configLongReader.getValueOf(Config.Character.COUNT_OF_TAKE_HIT_STATE.key).intValue(),childsList);
+        this.loadImagesFor(Config.PlayerAction.FALL,configLongReader.getValueOf(Config.Character.COUNT_OF_FALL_STATE.key).intValue(),childsList);
     } 
     
     /**

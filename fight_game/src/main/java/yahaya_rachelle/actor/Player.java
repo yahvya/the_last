@@ -200,6 +200,12 @@ public class Player extends Configurable{
             return this.currentDirection;
         }
 
+        public Position setCurrentY(double currentY){
+            this.currentY = currentY;
+
+            return this;
+        }
+
         public double getCurrentX(){
             return this.currentX;
         }

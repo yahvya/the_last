@@ -181,13 +181,41 @@ public class GameSessionScene extends GameScene{
             int sequenceSize = sequence.size();
 
             // arrêt de l'animation précédente
-            this.timeline.setOnFinished(null);;
+            this.timeline.setOnFinished(null);
             this.timeline.stop();
 
             // on joue l'animation de l'action, l'animation durera maxMsForAction et le temps sera partagé entre le nombre d'images
-            this.timeline = new Timeline(new KeyFrame(Duration.millis(PlayerManager.MAX_MS_PER_ACTION / sequenceSize),(e) -> {
+            this.timeline = new Timeline(new KeyFrame(Duration.millis((action == Config.PlayerAction.JUMP || action == Config.PlayerAction.FALL ? PlayerManager.MAX_MS_PER_ACTION / 2 : PlayerManager.MAX_MS_PER_ACTION) / sequenceSize),(e) -> {
                 try
-                {
+                {   
+                    if(action == Config.PlayerAction.JUMP || action == Config.PlayerAction.FALL){
+                        double val  = GameSession.JUMP_HEIGHT / sequenceSize;
+
+                        Player.Position position = this.player.getPosition();
+
+                        switch(action){
+                            case JUMP:
+                                // modification du Y du joueur
+                                double newAddY = position
+                                    .setCurrentY(position.getCurrentY() - val)
+                                    .getCurrentY();
+
+                                this.view.setTranslateY(newAddY);
+                            ; break;
+
+                            case FALL:
+                                // modification du Y du joueur
+                                double newRemoveY = position
+                                    .setCurrentY(position.getCurrentY() + val)
+                                    .getCurrentY();
+
+                                this.view.setTranslateY(newRemoveY);
+                            ; break;
+
+                            default:;
+                        }
+                    }
+
                     // suppression et récupération de la première image de la séquence
                     Image image = sequence.remove(0);
 
