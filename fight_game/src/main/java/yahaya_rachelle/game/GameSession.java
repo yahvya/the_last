@@ -9,6 +9,7 @@ import yahaya_rachelle.utils.GameCallback;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URISyntaxException;
 
 import org.json.simple.parser.ParseException;
@@ -20,6 +21,8 @@ import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
 
 public class GameSession extends Configurable{
+    private static final int X_SPEED = 7;
+
     private Game linkedGame;
 
     private String saveGameFilePath;
@@ -60,13 +63,14 @@ public class GameSession extends Configurable{
             @Override
             public void run(){
                 try{
-                    // recherche d'un adversaire
+                    // recherche d'un adversaire à faire
 
                     Platform.runLater(new Runnable(){
                         @Override 
                         public void run(){
                             // préviens du fait qu'il ait été trouvé
-                            toCallAfterFind.action();
+                            if(toCallAfterFind != null)
+                                toCallAfterFind.action();
 
                             // lance la partie
                             startGame();
@@ -79,7 +83,8 @@ public class GameSession extends Configurable{
                         @Override
                         public void run(){
                             // préviens d'une échec de recherche ou de création des joueurs
-                            toCallOnFailure.action();
+                            if(toCallOnFailure != null)
+                                toCallOnFailure.action();
                         }
                     });
                 }
@@ -138,14 +143,14 @@ public class GameSession extends Configurable{
                 
                 position
                     .setCurrentDirection(Player.Position.Direction.RIGHT)
-                    .moveOnCurrentDirection(5);
+                    .moveOnCurrentDirection(GameSession.X_SPEED);
             })  
             .madeActionIf(code,KeyCode.LEFT,PlayerAction.RUN,toDoAfter,() -> {
                 Player.Position position = this.playerOne.getPosition();
                 
                 position
                     .setCurrentDirection(Player.Position.Direction.LEFT)
-                    .moveOnCurrentDirection(5);
+                    .moveOnCurrentDirection(GameSession.X_SPEED);
             }) ; 
     }
 

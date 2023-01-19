@@ -230,6 +230,8 @@ public class HomeScene extends GameScene{
                     // si l'action non annulé alors on démarre une nouvelle partie
                     if(!isCanceled)
                         this.startNewGame(choiceResult.getChoosedCharacter(),choiceResult.getChoosedPseudo(),container);
+                    else
+                        this.someActionIsPerforming = false;
                 }).getPopup();
 
                 children.add(chooser);
