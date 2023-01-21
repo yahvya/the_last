@@ -6,6 +6,7 @@ import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.scene.scene.GameSessionScene;
 import yahaya_rachelle.scene.scene.HomeScene;
 import yahaya_rachelle.utils.GameCallback;
+import yahaya_rachelle.utils.GameContainerCallback;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -66,37 +67,48 @@ public class GameSession extends Configurable{
     }
 
     /**
-     * cherche un adversaire et lance le jeux
+     * génère le code de partage, cherche les adversaire et lance le jeux une fois trouvé
      */
-    public void searchOpponent(GameCallback toCallAfterFind,GameCallback toCallOnFailure){
+    public void findOpponents(int countOfParticipants,GameContainerCallback toCallWhenGetCode,GameCallback toCallAfterFind,GameCallback toCallOnFailure,GameContainerCallback toCallOnNewPlayer){
 
         Thread searchThread = new Thread(){
             @Override
             public void run(){
                 try{
+                    Thread.sleep(3000);
+
+                    Platform.runLater(() -> toCallWhenGetCode.action("vhvhbkjcb--<dk",false) );
+
                     // recherche d'un adversaire à faire
-
-                    Platform.runLater(new Runnable(){
-                        @Override 
-                        public void run(){
-                            // préviens du fait qu'il ait été trouvé
-                            if(toCallAfterFind != null)
-                                toCallAfterFind.action();
-
-                            // lance la partie
-                            startGame();
+                    for(int i = 0; i < countOfParticipants; i++){
+                        final int index = i + 1;
+                        try{
+                            Thread.sleep(4000);
+                            Platform.runLater(() -> toCallOnNewPlayer.action(index,index == countOfParticipants) );
                         }
+                        catch(Exception e){};
+                    }
+
+                    try{
+                        Thread.sleep(4000);
+                    }catch(Exception e){}
+                    
+
+                    Platform.runLater(() -> {
+                        // préviens du fait qu'il ait été trouvé
+                        if(toCallAfterFind != null)
+                            toCallAfterFind.action();
+
+                        // lance la partie
+                        startGame();
                     });
                 }
                 catch(Exception e){
                     
-                    Platform.runLater(new Runnable(){
-                        @Override
-                        public void run(){
-                            // préviens d'une échec de recherche ou de création des joueurs
-                            if(toCallOnFailure != null)
-                                toCallOnFailure.action();
-                        }
+                    Platform.runLater(() -> {
+                        // préviens d'une échec de recherche ou de création des joueurs
+                        if(toCallOnFailure != null)
+                            toCallOnFailure.action();
                     });
                 }
             }
@@ -105,6 +117,30 @@ public class GameSession extends Configurable{
         searchThread.start();
     }
 
+
+    /**
+     * tente de rejoindre une partie, patiente en attendant le début, lance le jeux une fois commencé
+     */
+    public void waitGameStart(String gameCode,GameCallback toCallAfterStart,GameCallback toCallOnFailure){
+        // création du thread d'attente
+        Thread waitingThread = new Thread(){
+            @Override
+            public void run(){
+                try{
+                    Thread.sleep(4000);
+                    Platform.runLater(() -> {
+                        toCallAfterStart.action();
+                        startGame();
+                    });
+                }
+                catch(Exception e){
+                    Platform.runLater(() -> toCallOnFailure.action() );
+                }
+            }
+        };
+
+        waitingThread.start();
+    }
     /**
      * finis le jeux et retourne à la page d'accueil
      */

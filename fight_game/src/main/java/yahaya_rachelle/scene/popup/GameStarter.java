@@ -38,6 +38,8 @@ public class GameStarter extends ScenePopup{
 
     private Spinner<Integer> countOfParticipants;
 
+    private ScrollPane parent;
+
     public GameStarter(GameScene linkedScene, GameContainerCallback toDoOnConfirm) {
         super(linkedScene, toDoOnConfirm);
     }
@@ -75,15 +77,15 @@ public class GameStarter extends ScenePopup{
         pseudoChooser.setMaxWidth(width / 4);
         pseudoChooser.setMinWidth(width / 4);
 
+        this.parent = new ScrollPane(container);
+
         children.addAll(zoneTitle,pseudoChooser,this.createActionChooserZone(manager),this.createCharactersChooserZone(container,pseudoChooser),this.addExitButton(container) );
 
-        ScrollPane parent = new ScrollPane(container);
-
-        parent.setTranslateX((width  - (width / divisionVal)) / 2);
-        parent.setTranslateY((height  - (height / divisionVal)) / 2);
-        parent.setPrefSize(width / divisionVal,height / divisionVal);
-        parent.setHbarPolicy(ScrollBarPolicy.NEVER);
-        parent.setVbarPolicy(ScrollBarPolicy.NEVER);
+        this.parent.setTranslateX((width  - (width / divisionVal)) / 2);
+        this.parent.setTranslateY((height  - (height / divisionVal)) / 2);
+        this.parent.setPrefSize(width / divisionVal,height / divisionVal);
+        this.parent.setHbarPolicy(ScrollBarPolicy.NEVER);
+        this.parent.setVbarPolicy(ScrollBarPolicy.NEVER);
 
         return parent;
     }
@@ -191,7 +193,7 @@ public class GameStarter extends ScenePopup{
     private Button addExitButton(VBox container){
         Button button = this.getCustomButton("Quitter");
 
-        button.setOnMouseClicked((e) -> this.toDoOnConfirm.action(new ChoosedData(container),true) );
+        button.setOnMouseClicked((e) -> this.toDoOnConfirm.action(new ChoosedData(this.parent),true) );
 
         return button;
     }
@@ -228,7 +230,7 @@ public class GameStarter extends ScenePopup{
             if(choosedPseudo.length() < 2 || (this.actionToDo == Action.JOIN && this.gameCode.getText().length() < 1) )
                 return;
 
-            ChoosedData data = new ChoosedData(container,character,choosedPseudo,this.actionToDo);
+            ChoosedData data = new ChoosedData(this.parent,character,choosedPseudo,this.actionToDo);
 
             if(this.actionToDo == Action.JOIN)
                 data.setGameCode(this.gameCode.getText() );
@@ -266,7 +268,7 @@ public class GameStarter extends ScenePopup{
     public enum Action{JOIN,CREATE};
 
     public class ChoosedData{
-        private VBox container;
+        private ScrollPane container;
         
         private Character choosedCharacter;
         
@@ -278,11 +280,11 @@ public class GameStarter extends ScenePopup{
 
         private int countOfParticipants;
 
-        public ChoosedData(VBox container){
+        public ChoosedData(ScrollPane container){
             this.container = container;
         }
 
-        public ChoosedData(VBox container,Character choosedCharacter,String choosedPseudo,Action actionToDo){
+        public ChoosedData(ScrollPane container,Character choosedCharacter,String choosedPseudo,Action actionToDo){
             this(container);
             this.choosedCharacter = choosedCharacter;
             this.choosedPseudo = choosedPseudo;
@@ -297,7 +299,7 @@ public class GameStarter extends ScenePopup{
             this.countOfParticipants = countOfParticipants;
         }
 
-        public VBox getContainer(){
+        public ScrollPane getContainer(){
             return this.container;
         }
 

@@ -5,6 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -12,6 +13,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
@@ -30,8 +33,9 @@ import yahaya_rachelle.game.Game;
 import yahaya_rachelle.game.GameSession;
 import yahaya_rachelle.scene.popup.CreatePlayer;
 import yahaya_rachelle.scene.popup.GameStarter;
+import yahaya_rachelle.scene.popup.GameStarter.Action;
 import yahaya_rachelle.scene.popup.GameStarter.ChoosedData;
-import yahaya_rachelle.actor.Character;
+import yahaya_rachelle.utils.GameCallback;
 
 public class HomeScene extends GameScene{
 
@@ -229,7 +233,7 @@ public class HomeScene extends GameScene{
 
                     // si l'action non annulé alors on démarre une nouvelle partie
                     if(!isCanceled)
-                        this.startNewGame(choiceResult.getChoosedCharacter(),choiceResult.getChoosedPseudo(),container);
+                        this.startNewGame(choiceResult,container);
                     else
                         this.someActionIsPerforming = false;
                 }).getPopup();
@@ -242,57 +246,139 @@ public class HomeScene extends GameScene{
     /**
      * lance une nouvelle partie
      */
-    public void startNewGame(Character choosedCharacter,String choosedPseudo,AnchorPane container){
-
-        ConfigGetter<String> configStringGetter = new ConfigGetter<String>(this.game);
-        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.game);
-
-        // ajout de l'animation de chargement
-
-        Paint color = Paint.valueOf(configStringGetter.getValueOf(Config.App.LOADING_ON_COLOR.key) );
-
-        final int circle_raduis = 15;
-        final int rotationSpeed = 95;
-
-        Circle loadingCircle = new Circle();
-
-        loadingCircle.setFill(null);
-        loadingCircle.setRadius(circle_raduis);
-        loadingCircle.setStroke(color);
-        loadingCircle.setStrokeWidth(5);
-        loadingCircle.getStrokeDashArray().add(15d);
-        loadingCircle.setTranslateX(configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key) - (circle_raduis * 2) - 20);
-        loadingCircle.setTranslateY(configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key) - (circle_raduis * 2) - 30);
-
-        ObservableList<Node> children = container.getChildren();
-        
-        children.add(loadingCircle);
-
-        Timeline loadingAnimationTimeline = new Timeline(new KeyFrame(Duration.millis(rotationSpeed),(e) -> {
-
-            double currentRotation = loadingCircle.getRotate();
-
-            loadingCircle.setRotate(currentRotation + 30);
-        }) );
-
-        loadingAnimationTimeline.setCycleCount(Animation.INDEFINITE);
-        loadingAnimationTimeline.play();
-
+    public void startNewGame(ChoosedData choiceData,AnchorPane container){
         try{
-            GameSession session = new GameSession(this.game,choosedCharacter,choosedPseudo,() -> {
+            // création de l'objet de gestion d'une partie
+            GameSession session = new GameSession(this.game,choiceData.getChoosedCharacter(),choiceData.getChoosedPseudo(),() -> {
                 this.someActionIsPerforming = false;
                 this.putSceneInWindow();
             });
 
-            session.searchOpponent(() -> children.remove(loadingCircle),() -> {
+            VBox waitingBox = new VBox(20);
+            
+            ObservableList<Node> children = waitingBox.getChildren();
+            
+            Label text = new Label();
+
+            text.setFont(this.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,17) );
+
+            // ajout de l'animation de chargement
+            Paint color = Paint.valueOf(new ConfigGetter<String>(this.game).getValueOf(Config.App.LOADING_ON_COLOR.key) );
+
+            final int circleRadius = 10;
+            final int rotationSpeed = 95;
+            final int fixedWidth = 360;
+            final int fixedHeight = 160;
+
+            Circle loadingCircle = new Circle();
+
+            loadingCircle.setFill(null);
+            loadingCircle.setRadius(circleRadius);
+            loadingCircle.setStroke(color);
+            loadingCircle.setStrokeWidth(5);
+            loadingCircle.getStrokeDashArray().add(10d);
+            loadingCircle.setTranslateX((fixedWidth / 2) - (circleRadius * 3) );
+            loadingCircle.setTranslateY(circleRadius * -1);
+
+            Timeline loadingAnimationTimeline = new Timeline(new KeyFrame(Duration.millis(rotationSpeed),(e) -> {
+
+                double currentRotation = loadingCircle.getRotate();
+
+                loadingCircle.setRotate(currentRotation + 30);
+            }) );
+
+            loadingAnimationTimeline.setCycleCount(Animation.INDEFINITE);
+            loadingAnimationTimeline.play();
+
+            ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.game);
+
+            double width = configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
+            double height = configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue();
+
+            waitingBox.setPadding(new Insets(10,15,10,15) );
+            waitingBox.setBackground(new Background(new BackgroundImage(this.gameDataManager.getItems().getImage(Config.Items.PARCHMENT_TEXTURE.key),BackgroundRepeat.REPEAT,BackgroundRepeat.REPEAT,BackgroundPosition.DEFAULT,new BackgroundSize(100,100,true,true,false,true) ) ) );
+            waitingBox.setMaxSize(fixedWidth,fixedHeight);
+            waitingBox.setMinSize(fixedWidth,fixedHeight);
+            waitingBox.setTranslateX((width - fixedWidth) / 2);
+            waitingBox.setTranslateY((height - fixedHeight) / 2);
+            
+            children.addAll(text,loadingCircle);
+
+            GameCallback removeWaitingZone = () -> {
+                loadingAnimationTimeline.stop();
+                container.getChildren().remove(waitingBox);
+            };
+
+            GameCallback removeAndFailure = () -> {
+                loadingAnimationTimeline.stop();
+                container.getChildren().remove(waitingBox);
                 this.someActionIsPerforming = false;
                 this.showStartGameFailure();
-            });
+            };
+
+            if(choiceData.getActionToDo() == Action.CREATE){
+                // création d'une partie
+                int countOfParticipants = choiceData.getCountOfParticipants();
+
+                text.setText("En attente des joueurs");
+
+                String countOfParticipantsStr = Integer.toString(countOfParticipants);
+
+                Label gameCode = new Label("Creation du code de la partie ...");
+                gameCode.setFont(this.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,12.5) );
+                gameCode.setWrapText(true);
+
+                Label newPlayers = new Label(String.join(" sur ","0",countOfParticipantsStr) );
+                
+                newPlayers.setFont(this.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,14) );
+
+                children.add(1,gameCode);
+                children.add(2,newPlayers);
+
+                // lancement de la recherche d'adversaires
+                session.findOpponents(
+                    countOfParticipants,
+                    // action quand le code de la partie à été généré
+                    (code,noNeed) -> {
+                        gameCode.setFont(Font.getDefault() );
+                        gameCode.setText(String.join(" : ","Appuyez ici pour copier le code",(String) code) );
+
+                        final Clipboard clipboard = Clipboard.getSystemClipboard();
+                        final ClipboardContent content = new ClipboardContent();
+
+                        Scene scene = this.page;
+
+                        gameCode.setOnMouseEntered((e) -> scene.setCursor(Cursor.OPEN_HAND) );
+                        gameCode.setOnMouseExited((e) -> scene.setCursor(Cursor.DEFAULT) );
+                        gameCode.setOnMouseClicked((e) -> {
+                            scene.setCursor(Cursor.CLOSED_HAND);
+                            content.putString((String) code);
+                            clipboard.setContent(content);
+                        });
+                    },
+                    // action après avoir trouvé tous les participants
+                    removeWaitingZone,
+                    // action en cas d'échec de recherche
+                    removeAndFailure,
+                    // action appelé à chaque nouveau joueur trouvé
+                    (playerIndex,isLast) -> newPlayers.setText(String.join(" sur ",Integer.toString((Integer) playerIndex),countOfParticipantsStr) )
+                );
+            }
+            else{
+                // rejoins une partie et attend qu'elle commence
+                text.setText("Attente du debut de la partie");
+                waitingBox.setMaxHeight(fixedHeight / 2);
+                waitingBox.setMinHeight(fixedHeight / 2);
+
+                session.waitGameStart(choiceData.getGameCode(),removeWaitingZone,removeAndFailure);
+            }
+
+            container.getChildren().add(waitingBox);
         }
         catch(Exception e){
             this.someActionIsPerforming = false;
             this.showStartGameFailure();
-        } 
+        }
     }
 
     /**

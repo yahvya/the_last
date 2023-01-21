@@ -57,23 +57,11 @@ public class GameDataManager {
                     manager.characters.addAll(Character.loadCharacters(manager.getClass(),configStringGetter.getValueOf(Config.App.CUSTOM_CHARACTERS_PATH.key),manager.linkedGame) );
 
                     // lancement de l'action callback de succès
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run()
-                        {
-                            toCallOnSuccess.action();
-                        }
-                    });
+                    Platform.runLater(() -> toCallOnSuccess.action() );
                 }
                 catch(Exception e){
                      // lancement de l'action callback d'échec
-                     Platform.runLater(new Runnable() {
-                        @Override
-                        public void run()
-                        {
-                            toCallOnFailure.action();
-                        }
-                    });
+                     Platform.runLater(() -> toCallOnFailure.action() );
                 }
             }
         };
