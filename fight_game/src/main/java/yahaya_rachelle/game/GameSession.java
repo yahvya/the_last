@@ -167,9 +167,7 @@ public class GameSession extends Configurable{
                     this.isInJumpingSession = false;
                     toDoAfter.action();
                 });
-            },() -> {
-                this.isInJumpingSession = true;
-            })
+            },() -> this.isInJumpingSession = true)
             .madeActionIf(code,KeyCode.RIGHT,PlayerAction.RUN,toDoAfter,() -> {
                 Player.Position position = this.linkedPlayer.getPosition();
                 

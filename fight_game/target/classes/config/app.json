@@ -13,5 +13,6 @@
     "players_life" : 1000,
     "characters_max_force" : 80,
     "characters_super_attack_adding" : 20,
-    "characters_super_attack_block_time_ms" : 4000
+    "characters_super_attack_block_time_ms" : 4000,
+    "game_max_participants": 3
 }

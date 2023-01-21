@@ -29,8 +29,8 @@ import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.game.Game;
 import yahaya_rachelle.game.GameSession;
 import yahaya_rachelle.scene.popup.CreatePlayer;
-import yahaya_rachelle.scene.popup.PlayerChooser;
-import yahaya_rachelle.scene.popup.PlayerChooser.ChoosedData;
+import yahaya_rachelle.scene.popup.GameStarter;
+import yahaya_rachelle.scene.popup.GameStarter.ChoosedData;
 import yahaya_rachelle.actor.Character;
 
 public class HomeScene extends GameScene{
@@ -222,7 +222,7 @@ public class HomeScene extends GameScene{
 
                 ObservableList<Node> children = container.getChildren();
 
-                VBox chooser = (VBox) new PlayerChooser(this,(result,isCanceled) -> {
+                ScrollPane chooser = (ScrollPane) new GameStarter(this,(result,isCanceled) -> {
                     ChoosedData choiceResult = (ChoosedData) result;
 
                     children.remove(choiceResult.getContainer() );

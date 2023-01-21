@@ -20,7 +20,8 @@ public abstract class Config {
         PLAYERS_LIFE("players_life"),
         CHARACTERS_MAX_FORCE("characters_max_force"),
         CHARACTERS_SUPER_ATTACK_ADDING("characters_super_attack_adding"),
-        CHARACTERS_SUPPER_ATTACK_BLOCK_TIME("characters_super_attack_block_time_ms");
+        CHARACTERS_SUPPER_ATTACK_BLOCK_TIME("characters_super_attack_block_time_ms"),
+        GAME_MAX_PARTICIPANTS("game_max_participants");
 
         public final String key;
 
