@@ -11,8 +11,7 @@ public abstract class GameScene {
 
     protected Scene page;
 
-    public GameScene(Game game)
-    {
+    public GameScene(Game game){
         this.game = game;
         this.gameDataManager = game.getGameDataManager();
         this.page = null;
@@ -25,8 +24,7 @@ public abstract class GameScene {
     /**
      * permet d'afficher la page sur la fenêtre
      */
-    public void putSceneInWindow(boolean update)
-    {
+    public void putSceneInWindow(boolean update){
         if(this.page == null || update)
             this.page = this.buildPage();
             
@@ -36,8 +34,7 @@ public abstract class GameScene {
     /**
      * permet d'afficher la page sur la fenêtre
      */
-    public void putSceneInWindow()
-    {
+    public void putSceneInWindow(){
         this.putSceneInWindow(false);
     }
 
