@@ -35,12 +35,10 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -597,15 +595,11 @@ public class CreatePlayer extends ScenePopup{
         String hoverColor = "#98572c";
 
         // design du boutton
-        button.setBackground(new Background(new BackgroundFill(Paint.valueOf(color),CornerRadii.EMPTY,Insets.EMPTY) ) );
+        button.setBackground(Background.fill(Paint.valueOf(color) ) );
         button.setFont(Font.font(font.getFamily(),15) );
         button.setWrapText(true);
-        button.setOnMouseExited((e) -> {
-            button.setBackground(new Background(new BackgroundFill(Paint.valueOf(color),CornerRadii.EMPTY,Insets.EMPTY) ) );
-        });
-        button.setOnMouseEntered((e) -> {
-            button.setBackground(new Background(new BackgroundFill(Paint.valueOf(hoverColor),CornerRadii.EMPTY,Insets.EMPTY) ) );
-        });
+        button.setOnMouseExited((e) -> button.setBackground(Background.fill(Paint.valueOf(color) ) ) );
+        button.setOnMouseEntered((e) -> button.setBackground(Background.fill(Paint.valueOf(hoverColor) ) ) );
 
         return button;
     }

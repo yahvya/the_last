@@ -14,12 +14,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
@@ -59,7 +57,7 @@ public class GameStarter extends ScenePopup{
         // création du conteneur
         VBox container = new VBox(30);
 
-        final double divisionVal = 1.3;
+        final double divisionVal = 1.5;
 
         container.setPrefSize(width / divisionVal,height / divisionVal);
         container.setBackground(new Background(new BackgroundImage(manager.getItems().getImage(Config.Items.PARCHMENT_TEXTURE.key),BackgroundRepeat.REPEAT,BackgroundRepeat.REPEAT,BackgroundPosition.DEFAULT,new BackgroundSize(100,100,true,true,true, false) ) ) );
@@ -252,15 +250,11 @@ public class GameStarter extends ScenePopup{
         String hoverColor = "#98572c";
 
         // design du boutton
-        button.setBackground(new Background(new BackgroundFill(Paint.valueOf(color),CornerRadii.EMPTY,Insets.EMPTY) ) );
+        button.setBackground(Background.fill(Paint.valueOf(color)) );
         button.setFont(this.linkedScene.getGameDataManager().getFonts().getFont(Config.Fonts.BASIC.key,15) );
         button.setWrapText(true);
-        button.setOnMouseExited((e) -> {
-            button.setBackground(new Background(new BackgroundFill(Paint.valueOf(color),CornerRadii.EMPTY,Insets.EMPTY) ) );
-        });
-        button.setOnMouseEntered((e) -> {
-            button.setBackground(new Background(new BackgroundFill(Paint.valueOf(hoverColor),CornerRadii.EMPTY,Insets.EMPTY) ) );
-        });
+        button.setOnMouseExited((e) -> button.setBackground(Background.fill(Paint.valueOf(color) ) ) );
+        button.setOnMouseEntered((e) -> button.setBackground(Background.fill(Paint.valueOf(hoverColor) ) ) );
 
         return button;
     }

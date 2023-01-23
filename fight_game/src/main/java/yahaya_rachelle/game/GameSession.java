@@ -75,7 +75,7 @@ public class GameSession extends Configurable{
             @Override
             public void run(){
                 try{
-                    Thread.sleep(3000);
+                    // Thread.sleep(3000);
 
                     Platform.runLater(() -> toCallWhenGetCode.action("vhvhbkjcb--<dk",false) );
 
@@ -83,14 +83,14 @@ public class GameSession extends Configurable{
                     for(int i = 0; i < countOfParticipants; i++){
                         final int index = i + 1;
                         try{
-                            Thread.sleep(4000);
+                            // Thread.sleep(4000);
                             Platform.runLater(() -> toCallOnNewPlayer.action(index,index == countOfParticipants) );
                         }
                         catch(Exception e){};
                     }
 
                     try{
-                        Thread.sleep(4000);
+                        // Thread.sleep(4000);
                     }catch(Exception e){}
                     
 
@@ -127,7 +127,7 @@ public class GameSession extends Configurable{
             @Override
             public void run(){
                 try{
-                    Thread.sleep(4000);
+                    // Thread.sleep(4000);
                     Platform.runLater(() -> {
                         toCallAfterStart.action();
                         startGame();
@@ -171,8 +171,28 @@ public class GameSession extends Configurable{
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
 
         this.linkedPlayer.setPosition(new Player.Position(30,30,configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue(),configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
-        this.gameSessionScene.addPlayer(this.linkedPlayer);
-        this.gameSessionScene.updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
+
+        this.gameSessionScene
+            .addPlayer(this.linkedPlayer)
+            .updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
+
+        Thread t = new Thread(){
+            public void run(){
+                try{
+                    Thread.sleep(4000);
+
+                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
+                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
+                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
+                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
+                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
+
+                    gameSessionScene.updatePlayer(linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
+                }catch(Exception e){}
+            }
+        };
+
+        t.start();
     }  
 
     /**

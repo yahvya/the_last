@@ -35,8 +35,7 @@ public class LoadingScene extends GameScene{
 
         ObservableList<Node> children =  container.getChildren();
 
-        try
-        {
+        try{
             ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.game);
 
             Canvas canvas = new Canvas(configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue(),configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() );
@@ -59,8 +58,7 @@ public class LoadingScene extends GameScene{
      * @param list
      * @throws KeyNotExist
      */
-    public void putBackgroundImage(GraphicsContext pen) throws KeyNotExist
-    {
+    public void putBackgroundImage(GraphicsContext pen) throws KeyNotExist{
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.game);
 
         pen.drawImage(new Image(this.getClass().getResource(new ConfigGetter<String>(this.game).getValueOf(Config.App.LOADING_POSTER_PATH.key) ).toString() ),0,0,configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue(),configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue() );
@@ -115,8 +113,7 @@ public class LoadingScene extends GameScene{
     /**
      * free the loading page resources
      */
-    public void destroyScene()
-    {   
+    public void destroyScene(){   
         this.loadingAnimationTimeline.stop();
     }
 }

@@ -7,6 +7,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -17,20 +18,26 @@ import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import yahaya_rachelle.actor.Player;
 import yahaya_rachelle.configuration.Config;
+import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.game.GameSession;
 import yahaya_rachelle.utils.GameCallback;
 
 public class GameSessionScene extends GameScene{
-
     private GameSession gameSession;
 
     private ObservableList<Node> children;
 
     private HashMap<Player,PlayerManager> playersMap;
+
+    private double playersMaxLife;
+
+    private ObservableList<Node> lifebarsList;
 
     public GameSessionScene(GameSession gameSession) {
         super(gameSession.getLinkedGame() );
@@ -41,14 +48,22 @@ public class GameSessionScene extends GameScene{
     @Override
     protected Scene buildPage() {
         this.playersMap = new HashMap<Player,PlayerManager>();
+        this.playersMaxLife = new ConfigGetter<Long>(this.game).getValueOf(Config.App.PLAYERS_LIFE.key).doubleValue();
 
         AnchorPane container = new AnchorPane();
+
+        HBox lifeContainer = new HBox(30);
+
+        lifeContainer.setTranslateY(30);
+        lifeContainer.setPadding(new Insets(0,20,0,20) );
 
         GameDataManager manager = this.getGameDataManager();
         
         container.setBackground(new Background(new BackgroundImage(manager.getScenes().getRandomScene().getSceneImage(),BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.DEFAULT,new BackgroundSize(100,100,true,true,false, true)) ) );
 
         this.children = container.getChildren();
+        this.lifebarsList = lifeContainer.getChildren();
+        this.children.add(lifeContainer);
 
         return new Scene(container);
     }
@@ -59,16 +74,19 @@ public class GameSessionScene extends GameScene{
      * @param action
      * @param toDoOnEnd
      */
-    public void updatePlayer(Player player,Config.PlayerAction action,GameCallback toDoOnEnd){
+    public GameSessionScene updatePlayer(Player player,Config.PlayerAction action,GameCallback toDoOnEnd){
         try{
             PlayerManager manager = this.playersMap.get(player);
 
             manager
                 .updateDirection()
                 .updateViewPosition()
+                .updateLifebar()
                 .newAction(action,toDoOnEnd);
         }
         catch(Exception e){}
+
+        return this;
     }
 
     /**
@@ -77,16 +95,17 @@ public class GameSessionScene extends GameScene{
      * @return GameSessionScene
      */
     public GameSessionScene addPlayer(Player player){
-        PlayerManager manager = new PlayerManager(player);
+        PlayerManager manager = new PlayerManager(player,this.playersMaxLife);
 
         this.playersMap.put(player,manager);
         this.children.add(manager.getView() );
-
+        this.lifebarsList.add(manager.getLifebar() );
+               
         return this;
     }
 
     /**
-     * ajoute un joueur à la scène
+     * supprime un joueur à la scène
      * @param player
      * @return GameSessionScene
      */
@@ -97,6 +116,7 @@ public class GameSessionScene extends GameScene{
 
             this.children.remove(manager.getView() );
             this.playersMap.remove(player);
+            this.lifebarsList.remove(manager.getLifebar());
         }
         catch(Exception e){}
 
@@ -110,20 +130,59 @@ public class GameSessionScene extends GameScene{
         
         private ImageView view;
 
+        private double playersMaxLife;
+
+        private AnchorPane lifebar;
+        private AnchorPane toReduce;
+
         private Config.PlayerAction currentAction;
         
         private Player.Position.Direction currentDirection;
 
         private static final int MAX_MS_PER_ACTION = 700;
+        private static final int LIFEBAR_WIDTH = 180;
 
-        public PlayerManager(Player player){
+        public PlayerManager(Player player,double playersMaxLife){
             this.player = player;
+            this.playersMaxLife = playersMaxLife;
+            this.lifebar = this.createLifeBar();
             this.timeline = new Timeline();
             this.view = new ImageView();
             this.currentAction = null;
             this.currentDirection = this.player.getPosition().getCurrentDirection();
             this.view.setFitWidth(this.player.getWidth() );
             this.view.setFitHeight(this.player.getHeight() );
+        }
+
+        /**
+         * crée une barre de vie
+         * @return la barre de vie
+         */
+        private AnchorPane createLifeBar() {
+            AnchorPane lifeBar = new AnchorPane();
+            AnchorPane redBar = new AnchorPane();
+            this.toReduce = new AnchorPane();
+
+            redBar.setBackground(Background.fill(Color.RED) );
+            this.toReduce.setBackground(Background.fill(Color.GREEN) );
+
+            for(AnchorPane p : new AnchorPane[]{lifeBar,redBar,this.toReduce} )
+                p.setPrefSize(PlayerManager.LIFEBAR_WIDTH, 30);
+
+            lifeBar.getChildren().addAll(redBar,this.toReduce);
+
+            return lifeBar;
+        }
+
+        /**
+         * met à jour la barre de vie du joueur
+         * @return
+         */
+        public PlayerManager updateLifebar() {
+            // récupération du taux de réduction et modification de la taille de la bare
+            this.toReduce.setMaxWidth((PlayerManager.LIFEBAR_WIDTH / 100.0) * ((100.0 / this.playersMaxLife) * this.player.getCurrentLife() ) );
+
+            return this;
         }
 
         /**
@@ -245,5 +304,10 @@ public class GameSessionScene extends GameScene{
         public ImageView getView(){
             return this.view;
         }
+    
+        public AnchorPane getLifebar() {
+            return this.lifebar;
+        }
+    
     }   
 }

@@ -155,7 +155,7 @@ public class HomeScene extends GameScene{
      */
     public void addBackgroundSong(AnchorPane container)
     {
-        final double defaultVolumePercent = 30;
+        final double defaultVolumePercent = 10;
 
         double window_width = new ConfigGetter<Long>(this.game).getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
 
@@ -395,8 +395,7 @@ public class HomeScene extends GameScene{
      * vérifie si une action peut être fait ou joue le son de refus
      * @return si une action peut être fait
      */
-    private boolean canDoAction()
-    {
+    private boolean canDoAction(){
         if(this.someActionIsPerforming)
         {
             this.refusedActionSongPlayer.play();

@@ -39,9 +39,7 @@ public class Game extends Configurable{
                     loadingPage.destroyScene();
                     new HomeScene(this).putSceneInWindow();
                 },
-                () -> {
-                    this.showLoadingError();
-                }
+                () -> this.showLoadingError()
             );
         }
         catch(Exception e){
@@ -49,6 +47,9 @@ public class Game extends Configurable{
         }
     }
     
+    /**
+     * affiche une erreur sur un échec de chargement
+     */
     private void showLoadingError(){
         Alert errorAlert = new Alert(AlertType.ERROR);
 
