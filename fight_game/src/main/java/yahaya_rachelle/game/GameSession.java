@@ -26,6 +26,9 @@ import yahaya_rachelle.actor.Player;
 import yahaya_rachelle.communication.Communicator;
 import yahaya_rachelle.communication.Communicator.MessageType;
 
+/**
+ * représente une partie
+ */
 public class GameSession extends Configurable{
     public static final int X_SPEED = 9;
     public static final int JUMP_HEIGHT = 230;

@@ -4,6 +4,9 @@ import javafx.scene.Parent;
 import yahaya_rachelle.scene.scene.GameScene;
 import yahaya_rachelle.utils.GameContainerCallback;
 
+/**
+ * représente toute chose pouvant être intégré dans une page
+ */
 public abstract class ScenePopup{
     protected GameScene linkedScene;
 

@@ -9,6 +9,9 @@ import org.json.simple.parser.ParseException;
 
 import yahaya_rachelle.utils.JsonReader;
 
+/**
+ * représente une class lié à un fichier de configuration
+ */
 public abstract class Configurable {
 
     protected JSONObject config;
@@ -31,6 +34,9 @@ public abstract class Configurable {
      */
     abstract protected String getConfigFilePath();
 
+    /**
+     * permet la lecture par l'intermédiaire du json reader d'un fichier json
+     */
     static public class ConfigGetter<ToCastIn>{
         private Configurable container;
 

@@ -9,6 +9,9 @@ import org.json.simple.parser.ParseException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+/**
+ * permet de récupérer le contenu d'un fichier json
+ */
 public class JsonReader<ToCastIn> {
 
     private String key;

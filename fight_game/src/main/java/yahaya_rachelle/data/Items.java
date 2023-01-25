@@ -6,6 +6,9 @@ import java.net.URISyntaxException;
 
 import org.json.simple.parser.ParseException;
 
+/**
+ * représente les items du jeux
+ */
 public class Items extends ImageDatas {
 
     public Items() throws FileNotFoundException, ParseException, IOException, URISyntaxException {

@@ -9,6 +9,9 @@ import org.json.simple.parser.ParseException;
 import javafx.scene.text.Font;
 import yahaya_rachelle.configuration.Configurable;
 
+/**
+ * représente les polices d'écritures de l'application
+ */
 public class Fonts extends Configurable{
     public Fonts() throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.setConfig();

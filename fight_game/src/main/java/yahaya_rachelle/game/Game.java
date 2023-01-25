@@ -10,6 +10,9 @@ import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.scene.scene.HomeScene;
 import yahaya_rachelle.scene.scene.LoadingScene;
 
+/**
+ * représente le jeux et sa fenêtre principale
+ */
 public class Game extends Configurable{
 
     private Stage window;

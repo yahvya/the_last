@@ -10,6 +10,9 @@ import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.game.Game;
 import yahaya_rachelle.utils.GameCallback;
 
+/**
+ * gère les données du jeux
+ */
 public class GameDataManager {
 
     private AppSongs appSongs;

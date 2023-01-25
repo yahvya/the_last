@@ -9,6 +9,9 @@ import org.json.simple.parser.ParseException;
 import javafx.scene.media.Media;
 import yahaya_rachelle.configuration.Configurable;
 
+/**
+ * représente les class représentant une donnée sous forme de son
+ */
 public abstract class MediaDatas extends Configurable{
 
     public MediaDatas() throws FileNotFoundException, ParseException, IOException, URISyntaxException {

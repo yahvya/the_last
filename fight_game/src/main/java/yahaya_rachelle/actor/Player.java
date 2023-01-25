@@ -10,6 +10,9 @@ import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable;
 import yahaya_rachelle.game.GameSession;
 
+/**
+ * représente un joueur
+ */
 public class Player extends Configurable{
     private Character character;
 
@@ -111,6 +114,9 @@ public class Player extends Configurable{
         return "/config/player.json";
     }
 
+    /**
+     * représente la position d'un joueur
+     */
     public static class Position{
         private double currentX;
         private double currentY;

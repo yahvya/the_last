@@ -4,6 +4,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import yahaya_rachelle.game.Game;
 
+/**
+ * représente une page du jeux
+ */
 public class GamingScene extends GameScene{
 
     public GamingScene(Game game) {

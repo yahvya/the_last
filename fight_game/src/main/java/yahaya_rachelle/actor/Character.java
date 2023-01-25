@@ -14,6 +14,9 @@ import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable;
 import yahaya_rachelle.game.Game;
 
+/**
+ * représente un personnage du jeyx
+ */
 public class Character extends Configurable{
     private HashMap<Config.PlayerAction,ArrayList<Image> > actionsMap;
 
@@ -109,7 +112,7 @@ public class Character extends Configurable{
     } 
 
     /**
-     * 
+     * charge tous les personnsages du dossier spécifié
      * @return liste de personnages
      * @throws URISyntaxException
      * @throws IOException

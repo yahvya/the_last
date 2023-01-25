@@ -15,6 +15,9 @@ import javafx.util.Duration;
 import yahaya_rachelle.utils.GameCallback;
 import yahaya_rachelle.utils.GameContainerCallback;
 
+/**
+ * gère les échanges entre les différences instances du jeux durant une partie
+ */
 public class Communicator {
     private static final int PORT = 6666; 
 

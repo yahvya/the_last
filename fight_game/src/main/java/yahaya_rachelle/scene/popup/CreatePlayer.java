@@ -54,6 +54,9 @@ import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.scene.scene.GameScene;
 import yahaya_rachelle.utils.GameContainerCallback;
 
+/**
+ * popup de création d'un personnage customisé
+ */
 public class CreatePlayer extends ScenePopup{
 
     private HashMap<Config.PlayerAction,ArrayList<Image> > actionsSequences;

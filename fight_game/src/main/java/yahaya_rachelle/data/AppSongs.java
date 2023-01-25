@@ -6,6 +6,9 @@ import java.net.URISyntaxException;
 
 import org.json.simple.parser.ParseException;
 
+/**
+ * représente les musiques de l'application
+ */
 public class AppSongs extends MediaDatas {
     
     public AppSongs() throws FileNotFoundException, ParseException, IOException, URISyntaxException {

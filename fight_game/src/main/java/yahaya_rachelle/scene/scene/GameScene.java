@@ -4,6 +4,9 @@ import javafx.scene.Scene;
 import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.game.Game;
 
+/**
+ * représente une page du jeux
+ */
 public abstract class GameScene {
 
     protected Game game;

@@ -14,6 +14,9 @@ import javafx.scene.image.Image;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable;
 
+/**
+ * représente les scènes du jeux
+ */
 public class Scenes extends Configurable{
 
     private ArrayList<Scene> scenes;

@@ -20,6 +20,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 
+/**
+ * représente la page de chargement des resources
+ */
 public class LoadingScene extends GameScene{
 
     private Timeline loadingAnimationTimeline;

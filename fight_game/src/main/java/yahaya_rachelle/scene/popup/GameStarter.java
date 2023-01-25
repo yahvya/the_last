@@ -28,6 +28,9 @@ import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.scene.scene.GameScene;
 import yahaya_rachelle.utils.GameContainerCallback;
 
+/**
+ * popup de lancement ou de participatoin à une partie
+ */
 public class GameStarter extends ScenePopup{
 
     private Action actionToDo;

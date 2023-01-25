@@ -28,6 +28,9 @@ import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.game.GameSession;
 import yahaya_rachelle.utils.GameCallback;
 
+/**
+ * représente la page d'affichage d'une partie
+ */
 public class GameSessionScene extends GameScene{
     private GameSession gameSession;
 
@@ -123,6 +126,9 @@ public class GameSessionScene extends GameScene{
         return this;
     }
 
+    /**
+     * gère les animations et placement du joueur dans la page de jeux
+     */
     class PlayerManager{
         private Player player;
 

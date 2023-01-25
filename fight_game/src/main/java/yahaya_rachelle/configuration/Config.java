@@ -1,7 +1,7 @@
 package yahaya_rachelle.configuration;
 
 /**
- * regroupe les congigrations de l'application
+ * regroupe les configurations de l'application
  */ 
 public abstract class Config {
 

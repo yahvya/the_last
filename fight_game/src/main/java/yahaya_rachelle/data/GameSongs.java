@@ -6,6 +6,9 @@ import java.net.URISyntaxException;
 
 import org.json.simple.parser.ParseException;
 
+/**
+ * représente les musiques des parties jeux
+ */
 public class GameSongs extends MediaDatas {
 
     public GameSongs() throws FileNotFoundException, ParseException, IOException, URISyntaxException {

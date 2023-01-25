@@ -37,6 +37,9 @@ import yahaya_rachelle.scene.popup.GameStarter.Action;
 import yahaya_rachelle.scene.popup.GameStarter.ChoosedData;
 import yahaya_rachelle.utils.GameCallback;
 
+/**
+ * représente la page d'accueil du jeux
+ */
 public class HomeScene extends GameScene{
 
     private boolean someActionIsPerforming;
