@@ -57,6 +57,9 @@ public class Scenes extends Configurable{
         return this.scenes;
     }
 
+    /**
+     * représente une scène
+     */
     public class Scene extends ImageDatas{
         private Image sceneImage;
 

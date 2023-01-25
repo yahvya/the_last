@@ -5,6 +5,9 @@ package yahaya_rachelle.configuration;
  */ 
 public abstract class Config {
 
+    /**
+     * configuration du fichier de l'application
+     */
     public enum App{
         WINDOW_HEIGHT("window_height"),
         WINDOW_WIDTH("window_width"),
@@ -30,6 +33,9 @@ public abstract class Config {
         }
     };
 
+    /**
+     * configuration du fichier des sons de l'application
+     */
     public enum AppSongs {
         HOME("home"),
         REFUSED("refused");
@@ -42,6 +48,9 @@ public abstract class Config {
 
     }
 
+    /**
+     * configuration du fichier des polices d'écriture
+     */
     public enum Fonts {
         BASIC("basic"),
         SPECIAL("special");
@@ -53,6 +62,9 @@ public abstract class Config {
         }
     }
 
+    /**
+     * configuration du fichier des musiques de parties jeux
+     */
     public enum GameSongs {
         ;
 
@@ -63,6 +75,9 @@ public abstract class Config {
         }
     }
 
+    /**
+     * configuration du fichier des items du jeux
+     */
     public enum Items {
 
         PARCHMENT("parchment"),
@@ -77,6 +92,9 @@ public abstract class Config {
         }
     }
 
+    /**
+     * configuration des actions d'un joueur
+     */
     public enum PlayerAction{
         ATTACK("attack"),
         SUPER_ATTACK("super_attack"),
@@ -93,6 +111,9 @@ public abstract class Config {
         }
     };
 
+    /**
+     * configuration du fichier des personnsages
+     */
     public enum Character{
         NAME("name"),
         FORCE("force"),
@@ -112,6 +133,9 @@ public abstract class Config {
         }
     }
 
+    /**
+     * configuration du fichier des scènes
+     */
     public enum Scenes{
         SCENES("scenes"),
         IMAGE("image");
@@ -123,6 +147,9 @@ public abstract class Config {
         }
     }
 
+    /**
+     * configuration du fichier des joueurs
+     */
     public enum Player{
         PLAYER_WIDTH("player_width"),
         PLAYER_HEIGHT("player_height");

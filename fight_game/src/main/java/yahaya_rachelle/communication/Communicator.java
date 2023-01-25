@@ -207,8 +207,14 @@ public class Communicator {
         return code;
     }
 
+    /**
+     * représente les types de messages pouvant être envoyé et reçu
+     */
     public enum MessageType{RECEIVE_COUNT_OF_PLAYERS_IN_SESSION,RECEIVE_IP_LIST,ERROR};
 
+    /**
+     * représente un message
+     */
     public interface Message extends Serializable{
         public MessageType getMessageType();
         public Object getMessageData();

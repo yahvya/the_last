@@ -4,6 +4,9 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import yahaya_rachelle.game.Game;
 
+/**
+ * lance le programme
+ */
 public class Launcher extends Application{
 
     @Override
