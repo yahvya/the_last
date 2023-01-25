@@ -166,6 +166,7 @@ public class GameSessionScene extends GameScene{
             redBar.setBackground(Background.fill(Color.RED) );
             this.toReduce.setBackground(Background.fill(Color.GREEN) );
 
+            // mise à jour des dimensions des anchor pane
             for(AnchorPane p : new AnchorPane[]{lifeBar,redBar,this.toReduce} )
                 p.setPrefSize(PlayerManager.LIFEBAR_WIDTH, 30);
 
@@ -176,7 +177,7 @@ public class GameSessionScene extends GameScene{
 
         /**
          * met à jour la barre de vie du joueur
-         * @return
+         * @return this
          */
         public PlayerManager updateLifebar() {
             // récupération du taux de réduction et modification de la taille de la bare

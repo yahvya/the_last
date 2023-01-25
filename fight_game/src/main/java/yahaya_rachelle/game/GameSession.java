@@ -11,6 +11,7 @@ import yahaya_rachelle.utils.GameContainerCallback;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import org.json.simple.parser.ParseException;
 
@@ -22,6 +23,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Duration;
 import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
+import yahaya_rachelle.communication.Communicator;
+import yahaya_rachelle.communication.Communicator.MessageType;
 
 public class GameSession extends Configurable{
     public static final int X_SPEED = 9;
@@ -75,33 +78,41 @@ public class GameSession extends Configurable{
             @Override
             public void run(){
                 try{
-                    // Thread.sleep(3000);
+                    String code = Communicator.generateCode();
 
-                    Platform.runLater(() -> toCallWhenGetCode.action("vhvhbkjcb--<dk",false) );
+                    Communicator communicator = new Communicator();
 
-                    // recherche d'un adversaire à faire
-                    for(int i = 0; i < countOfParticipants; i++){
-                        final int index = i + 1;
-                        try{
-                            // Thread.sleep(4000);
-                            Platform.runLater(() -> toCallOnNewPlayer.action(index,index == countOfParticipants) );
-                        }
-                        catch(Exception e){};
-                    }
+                    IntegerHelper valueObject = new IntegerHelper();
 
-                    try{
-                        // Thread.sleep(4000);
-                    }catch(Exception e){}
-                    
+                    // lance le serveur et attend les connexions
+                    communicator.createEntryPoint(
+                        countOfParticipants,
+                        () -> {
 
-                    Platform.runLater(() -> {
-                        // préviens du fait qu'il ait été trouvé
-                        if(toCallAfterFind != null)
-                            toCallAfterFind.action();
+                            int value = valueObject
+                                .addOne()
+                                .getValue();
 
-                        // lance la partie
-                        startGame();
-                    });
+                            Platform.runLater(() -> toCallOnNewPlayer.action(value,value == countOfParticipants) );
+                        },
+                        () -> {
+                            if(toCallOnFailure != null)
+                                toCallOnFailure.action();
+                        },
+                        () -> {
+                            Platform.runLater(() -> {
+                                // préviens du fait qu'il ait été trouvé
+                                if(toCallAfterFind != null)
+                                    toCallAfterFind.action();
+        
+                                // lance la partie
+                                startGame();
+                            });
+                        },
+                        createActionsMap()
+                    );
+
+                    Platform.runLater(() -> toCallWhenGetCode.action(code,false) );
                 }
                 catch(Exception e){
                     
@@ -127,11 +138,18 @@ public class GameSession extends Configurable{
             @Override
             public void run(){
                 try{
-                    // Thread.sleep(4000);
-                    Platform.runLater(() -> {
-                        toCallAfterStart.action();
-                        startGame();
-                    });
+                    Communicator communicator = new Communicator();
+
+                    communicator.joinEntryPoint(
+                        gameCode,
+                        toCallOnFailure,
+                        () -> {
+                            Platform.runLater(() -> {
+                                toCallAfterStart.action();
+                                startGame();
+                            });
+                        }
+                    );
                 }
                 catch(Exception e){
                     Platform.runLater(() -> toCallOnFailure.action() );
@@ -141,6 +159,17 @@ public class GameSession extends Configurable{
 
         waitingThread.start();
     }
+
+    /**
+     * 
+     * @return la map des actions liés aux types de message
+     */
+    private HashMap<MessageType,GameContainerCallback> createActionsMap(){
+        HashMap<MessageType,GameContainerCallback> map = new HashMap<MessageType,GameContainerCallback>();
+
+        return map;
+    }
+
     /**
      * finis le jeux et retourne à la page d'accueil
      */
@@ -165,8 +194,6 @@ public class GameSession extends Configurable{
         this.gameSessionScene = new GameSessionScene(this);
         // ajout de la gestion des évenements clavier 
         this.gameSessionScene.getPage().setOnKeyPressed((keyData) -> this.manageKeyEvent(keyData) );
-        // affichage de la scène
-        this.gameSessionScene.putSceneInWindow();
         // placement des joueurs sur la scène;
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
 
@@ -176,23 +203,8 @@ public class GameSession extends Configurable{
             .addPlayer(this.linkedPlayer)
             .updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
 
-        Thread t = new Thread(){
-            public void run(){
-                try{
-                    Thread.sleep(4000);
-
-                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
-                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
-                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
-                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
-                    linkedPlayer.takeHitFromSuperAttackOf(linkedPlayer);
-
-                    gameSessionScene.updatePlayer(linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
-                }catch(Exception e){}
-            }
-        };
-
-        t.start();
+        // affichage de la scène
+        this.gameSessionScene.putSceneInWindow();
     }  
 
     /**
@@ -282,5 +294,23 @@ public class GameSession extends Configurable{
     @Override
     protected String getConfigFilePath() {
         return this.saveGameFilePath;
+    }
+
+    class IntegerHelper{
+        private int value;
+
+        public IntegerHelper(){
+            this.value = 0;
+        }
+
+        public IntegerHelper addOne(){
+            this.value++;
+
+            return this;
+        }
+
+        public int getValue(){
+            return this.value;
+        }
     }
 }

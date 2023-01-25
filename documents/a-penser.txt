@@ -1,0 +1,1 @@
+gérer le cas ou il y a une erreur chez l'un

@@ -243,6 +243,11 @@ public class GameStarter extends ScenePopup{
         children.add(characterContainer);
     }
 
+    /**
+     * crée un boutton custom
+     * @param buttonText
+     * @return le boutton
+     */
     private Button getCustomButton(String buttonText){
         Button button = new Button(buttonText);
 
