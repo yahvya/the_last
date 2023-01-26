@@ -1,0 +1,11 @@
+processus d'interconnexion
+
+le serveur (créateur de la partie) attend les connexions clients (autres joueurs qui saisissent le code) fait
+
+quand tous ont rejoins
+    le serveur envoie le nombre participants qu'ils doivent à leur tour accepter 
+    à la réception de ce message chacun démarre l'acceptation et préviens le serveur
+    
+quand tous ont prévenu le serveur donc tous prêt à accepter
+    le serveur envoi la liste des ips à laquelle ils doivent se connecter
+    les clients se connectent aux autres à ce moment

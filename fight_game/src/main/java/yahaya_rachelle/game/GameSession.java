@@ -23,7 +23,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Duration;
 import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
+import yahaya_rachelle.communication.ClientManager;
 import yahaya_rachelle.communication.Communicator;
+import yahaya_rachelle.communication.ServerManager;
+import yahaya_rachelle.communication.Communicator.MessageManager;
 import yahaya_rachelle.communication.Communicator.MessageType;
 
 /**
@@ -47,6 +50,8 @@ public class GameSession extends Configurable{
     private boolean isInJumpingSession;
 
     private int blockTime;
+
+    private Communicator communicator;
 
     public GameSession(Game linkedGame,Character character,String pseudo,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.linkedGame = linkedGame;
@@ -83,13 +88,12 @@ public class GameSession extends Configurable{
                 try{
                     String code = Communicator.generateCode();
 
-                    Communicator communicator = new Communicator();
+                    ServerManager serverCommunicator = new ServerManager(createActionsMap(),countOfParticipants);
 
                     IntegerHelper valueObject = new IntegerHelper();
 
-                    // lance le serveur et attend les connexions
-                    communicator.createEntryPoint(
-                        countOfParticipants,
+                    // lance le serveur
+                    serverCommunicator.createEntryPoint(
                         () -> {
 
                             int value = valueObject
@@ -111,9 +115,10 @@ public class GameSession extends Configurable{
                                 // lance la partie
                                 startGame();
                             });
-                        },
-                        createActionsMap()
+                        }
                     );
+
+                    communicator = serverCommunicator;
 
                     Platform.runLater(() -> toCallWhenGetCode.action(code,false) );
                 }
@@ -131,46 +136,37 @@ public class GameSession extends Configurable{
         searchThread.start();
     }
 
-
     /**
      * tente de rejoindre une partie, patiente en attendant le début, lance le jeux une fois commencé
      */
     public void waitGameStart(String gameCode,GameCallback toCallAfterStart,GameCallback toCallOnFailure){
-        // création du thread d'attente
-        Thread waitingThread = new Thread(){
+        // création et lancement du thread pour rejoindre la partie
+        new Thread(){
             @Override
             public void run(){
                 try{
-                    Communicator communicator = new Communicator();
+                    ClientManager clientCommunicator = new ClientManager(createActionsMap() );
 
-                    communicator.joinEntryPoint(
+                    // on rejoins la partie
+                    clientCommunicator.joinEntryPoint(
                         gameCode,
                         toCallOnFailure,
                         () -> {
                             Platform.runLater(() -> {
+                                // lancement du jeux
                                 toCallAfterStart.action();
                                 startGame();
                             });
                         }
                     );
+
+                    communicator = clientCommunicator;
                 }
                 catch(Exception e){
                     Platform.runLater(() -> toCallOnFailure.action() );
                 }
             }
-        };
-
-        waitingThread.start();
-    }
-
-    /**
-     * 
-     * @return la map des actions liés aux types de message
-     */
-    private HashMap<MessageType,GameContainerCallback> createActionsMap(){
-        HashMap<MessageType,GameContainerCallback> map = new HashMap<MessageType,GameContainerCallback>();
-
-        return map;
+        }.start();
     }
 
     /**
@@ -188,6 +184,52 @@ public class GameSession extends Configurable{
     public boolean saveGameIn(String saveFilePath){
         return false;
     }
+
+    /**
+     * lance l'exécution d'unae action
+     * @return this
+     */
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck){
+        
+        // aucune action n'est possible durant
+        if(this.isInJumpingSession)
+            return this;
+
+        if(code.compareTo(toCheck) == 0 && conditionToCheck)
+        {
+            if(toDoBeforeIfMatch != null)
+                toDoBeforeIfMatch.action();
+
+            this.gameSessionScene.updatePlayer(this.linkedPlayer,action,toDoAfter); 
+        }
+
+        return this;
+    }
+
+    /*
+     * alias
+     */
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter){
+        return this.madeActionIf(code,toCheck,action,toDoAfter,null,true);
+    }
+
+     /*
+     * alias
+     */
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch){
+        return this.madeActionIf(code,toCheck,action,toDoAfter,toDoBeforeIfMatch,true);
+    }
+
+    /**
+     * 
+     * @return la map des actions liés aux types de message
+     */
+    private HashMap<MessageType,MessageManager> createActionsMap(){
+        HashMap<MessageType,MessageManager> map = new HashMap<MessageType,MessageManager>();
+
+        return map;
+    }
+
 
     /**
      * lance une partie
@@ -253,41 +295,6 @@ public class GameSession extends Configurable{
                     .setCurrentDirection(Player.Position.Direction.LEFT)
                     .moveOnCurrentDirection(GameSession.X_SPEED);
             });
-    }
-
-    /**
-     * lance l'exécution d'unae action
-     * @return this
-     */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck){
-        
-        // aucune action n'est possible durant
-        if(this.isInJumpingSession)
-            return this;
-
-        if(code.compareTo(toCheck) == 0 && conditionToCheck)
-        {
-            if(toDoBeforeIfMatch != null)
-                toDoBeforeIfMatch.action();
-
-            this.gameSessionScene.updatePlayer(this.linkedPlayer,action,toDoAfter); 
-        }
-
-        return this;
-    }
-
-    /*
-     * alias
-     */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter){
-        return this.madeActionIf(code,toCheck,action,toDoAfter,null,true);
-    }
-
-     /*
-     * alias
-     */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch){
-        return this.madeActionIf(code,toCheck,action,toDoAfter,toDoBeforeIfMatch,true);
     }
 
     public Game getLinkedGame(){

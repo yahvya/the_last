@@ -1,26 +1,24 @@
 package yahaya_rachelle.communication;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
-import yahaya_rachelle.utils.GameCallback;
-import yahaya_rachelle.utils.GameContainerCallback;
 
 /**
- * gère les échanges entre les différences instances du jeux durant une partie
+ * gestion des communications de l'application
  */
-public class Communicator {
-    private static final int PORT = 6666; 
-
+public abstract class Communicator {
     private static String[][] REPLACES_MAP = new String[][]{
         {"0","a"},
         {"1","m"},
@@ -35,123 +33,144 @@ public class Communicator {
         {"\\.","-"}
     };
 
-    private ServerSocket server;
+    protected static final int PORT = 6666; 
 
-    private ArrayList<Socket> playersList;
+    protected ArrayList<Socket> otherPlayersSocket;
 
-    private ArrayList<ObjectOutputStream> outputList;
+    private HashMap<Socket,ObjectOutputStream> otherPlayersSocketOutput;
+    private HashMap<Socket,ObjectInputStream> otherPlayersSocketInput;
+    private HashMap<Socket,EntrantMessageThread> entrantMessageThreads;
 
-    public Communicator(){
-        this.playersList = new ArrayList<Socket>();
-        this.outputList = new ArrayList<ObjectOutputStream>();
+    protected ServerSocket server;
+
+    protected HashMap<MessageType,MessageManager> internalManagedMessages;
+    protected HashMap<MessageType,MessageManager> messagesLinkedActionsMap;
+
+    private ReentrantLock locker;
+
+    /**
+     * 
+     * @return les messages géré à l'interne par la classe
+     */
+    protected abstract HashMap<MessageType,MessageManager> getInternalManagedMessages();
+
+    public Communicator(HashMap<MessageType,MessageManager> messagesLinkedActionsMap){
+        this.messagesLinkedActionsMap = messagesLinkedActionsMap;
+        this.internalManagedMessages = this.getInternalManagedMessages();
+        this.otherPlayersSocket = new ArrayList<Socket>();
+        this.otherPlayersSocketOutput = new HashMap<Socket,ObjectOutputStream>();
+        this.otherPlayersSocketInput = new HashMap<Socket,ObjectInputStream>();
+        this.entrantMessageThreads = new HashMap<Socket,EntrantMessageThread>();
+        this.locker = new ReentrantLock();
     }
 
     /**
-     * gère le processus de lancement du serveur et de partage des ips
-     * gère certains messages et cherche dans la actionsMap les actions à réaliser sur les autres types de messages, si non spécifié alors message ignoré
-     * @param code
-     * @param countOfPlayersToWait
-     * @param toDoOnJoin
-     * @param toDoOnFailure
-     * @param actionsMap
+     * ferme toutes les ressources
+     * @return this
      */
-    public void createEntryPoint(int countOfPlayersToWait,GameCallback toDoOnJoin,GameCallback toDoOnFailure,GameCallback toDoWhenAllJoin,HashMap<MessageType,GameContainerCallback> messagesLinkedActionsMap){
+    public Communicator closeAll(){
         try{
-            this.server = new ServerSocket(Communicator.PORT);   
-
-            // création et lancemnt du thread de gestion des sockets
-            new Thread(){
-                @Override
-                public void run(){
-                    boolean error = false; 
-
-                    // on attend que les joueurs rejoignent
-                    for(int playerCount = 0; playerCount < countOfPlayersToWait; playerCount++){
-                        try{
-                            // récupération du joueur
-                            Socket player = server.accept();
-
-                            String playerIp = player.getLocalAddress().getHostAddress();
-
-                            // on vérifie que le joueur n'est pas déjà dans la partie
-                            boolean alreadyExist = false;
-
-                            for(Socket p : playersList){
-                                if(p.getLocalAddress().getHostAddress() == playerIp)
-                                    break;
-                            }
-
-                            if(alreadyExist)
-                            {
-                                playerCount--;
-
-                                continue;
-                            }
-
-                            // sauvegarde du joueur
-                            playersList.add(player); 
-                            // création et sauvegarde de l'objet d'envoi au joueur
-                            outputList.add(new ObjectOutputStream(player.getOutputStream() ) );
-                            
-                            toDoOnJoin.action();
-                        }
-                        catch(Exception e){
-                            // envoie aux clients déjà connecté du cas d'erreurs
-
-                            error = true;
-
-                            break;
-                        }
-                    }
-
-                    if(!error)
-                        toDoWhenAllJoin.action();
-                    else
-                        toDoOnFailure.action();
-                }
-            }.start();
-        }
-        catch(Exception e){
-            toDoOnFailure.action();
-        }
-    }
-
-    /**
-     * crée le socket client
-     * rejoins la session 
-     * gère la réception et la partage d'ip
-     * @param code
-     * @param toDoOnFailure
-     * @param toDoWhenAllJoined
-     */
-    public void joinEntryPoint(String code,GameCallback toDoOnFailure,GameCallback toDoWhenAllJoined){
-        try{  
-            // connexion du joueur à la partie du code donné
-            Socket player = new Socket(Communicator.readCode(code),Communicator.PORT);
-        }
-        catch(Exception e){
-            toDoOnFailure.action();
-        }
-    }
-
-    /**
-     * ferme tous les sockets
-     */
-    public void closeAll(){
-        try{
+            // fermeture du serveur
             this.server.close();
+
+            // fermeture des sockets interne et des objets de sorties
+            this.otherPlayersSocketOutput.forEach((socket,output) -> {
+                try{
+                    socket.close();
+                    output.close();
+                    this.otherPlayersSocketInput.get(socket).close();
+                    
+                    EntrantMessageThread thread =  this.entrantMessageThreads.get(socket);
+
+                    if(thread != null)
+                        thread.stopReading();
+                }
+                catch(Exception e){} 
+            });
         }
         catch(Exception e){}
+
+        return this;
     }
 
-     /**
+    /**
+     * ajoute le socket joueur à la liste et crée ses objets output de sortie et input d'entrée
+     * @param player
+     * @return this
+     * @throws IOException
+     */
+    protected Communicator addNewPlayerSocket(Socket playerSocket) throws IOException{
+        this.otherPlayersSocket.add(playerSocket);
+        this.otherPlayersSocketOutput.put(playerSocket,new ObjectOutputStream(playerSocket.getOutputStream() ) );
+        this.otherPlayersSocketInput.put(playerSocket,new ObjectInputStream(playerSocket.getInputStream() ) );
+        this.entrantMessageThreads.put(playerSocket,null);
+
+        return this;
+    }
+
+    /**
+     * gère les message entrant
+     * @param messagesLinkedActionsMap
+     * @param receivedMessage
+     * @return this
+     */
+    protected Communicator manageEntrantMessage(Message receivedMessage){
+        this.locker.lock();
+
+        System.out.println("message recu -> type : " + receivedMessage.getMessageType() + " - message : " + receivedMessage.getMessageData() );
+
+        MessageType messageType = receivedMessage.getMessageType();
+
+        // on vérifie si le message doit être géré à l'interne
+        MessageManager toDo = this.internalManagedMessages.get(messageType);
+        
+        // gestion interne du message
+        if(toDo != null){
+            toDo.manageMessage(receivedMessage.getMessageData() );
+            return this;
+        }
+
+        toDo = this.messagesLinkedActionsMap.get(messageType);
+
+        // gestion externe du message
+        if(toDo != null)
+            toDo.manageMessage(receivedMessage.getMessageData() );
+
+        this.locker.unlock();
+
+        return this;
+    }
+
+    /**
+     * lance le thread d'écoute des messages entrants 
+     * @return this
+     */
+    protected Communicator startListening(){
+        this.entrantMessageThreads.forEach((socket,inputObject) -> {
+            // vérifie si l'objet n'a pas déjà un thread de lecture en cours
+            if(inputObject == null){
+                // crée le thread d'écoute
+                EntrantMessageThread readingThread = new EntrantMessageThread(this.otherPlayersSocketInput.get(socket), this);
+
+                readingThread.start();
+
+                this.entrantMessageThreads.put(socket,readingThread);
+            }
+        });   
+
+        return this;
+    }
+
+    /**
      * envoie le message à la liste des participants, tente de renotifier une fois après 300 ms en cas de premier échec
      * @param message
      */
     public void propagateMessage(Message message){
+        System.out.println("message à envoyer -> type : " + message.getMessageType() + " - message : " + message.getMessageData() );
+
         ArrayList<ObjectOutputStream> retryList = new ArrayList<ObjectOutputStream>();
 
-        outputList.forEach((output) -> {
+        this.otherPlayersSocketOutput.forEach((socket,output) -> {
             try{
                 // envoie du message
                 output.writeObject(message);
@@ -163,6 +182,7 @@ public class Communicator {
         });
 
         if(retryList.size() != 0){
+            // lancement du seconde tentative d'envoi après 300 ms
             Timeline retryTimeline = new Timeline(new KeyFrame(Duration.ONE,(e) -> {
                 retryList.forEach((output) -> {
                     try{
@@ -210,13 +230,9 @@ public class Communicator {
     /**
      * représente les types de messages pouvant être envoyé et reçu
      */
-    public enum MessageType{RECEIVE_COUNT_OF_PLAYERS_IN_SESSION,RECEIVE_IP_LIST,ERROR};
+    public static enum MessageType{RECEIVE_COUNT_OF_PLAYERS_TO_ACCEPT,CONFIRM_CAN_RECEIVE_CONNEXIONS,RECEIVE_IP_LIST};
 
-    /**
-     * représente un message
-     */
-    public interface Message extends Serializable{
-        public MessageType getMessageType();
-        public Object getMessageData();
+    public interface MessageManager{
+        public void manageMessage(Object messageData);
     }
 }
