@@ -25,7 +25,9 @@ public class EntrantMessageThread extends Thread{
             try{
                 this.linkedCommunicator.manageEntrantMessage((Message) this.input.readObject() );
             }
-            catch(Exception e){e.printStackTrace(); break;}
+            catch(Exception e){
+                break;
+            }
         }
     }
 

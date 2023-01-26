@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -46,8 +45,6 @@ public abstract class Communicator {
     protected HashMap<MessageType,MessageManager> internalManagedMessages;
     protected HashMap<MessageType,MessageManager> messagesLinkedActionsMap;
 
-    private ReentrantLock locker;
-
     /**
      * 
      * @return les messages géré à l'interne par la classe
@@ -56,12 +53,12 @@ public abstract class Communicator {
 
     public Communicator(HashMap<MessageType,MessageManager> messagesLinkedActionsMap){
         this.messagesLinkedActionsMap = messagesLinkedActionsMap;
+        this.server = null;
         this.internalManagedMessages = this.getInternalManagedMessages();
         this.otherPlayersSocket = new ArrayList<Socket>();
         this.otherPlayersSocketOutput = new HashMap<Socket,ObjectOutputStream>();
         this.otherPlayersSocketInput = new HashMap<Socket,ObjectInputStream>();
         this.entrantMessageThreads = new HashMap<Socket,EntrantMessageThread>();
-        this.locker = new ReentrantLock();
     }
 
     /**
@@ -71,7 +68,8 @@ public abstract class Communicator {
     public Communicator closeAll(){
         try{
             // fermeture du serveur
-            this.server.close();
+            if(this.server != null)
+                this.server.close();
 
             // fermeture des sockets interne et des objets de sorties
             this.otherPlayersSocketOutput.forEach((socket,output) -> {
@@ -114,9 +112,7 @@ public abstract class Communicator {
      * @param receivedMessage
      * @return this
      */
-    protected Communicator manageEntrantMessage(Message receivedMessage){
-        this.locker.lock();
-
+    synchronized protected Communicator manageEntrantMessage(Message receivedMessage){
         System.out.println("message recu -> type : " + receivedMessage.getMessageType() + " - message : " + receivedMessage.getMessageData() );
 
         MessageType messageType = receivedMessage.getMessageType();
@@ -135,8 +131,6 @@ public abstract class Communicator {
         // gestion externe du message
         if(toDo != null)
             toDo.manageMessage(receivedMessage.getMessageData() );
-
-        this.locker.unlock();
 
         return this;
     }

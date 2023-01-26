@@ -57,6 +57,7 @@ public class GameSession extends Configurable{
         this.linkedGame = linkedGame;
         this.toCallOnEnd = toCallOnEnd;
         this.linkedPlayer = new Player(character,pseudo,this);
+        this.gameSessionScene = new GameSessionScene(this);
         this.canDoSuperAttack = true;
         this.isInJumpingSession = false;
         this.blockTime = new ConfigGetter<Long>(linkedGame).getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
@@ -123,7 +124,6 @@ public class GameSession extends Configurable{
                     Platform.runLater(() -> toCallWhenGetCode.action(code,false) );
                 }
                 catch(Exception e){
-                    
                     Platform.runLater(() -> {
                         // préviens d'une échec de recherche ou de création des joueurs
                         if(toCallOnFailure != null)
@@ -235,8 +235,6 @@ public class GameSession extends Configurable{
      * lance une partie
      */
     private void startGame(){
-        // création de la scène
-        this.gameSessionScene = new GameSessionScene(this);
         // ajout de la gestion des évenements clavier 
         this.gameSessionScene.getPage().setOnKeyPressed((keyData) -> this.manageKeyEvent(keyData) );
         // placement des joueurs sur la scène;
