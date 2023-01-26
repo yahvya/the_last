@@ -40,7 +40,7 @@ public class GameDataManager {
         GameDataManager manager = this;
 
         // lancement du thread de chargement des données
-        Thread loadingThread = new Thread(){
+        new Thread(){
             @Override
             public void run()
             { 
@@ -67,9 +67,7 @@ public class GameDataManager {
                      Platform.runLater(() -> toCallOnFailure.action() );
                 }
             }
-        };
-
-        loadingThread.start();
+        }.start();
     }
 
     /**

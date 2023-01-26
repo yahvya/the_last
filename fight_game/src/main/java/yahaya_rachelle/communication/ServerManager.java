@@ -130,8 +130,6 @@ public class ServerManager extends Communicator{
      * @return this
      */
     private ServerManager shareCountOfParticipantToOtherPlayers(){
-        System.out.println("Lancement du partage des ips");
-
         // envoi du nombre de participants à accepter
         this.propagateMessage(new Message(MessageType.RECEIVE_COUNT_OF_PLAYERS_TO_ACCEPT,countOfPlayersToWait - 1) );
 
@@ -143,7 +141,24 @@ public class ServerManager extends Communicator{
      * @return
      */
     private ServerManager shareOthersIpToEachParticipants(){
-        System.out.println("c 'est partit pour le partage des ips à tout le monde");
+        this.otherPlayersSocketOutput.forEach((socket,outputObject) -> {
+            ArrayList<String> othersIp = new ArrayList<String>();
+
+            // on récupère la liste des 
+            this.otherPlayersSocket.forEach(playerSocket -> {
+                if(playerSocket != socket)
+                    othersIp.add(socket.getLocalAddress().getHostAddress() );
+            });
+
+            // envoi de la liste d'ip des autres
+            try{
+                outputObject.writeObject(new Message(MessageType.RECEIVE_IP_LIST,othersIp) );
+            }
+            catch(Exception e){
+                // on déconnecte ce joueur de la session
+            }
+        });
+
         return this;
     }
 }

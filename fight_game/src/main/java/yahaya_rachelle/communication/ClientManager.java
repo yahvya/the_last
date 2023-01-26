@@ -46,7 +46,6 @@ public class ClientManager extends Communicator{
     /**
      * crée le socket client
      * rejoins la session 
-     * gère la réception et la partage d'ip
      * @param code
      * @param toDoOnFailure
      * @param toDoWhenAllJoined
@@ -59,7 +58,7 @@ public class ClientManager extends Communicator{
             this.playerSocket = new Socket(Communicator.readCode(code),Communicator.PORT);
             this.ip = Communicator.readCode(code);
             // ajout du serveur dans la liste de propagation
-            this.addNewPlayerSocket(playerSocket);
+            this.addNewPlayerSocket(this.playerSocket);
             this.startListening();
         }
         catch(Exception e){

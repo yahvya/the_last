@@ -36,8 +36,8 @@ public abstract class Communicator {
 
     protected ArrayList<Socket> otherPlayersSocket;
 
-    private HashMap<Socket,ObjectOutputStream> otherPlayersSocketOutput;
-    private HashMap<Socket,ObjectInputStream> otherPlayersSocketInput;
+    protected HashMap<Socket,ObjectOutputStream> otherPlayersSocketOutput;
+    protected HashMap<Socket,ObjectInputStream> otherPlayersSocketInput;
     private HashMap<Socket,EntrantMessageThread> entrantMessageThreads;
 
     protected ServerSocket server;
