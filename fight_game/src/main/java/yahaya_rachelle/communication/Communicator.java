@@ -115,6 +115,8 @@ public abstract class Communicator {
      * @return this
      */
     protected Communicator shareMyPlayer(){
+        this.propagateMessage(new Message(MessageType.RECEIVE_PLAYER,this.internalPlayer) );
+
         return this;
     }
 
@@ -156,7 +158,7 @@ public abstract class Communicator {
             // vérifie si l'objet n'a pas déjà un thread de lecture en cours
             if(inputObject == null){
                 // crée le thread d'écoute
-                EntrantMessageThread readingThread = new EntrantMessageThread(this.otherPlayersSocketInput.get(socket), this);
+                EntrantMessageThread readingThread = new EntrantMessageThread(socket,this.otherPlayersSocketInput.get(socket), this);
 
                 readingThread.start();
 

@@ -2,6 +2,7 @@ package yahaya_rachelle.actor;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URISyntaxException;
 
 import org.json.simple.parser.ParseException;
@@ -13,7 +14,7 @@ import yahaya_rachelle.game.GameSession;
 /**
  * représente un joueur
  */
-public class Player extends Configurable{
+public class Player extends Configurable implements Serializable{
     private Character character;
 
     private String pseudo;
@@ -117,7 +118,7 @@ public class Player extends Configurable{
     /**
      * représente la position d'un joueur
      */
-    public static class Position{
+    public static class Position implements Serializable{
         private double currentX;
         private double currentY;
         private double containerWidth;

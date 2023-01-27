@@ -47,14 +47,16 @@ public class ClientManager extends Communicator{
 
         // alors une action avait été défini pour cet évenement
         if(defaultManager != null){
-            finalManager = (playerData) -> {
-                this.manageEntrantPlayer(playerData);
+            finalManager = (playerObject) -> {
+                Player player = (Player) playerObject;
+
+                this.manageEntrantPlayer(player);
 
                 // appel de l'action prédéfini
-                defaultManager.manageMessage(playerData);
+                defaultManager.manageMessage(player);
             };
         }
-        else finalManager = (playerData) -> this.manageEntrantPlayer(playerData);
+        else finalManager = (player) -> this.manageEntrantPlayer((Player) player);
 
         internalManagedMessages.put(MessageType.RECEIVE_PLAYER,finalManager);
 
@@ -170,8 +172,11 @@ public class ClientManager extends Communicator{
      * @param playerData
      * @return this
      */
-    synchronized private ClientManager manageEntrantPlayer(Object playerData){
+    synchronized private ClientManager manageEntrantPlayer(Player player){
         this.countOfPlayersToReceive--;
+
+        // on reconstruit les images du personnage du joueur
+        player.getCharacter().rebuildActionsMapSerializable();
 
         // alors tous les joueurs attendues sont reçu
         if(this.countOfPlayersToReceive == 0){

@@ -1,6 +1,7 @@
 package yahaya_rachelle.communication;
 
 import java.io.ObjectInputStream;
+import java.net.Socket;
 
 /**
  * gère la lecture des messages entrants
@@ -12,9 +13,12 @@ public class EntrantMessageThread extends Thread{
 
     private Communicator linkedCommunicator;
 
-    public EntrantMessageThread(ObjectInputStream input,Communicator linkedCommunicator){
+    private Socket sourceSocket;
+
+    public EntrantMessageThread(Socket sourceSocket,ObjectInputStream input,Communicator linkedCommunicator){
         this.input = input;
         this.linkedCommunicator = linkedCommunicator;
+        this.sourceSocket = sourceSocket;
         this.stopThis = false;
     }
 
@@ -23,7 +27,11 @@ public class EntrantMessageThread extends Thread{
         // lecture des messages entrant
         while(!this.stopThis){
             try{
-                this.linkedCommunicator.manageEntrantMessage((Message) this.input.readObject() );
+                Message message = (Message) this.input.readObject();
+
+                message.setSource(this.sourceSocket);
+
+                this.linkedCommunicator.manageEntrantMessage(message);
             }
             catch(Exception e){
                 break;
