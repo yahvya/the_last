@@ -10,6 +10,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -68,6 +69,9 @@ public class GameSessionScene extends GameScene{
         this.lifebarsList = lifeContainer.getChildren();
         this.children.add(lifeContainer);
 
+        // ajout du boutton de gestion
+        this.lifebarsList.add(this.createGestionButton() );
+
         return new Scene(container);
     }
 
@@ -78,6 +82,7 @@ public class GameSessionScene extends GameScene{
      * @param toDoOnEnd
      */
     public GameSessionScene updatePlayer(Player player,Config.PlayerAction action,GameCallback toDoOnEnd){
+
         try{
             PlayerManager manager = this.playersMap.get(player);
 
@@ -112,8 +117,7 @@ public class GameSessionScene extends GameScene{
      * @param player
      * @return GameSessionScene
      */
-    public GameSessionScene
-     removePlayer(Player player){
+    public GameSessionScene removePlayer(Player player){
         try{
             PlayerManager manager = this.playersMap.get(player);
 
@@ -124,6 +128,16 @@ public class GameSessionScene extends GameScene{
         catch(Exception e){}
 
         return this;
+    }
+
+    /**
+     * 
+     * @return le boutton de gestion des bouttons
+     */
+    private Button createGestionButton(){
+        Button gameGestionButton = new Button();
+
+        return gameGestionButton;
     }
 
     /**

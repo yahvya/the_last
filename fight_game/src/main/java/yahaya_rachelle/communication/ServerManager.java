@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import yahaya_rachelle.actor.Player;
 import yahaya_rachelle.utils.GameCallback;
 
 /**
@@ -13,12 +14,14 @@ import yahaya_rachelle.utils.GameCallback;
 public class ServerManager extends Communicator{
     private int countOfPlayersToWait;
 
-    private ArrayList<String> ipListToReduce;
+    private ArrayList<String> ipListToReduceOnReceiveConnexion;
+    private ArrayList<String> ipListToReduceOnConfirmConnexion;
+    private ArrayList<String> ipListToReduceOnConfirmSharePlayers;
 
     private GameCallback toDoWhenAllJoin;
 
-    public ServerManager(HashMap<MessageType, MessageManager> messagesLinkedActionsMap,int countOfPlayersToWait) {
-        super(messagesLinkedActionsMap);
+    public ServerManager(HashMap<MessageType, MessageManager> messagesLinkedActionsMap,int countOfPlayersToWait,Player internalPlayer) {
+        super(messagesLinkedActionsMap,internalPlayer);
         this.countOfPlayersToWait = countOfPlayersToWait;
     }
 
@@ -28,22 +31,20 @@ public class ServerManager extends Communicator{
 
         // gestion de la réception du message indiquant la possibilité de recevoir des connexions
         internalManagedMessages.put(MessageType.CONFIRM_CAN_RECEIVE_CONNEXIONS,(clientIp) -> {
-            int size = this.ipListToReduce.size();
-
-            // on supprime l'ip donné dans la liste
-            for(int key = 0; key < size; key++){
-                String containedIp = this.ipListToReduce.get(key);
-
-                if(containedIp.equals((String) clientIp) ){
-                    size--;
-                    this.ipListToReduce.remove(key);
-                    break;
-                }
-            }
-
             // si la taille est à 0 alors tout le monde à confirmé pouvoir recevoir les connexions
-            if(size == 0)
-                this.shareOthersIpToEachParticipants();
+            if(this.removeOnList(ipListToReduceOnReceiveConnexion,(String) clientIp) == 0)
+                this.shareOthersIpToEach();
+        });
+        // gestion de la réception du message indiquant la connexion aux autres
+        internalManagedMessages.put(MessageType.CONFIRM_CONNECT_TO_OTHERS,(clientIp) -> {
+            // si la taille est à 0 alors tout le monde à confirmé s'être connecté aux autres
+            if(this.removeOnList(ipListToReduceOnConfirmConnexion,(String) clientIp) == 0)
+                this.sendSharePlayersMessageToEach();
+        });
+        internalManagedMessages.put(MessageType.CONFIRM_RECEIVE_ALL_PLAYERS,(clientIp) -> {
+            // si la taille est à 0 alors tout le monde à confirmé avoir reçu les joueurs des autres
+            if(this.removeOnList(ipListToReduceOnConfirmSharePlayers,(String) clientIp) == 0)
+                this.sendStartGameToEach();
         });
 
         return internalManagedMessages;
@@ -68,7 +69,7 @@ public class ServerManager extends Communicator{
                 public void run(){
                     boolean error = false;
 
-                    ipListToReduce = new ArrayList<String>();
+                    ipListToReduceOnReceiveConnexion = new ArrayList<String>();
                 
                     // on attend que les joueurs rejoignent
                     for(int playerCount = 0; playerCount < countOfPlayersToWait; playerCount++){
@@ -93,8 +94,8 @@ public class ServerManager extends Communicator{
                                 continue;
                             }
 
-                            // sauvegarde de l'ip dans la liste à réduire
-                            ipListToReduce.add(playerIp);
+                            // sauvegarde de l'ip dans les listes à réduire
+                            ipListToReduceOnReceiveConnexion.add(playerIp);
                             // sauvegarde du joueur et création de son objet de sortie
                             addNewPlayerSocket(playerSocket);
                             // appel de l'action à exécuter quand un joueur rejoins
@@ -109,6 +110,9 @@ public class ServerManager extends Communicator{
                     }
 
                     if(!error){
+                        ipListToReduceOnConfirmConnexion = (ArrayList<String>) ipListToReduceOnReceiveConnexion.clone();
+                        ipListToReduceOnConfirmSharePlayers = (ArrayList<String>) ipListToReduceOnReceiveConnexion.clone();
+
                         // commence à écouter les messages entrants et partage le nombre de participants
                         startListening();
                         shareCountOfParticipantToOtherPlayers();
@@ -138,9 +142,9 @@ public class ServerManager extends Communicator{
 
     /**
      * partage la liste des ip de chaque participant aux autres
-     * @return
+     * @return this
      */
-    private ServerManager shareOthersIpToEachParticipants(){
+    private ServerManager shareOthersIpToEach(){
         this.otherPlayersSocketOutput.forEach((socket,outputObject) -> {
             ArrayList<String> othersIp = new ArrayList<String>();
 
@@ -160,5 +164,54 @@ public class ServerManager extends Communicator{
         });
 
         return this;
+    }
+
+    /**
+     * envoi lemessage / signal pour démarrer le partage des joueurs et partage ce joueur aux autres 
+     * @return this
+     */
+    private ServerManager sendSharePlayersMessageToEach(){
+        this   
+            .propagateMessage(new Message(MessageType.RECEIVE_SIGNAL_TO_SHARE_PLAYER,null) )
+            .shareMyPlayer();
+
+        return this;
+    }
+
+    /**
+     * envoi l'évenement de début de partie à tous et déclenche l'action de joueurs rejoins
+     * @return this
+     */
+    private ServerManager sendStartGameToEach(){
+        this.propagateMessage(new Message(MessageType.START_GAME,null) );
+        
+        toDoWhenAllJoin.action();
+        
+        return this;
+    }
+
+    /**
+     * supprime une chaine dans la liste
+     * @param list
+     * @param toRemove
+     * @return la nouvelle taile de la liste
+     */
+    synchronized private int removeOnList(ArrayList<String> list,String toRemove){
+        int size = list.size();
+
+        // on supprime l'ip donné dans la liste
+        for(int key = 0; key < size; key++){
+            String containedString = list.get(key);
+
+            if(containedString.equals(toRemove) ){
+                size--;
+
+                list.remove(key);
+
+                break;
+            }
+        }
+
+        return size;
     }
 }

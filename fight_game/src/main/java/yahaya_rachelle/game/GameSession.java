@@ -82,14 +82,14 @@ public class GameSession extends Configurable{
      * génère le code de partage, cherche les adversaire et lance le jeux une fois trouvé
      */
     public void findOpponents(int countOfParticipants,GameContainerCallback toCallWhenGetCode,GameCallback toCallAfterFind,GameCallback toCallOnFailure,GameContainerCallback toCallOnNewPlayer){
-
-        Thread searchThread = new Thread(){
+        
+        new Thread(){
             @Override
             public void run(){
                 try{
                     String code = Communicator.generateCode();
 
-                    ServerManager serverCommunicator = new ServerManager(createActionsMap(),countOfParticipants);
+                    ServerManager serverCommunicator = new ServerManager(createActionsMap(),countOfParticipants,linkedPlayer);
 
                     IntegerHelper valueObject = new IntegerHelper();
 
@@ -131,9 +131,7 @@ public class GameSession extends Configurable{
                     });
                 }
             }
-        };
-
-        searchThread.start();
+        }.start();
     }
 
     /**
@@ -145,7 +143,7 @@ public class GameSession extends Configurable{
             @Override
             public void run(){
                 try{
-                    ClientManager clientCommunicator = new ClientManager(createActionsMap() );
+                    ClientManager clientCommunicator = new ClientManager(createActionsMap(),linkedPlayer);
 
                     // on rejoins la partie
                     clientCommunicator.joinEntryPoint(
