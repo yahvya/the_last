@@ -65,14 +65,17 @@ public class Game extends Configurable{
      * définis l'apparence de base de la fenêtre
      */
     private void setWindowStyle(){
-        ConfigGetter<String> configStringGetter = new ConfigGetter<String>(this);
-        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this);
+        try{
+            ConfigGetter<String> configStringGetter = new ConfigGetter<String>(this);
+            ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this);
 
-        this.window.setWidth(configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue() );
-        this.window.setHeight(configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() );
-        this.window.setTitle(configStringGetter.getValueOf(Config.App.GAME_NAME.key) );
-        this.window.setResizable(false);
-        this.window.getIcons().add(new Image(this.getClass().getResource(configStringGetter.getValueOf(Config.App.FAVICON_PATH.key) ).toString() ) );
+            this.window.setWidth(configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue() );
+            this.window.setHeight(configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() );
+            this.window.setTitle(configStringGetter.getValueOf(Config.App.GAME_NAME.key) );
+            this.window.setResizable(false);
+            this.window.getIcons().add(new Image(this.getClass().getResource(configStringGetter.getValueOf(Config.App.FAVICON_PATH.key) ).toString() ) );
+        }
+        catch(Exception e){}
     }
     
     public Stage getWindow(){

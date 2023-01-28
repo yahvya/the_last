@@ -10,7 +10,6 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -134,8 +133,8 @@ public class GameSessionScene extends GameScene{
      * 
      * @return le boutton de gestion des bouttons
      */
-    private Button createGestionButton(){
-        Button gameGestionButton = new Button();
+    private AnchorPane createGestionButton(){
+        AnchorPane gameGestionButton = new AnchorPane();
 
         return gameGestionButton;
     }

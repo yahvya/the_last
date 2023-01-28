@@ -1,5 +1,13 @@
 processus d'interconnexion
 
+(
+    modifications à penser:
+
+    en même temps que le nombre de personnes à accepter, le serveur envoit à un chaque personne son numéro qu'il assigne à son joueur donc le serveur l'assigne aussi
+    via ce numéro à la reception du message chaque socket calcule la position de son joueur et sa direction
+    à chaque message sur un joueur on envoi donc ce id accompagné du message
+)
+
 le serveur (créateur de la partie) attend les connexions clients (autres joueurs qui saisissent le code) (fait)
 
 quand tous ont rejoins
@@ -9,7 +17,7 @@ quand tous ont rejoins
 quand tous ont prévenu le serveur donc tous prêt à accepter
     le serveur envoi la liste des ips à laquelle ils doivent se connecter (fait)
     les clients se connectent aux autres à ce moment (fait à tester)
-    quand un client recois toutes ses connexions attendus il prévient le serveur
+    quand un client recois toutes ses connexions attendus il prévient le serveur (fait à tester)
 
 quand tous ont prévenus de la connexion
     le serveur envoi le signal pour démarrer le partage des joueurs (fait à tester)

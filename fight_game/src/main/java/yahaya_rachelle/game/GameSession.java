@@ -34,6 +34,7 @@ import yahaya_rachelle.communication.Communicator.MessageType;
  */
 public class GameSession extends Configurable{
     public static final int X_SPEED = 9;
+    public static final int JUMP_X_SPEED = 70;
     public static final int JUMP_HEIGHT = 230;
 
     private Game linkedGame;
@@ -47,7 +48,10 @@ public class GameSession extends Configurable{
     private Player linkedPlayer;
 
     private boolean canDoSuperAttack;
-    private boolean isInJumpingSession;
+    private boolean canMoveS;
+    private boolean canDoAction;
+
+    private double maxWidth;
 
     private int blockTime;
 
@@ -57,9 +61,9 @@ public class GameSession extends Configurable{
         this.linkedGame = linkedGame;
         this.toCallOnEnd = toCallOnEnd;
         this.linkedPlayer = new Player(character,pseudo,this);
-        this.gameSessionScene = new GameSessionScene(this);
         this.canDoSuperAttack = true;
-        this.isInJumpingSession = false;
+        this.canMoveS = true;
+        this.canDoAction = true;
         this.blockTime = new ConfigGetter<Long>(linkedGame).getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
     }
 
@@ -71,7 +75,7 @@ public class GameSession extends Configurable{
      * @throws ParseException
      * @throws FileNotFoundException
      */
-    public GameSession(String saveGameFilePath,HomeScene homeScene,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
+    public GameSession(String saveGameFilePath,Game linkedGame,HomeScene homeScene,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.saveGameFilePath = saveGameFilePath;
         this.toCallOnEnd = toCallOnEnd;
 
@@ -82,7 +86,6 @@ public class GameSession extends Configurable{
      * génère le code de partage, cherche les adversaire et lance le jeux une fois trouvé
      */
     public void findOpponents(int countOfParticipants,GameContainerCallback toCallWhenGetCode,GameCallback toCallAfterFind,GameCallback toCallOnFailure,GameContainerCallback toCallOnNewPlayer){
-        
         new Thread(){
             @Override
             public void run(){
@@ -96,7 +99,6 @@ public class GameSession extends Configurable{
                     // lance le serveur
                     serverCommunicator.createEntryPoint(
                         () -> {
-
                             int value = valueObject
                                 .addOne()
                                 .getValue();
@@ -131,7 +133,7 @@ public class GameSession extends Configurable{
                     });
                 }
             }
-        }.start();
+        };
     }
 
     /**
@@ -161,7 +163,8 @@ public class GameSession extends Configurable{
                     communicator = clientCommunicator;
                 }
                 catch(Exception e){
-                    Platform.runLater(() -> toCallOnFailure.action() );
+                    if(toCallOnFailure != null)
+                        Platform.runLater(() -> toCallOnFailure.action() );
                 }
             }
         }.start();
@@ -176,10 +179,9 @@ public class GameSession extends Configurable{
 
     /**
      * sauvegarde cette partie
-     * @param saveFilePath
      * @return si la sauvegarde a réussi
      */
-    public boolean saveGameIn(String saveFilePath){
+    public boolean saveGame(){
         return false;
     }
 
@@ -187,10 +189,9 @@ public class GameSession extends Configurable{
      * lance l'exécution d'unae action
      * @return this
      */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck){
-        
-        // aucune action n'est possible durant
-        if(this.isInJumpingSession)
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck,Player player){
+        // aucune action n'est possible durant le saut
+        if(!this.canDoAction)
             return this;
 
         if(code.compareTo(toCheck) == 0 && conditionToCheck)
@@ -198,7 +199,7 @@ public class GameSession extends Configurable{
             if(toDoBeforeIfMatch != null)
                 toDoBeforeIfMatch.action();
 
-            this.gameSessionScene.updatePlayer(this.linkedPlayer,action,toDoAfter); 
+            this.gameSessionScene.updatePlayer(player,action,toDoAfter); 
         }
 
         return this;
@@ -207,15 +208,15 @@ public class GameSession extends Configurable{
     /*
      * alias
      */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter){
-        return this.madeActionIf(code,toCheck,action,toDoAfter,null,true);
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,Player player){
+        return this.madeActionIf(code,toCheck,action,toDoAfter,null,true,player);
     }
 
      /*
      * alias
      */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch){
-        return this.madeActionIf(code,toCheck,action,toDoAfter,toDoBeforeIfMatch,true);
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,Player player){
+        return this.madeActionIf(code,toCheck,action,toDoAfter,toDoBeforeIfMatch,true,player);
     }
 
     /**
@@ -225,6 +226,15 @@ public class GameSession extends Configurable{
     private HashMap<MessageType,MessageManager> createActionsMap(){
         HashMap<MessageType,MessageManager> map = new HashMap<MessageType,MessageManager>();
 
+        // ajout du joueur entrant dans la page (temporaire)
+        map.put(MessageType.RECEIVE_PLAYER,(playerObject) -> {
+            Player player = (Player) playerObject;
+
+            this.gameSessionScene
+                .addPlayer((Player) player)
+                .updatePlayer(player,Config.PlayerAction.STATIC_POSITION,null);
+        });
+
         return map;
     }
 
@@ -233,12 +243,13 @@ public class GameSession extends Configurable{
      * lance une partie
      */
     private void startGame(){
+        this.gameSessionScene = new GameSessionScene(this);
         // ajout de la gestion des évenements clavier 
         this.gameSessionScene.getPage().setOnKeyPressed((keyData) -> this.manageKeyEvent(keyData) );
         // placement des joueurs sur la scène;
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
-
-        this.linkedPlayer.setPosition(new Player.Position(30,30,configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue(),configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
+        this.maxWidth = configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
+        this.linkedPlayer.setPosition(new Player.Position(30,30,this.maxWidth,configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
 
         this.gameSessionScene
             .addPlayer(this.linkedPlayer)
@@ -257,40 +268,55 @@ public class GameSession extends Configurable{
         GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
 
         this
-            .madeActionIf(code,KeyCode.F,PlayerAction.ATTACK,toDoAfter)
+            .madeActionIf(code,KeyCode.F,PlayerAction.ATTACK,toDoAfter,this.linkedPlayer)
             .madeActionIf(code,KeyCode.D,PlayerAction.SUPER_ATTACK,toDoAfter,() -> {
                 // on bloque la super attaque pendant x temps
                 this.canDoSuperAttack = false;
 
-                // timeline pour débloquer la super attaque
-                Timeline unlockTimeline = new Timeline(new KeyFrame(Duration.ONE,(e) -> this.canDoSuperAttack = true) );
+                this.doAfterBlockTime(() -> this.canDoSuperAttack = true);
 
-                unlockTimeline.setCycleCount(1);
-                unlockTimeline.setDelay(Duration.millis(this.blockTime) );
-                unlockTimeline.play();
-            },this.canDoSuperAttack)
+            },this.canDoSuperAttack,this.linkedPlayer)
             .madeActionIf(code,KeyCode.SPACE,PlayerAction.JUMP,() -> {
                 // à la fin de la séquence de saut, on lance la séquence de descente
                 this.gameSessionScene.updatePlayer(this.linkedPlayer,Config.PlayerAction.FALL,() -> {
-                    // quand la décente est terminé on débloque les autres actions
-                    this.isInJumpingSession = false;
+                    // quand la déscente est terminé on débloque les autres actions
+                    this.canDoAction = true;
+                    this.linkedPlayer.getPosition().moveOnCurrentDirection(GameSession.JUMP_X_SPEED);
                     toDoAfter.action();
                 });
-            },() -> this.isInJumpingSession = true)
+            },() -> this.canDoAction = false,this.linkedPlayer)
+            .madeActionIf(code,KeyCode.M,PlayerAction.STATIC_POSITION,null,() -> {
+                    // on bloque l'action pendant un certains pour la re activer
+                    this.linkedPlayer.getPosition().moveOnCurrentDirection(this.maxWidth);
+                    this.canMoveS = false;
+                    this.doAfterBlockTime(() -> this.canMoveS = true);
+                },this.canMoveS,this.linkedPlayer)
             .madeActionIf(code,KeyCode.RIGHT,PlayerAction.RUN,toDoAfter,() -> {
-                Player.Position position = this.linkedPlayer.getPosition();
-                
-                position
+                this.linkedPlayer.getPosition()
                     .setCurrentDirection(Player.Position.Direction.RIGHT)
                     .moveOnCurrentDirection(GameSession.X_SPEED);
-            })  
-            .madeActionIf(code,KeyCode.LEFT,PlayerAction.RUN,toDoAfter,() -> {
-                Player.Position position = this.linkedPlayer.getPosition();
-                
-                position
+            },this.linkedPlayer)  
+            .madeActionIf(code,KeyCode.LEFT,PlayerAction.RUN,toDoAfter,() -> {                
+                this.linkedPlayer.getPosition()
                     .setCurrentDirection(Player.Position.Direction.LEFT)
                     .moveOnCurrentDirection(GameSession.X_SPEED);
-            });
+            },this.linkedPlayer);
+    }
+
+    /**
+     * fais une certaine action après le temps de blocage
+     * @param toDo
+     * @return this
+     */
+    private GameSession doAfterBlockTime(GameCallback toDo){
+        // timeline pour débloquer la super attaque
+        Timeline unlockTimeline = new Timeline(new KeyFrame(Duration.ONE,(e) -> toDo.action() ) );
+
+        unlockTimeline.setCycleCount(1);
+        unlockTimeline.setDelay(Duration.millis(this.blockTime) );
+        unlockTimeline.play();
+        
+        return this;
     }
 
     public Game getLinkedGame(){
@@ -302,6 +328,9 @@ public class GameSession extends Configurable{
         return this.saveGameFilePath;
     }
 
+    /**
+     * aide interne à l'incrémentation d'entier dans un lambda
+     */
     class IntegerHelper{
         private int value;
 
