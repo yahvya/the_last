@@ -27,7 +27,7 @@ import yahaya_rachelle.communication.ClientManager;
 import yahaya_rachelle.communication.Communicator;
 import yahaya_rachelle.communication.ServerManager;
 import yahaya_rachelle.communication.Communicator.MessageManager;
-import yahaya_rachelle.communication.Communicator.MessageType;
+import yahaya_rachelle.communication.Message.MessageType;
 
 /**
  * représente une partie
@@ -67,6 +67,7 @@ public class GameSession extends Configurable{
         this.blockTime = new ConfigGetter<Long>(linkedGame).getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
     }
 
+    
     /**
      * permet de lancer une partie à partir d'une sauvegarde
      * @param saveGameFilePath
@@ -126,6 +127,7 @@ public class GameSession extends Configurable{
                     Platform.runLater(() -> toCallWhenGetCode.action(code,false) );
                 }
                 catch(Exception e){
+                    e.printStackTrace();
                     Platform.runLater(() -> {
                         // préviens d'une échec de recherche ou de création des joueurs
                         if(toCallOnFailure != null)
@@ -133,7 +135,7 @@ public class GameSession extends Configurable{
                     });
                 }
             }
-        };
+        }.start();
     }
 
     /**
@@ -238,7 +240,6 @@ public class GameSession extends Configurable{
         return map;
     }
 
-
     /**
      * lance une partie
      */
@@ -246,8 +247,10 @@ public class GameSession extends Configurable{
         this.gameSessionScene = new GameSessionScene(this);
         // ajout de la gestion des évenements clavier 
         this.gameSessionScene.getPage().setOnKeyPressed((keyData) -> this.manageKeyEvent(keyData) );
+
         // placement des joueurs sur la scène;
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
+
         this.maxWidth = configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
         this.linkedPlayer.setPosition(new Player.Position(30,30,this.maxWidth,configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
 
@@ -321,6 +324,21 @@ public class GameSession extends Configurable{
 
     public Game getLinkedGame(){
         return this.linkedGame;
+    }
+
+    /**
+     * @see fonction de test
+     * @return void
+     */
+    public void testFunction(){
+        new Thread(){
+            @Override 
+            public void run(){
+                while(true){
+                    System.out.println("Bonjour comment allez vous ?");
+                }
+            }
+        }.start();
     }
 
     @Override

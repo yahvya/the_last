@@ -9,11 +9,11 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import yahaya_rachelle.actor.Player;
+import yahaya_rachelle.communication.Message.MessageType;
 
 /**
  * gestion des communications de l'application
@@ -237,20 +237,6 @@ public abstract class Communicator {
 
         return code;
     }
-
-    /**
-     * représente les types de messages pouvant être envoyé et reçu
-     */
-    public static enum MessageType{
-        RECEIVE_COUNT_OF_PLAYERS_TO_ACCEPT, // réception du nombre de personnes à accepter
-        CONFIRM_CAN_RECEIVE_CONNEXIONS, // confirmation du fait de pouvoir recevoir des connexion
-        RECEIVE_IP_LIST, // réception de la list des ips auquels se connecter
-        CONFIRM_CONNECT_TO_OTHERS, // confirmation de connexion aux autres
-        RECEIVE_SIGNAL_TO_SHARE_PLAYER, // réception du signal d'envoi de son joueur aux autres
-        RECEIVE_PLAYER, // réception d'un joueur,
-        CONFIRM_RECEIVE_ALL_PLAYERS, // confirmation de réception de tous les joueurs,
-        START_GAME // début de partie
-    };
 
     /**
      * permet la gestion des messages reçuw

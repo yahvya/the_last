@@ -25,7 +25,7 @@ import yahaya_rachelle.game.Game;
  * représente un personnage du jeyx
  */
 public class Character extends Configurable implements Serializable{
-    // class image non serializable
+    
     transient private HashMap<Config.PlayerAction,ArrayList<Image> > actionsMap;
     
     private HashMap<Config.PlayerAction,ArrayList<byte[]> > serializableActionsMap;

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import yahaya_rachelle.actor.Player;
+import yahaya_rachelle.communication.Message.MessageType;
 import yahaya_rachelle.utils.GameCallback;
 
 /**
@@ -73,10 +74,8 @@ public class ClientManager extends Communicator{
     public void joinEntryPoint(String code,GameCallback toDoOnFailure,GameCallback toDoWhenGameStart){
         try{  
             // connexion du joueur à la partie du code donné
-            // this.server = new ServerSocket(Communicator.PORT);
-            // à retirer
+            this.server = new ServerSocket(Communicator.PORT);
             this.toDoWhenGameStart = toDoWhenGameStart;
-            this.server = new ServerSocket(0);
             this.linkWithServerSocket = new Socket(Communicator.readCode(code),Communicator.PORT);
             this.ip = Communicator.readCode(code);
             // ajout du serveur dans la liste de propagation
@@ -144,7 +143,6 @@ public class ClientManager extends Communicator{
 
         // envoi du message de confirmation au serveur pour la réception de connexion, à ce stade unique membre de la liste
         this.propagateMessage(new Message(MessageType.CONFIRM_CAN_RECEIVE_CONNEXIONS,this.ip) );
-
         return this;
     }
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import yahaya_rachelle.actor.Player;
+import yahaya_rachelle.communication.Message.MessageType;
 import yahaya_rachelle.utils.GameCallback;
 
 /**
@@ -63,7 +64,7 @@ public class ServerManager extends Communicator{
             this.server = new ServerSocket(Communicator.PORT); 
             this.toDoWhenAllJoin = toDoWhenAllJoin;  
 
-            // création et lancemnt du thread de gestion des sockets
+            // création et lancement du thread d'acceptation des joueurs
             new Thread(){
                 @Override
                 public void run(){
