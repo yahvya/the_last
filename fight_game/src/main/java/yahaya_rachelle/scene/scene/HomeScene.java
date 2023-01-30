@@ -3,6 +3,7 @@ package yahaya_rachelle.scene.scene;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
@@ -308,15 +309,19 @@ public class HomeScene extends GameScene{
             children.addAll(text,loadingCircle);
 
             GameCallback removeWaitingZone = () -> {
-                loadingAnimationTimeline.stop();
-                container.getChildren().remove(waitingBox);
+                Platform.runLater(() -> {
+                    loadingAnimationTimeline.stop();
+                    container.getChildren().remove(waitingBox);
+                });
             };
 
             GameCallback removeAndFailure = () -> {
-                loadingAnimationTimeline.stop();
-                container.getChildren().remove(waitingBox);
-                this.someActionIsPerforming = false;
-                this.showStartGameFailure();
+                Platform.runLater(() -> {
+                    loadingAnimationTimeline.stop();
+                    container.getChildren().remove(waitingBox);
+                    this.someActionIsPerforming = false;
+                    this.showStartGameFailure();
+                }); 
             };
 
             if(choiceData.getActionToDo() == Action.CREATE){

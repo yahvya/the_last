@@ -181,10 +181,12 @@ public abstract class Communicator {
 
         this.otherPlayersSocketOutput.forEach((socket,output) -> {
             try{
+                System.out.println("ip -> " + socket.getInetAddress().getLocalHost().getHostAddress());
                 // envoie du message
                 output.writeObject(message);
             }
             catch(Exception e){
+                e.printStackTrace();
                 // sauvegarde dans la liste des personnes à renotifier
                 retryList.add(output);
             }

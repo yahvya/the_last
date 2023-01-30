@@ -1,5 +1,6 @@
 package yahaya_rachelle.communication;
 
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -51,6 +52,8 @@ public class ClientManager extends Communicator{
             finalManager = (playerObject) -> {
                 Player player = (Player) playerObject;
 
+                System.out.println("pseudo du joueur recu -> " + player.getPseudo());
+
                 this.manageEntrantPlayer(player);
 
                 // appel de l'action prédéfini
@@ -76,8 +79,9 @@ public class ClientManager extends Communicator{
             // connexion du joueur à la partie du code donné
             this.server = new ServerSocket(Communicator.PORT);
             this.toDoWhenGameStart = toDoWhenGameStart;
-            this.linkWithServerSocket = new Socket(Communicator.readCode(code),Communicator.PORT);
-            this.ip = Communicator.readCode(code);
+            this.ip = InetAddress.getLocalHost().getHostAddress();
+            // this.linkWithServerSocket = new Socket(Communicator.readCode(code²),Communicator.PORT);
+            this.linkWithServerSocket = new Socket("192.168.101.182",Communicator.PORT);
             // ajout du serveur dans la liste de propagation
             this.addNewPlayerSocket(this.linkWithServerSocket);
             this.startListening();
@@ -102,13 +106,13 @@ public class ClientManager extends Communicator{
                     for(int playerCount = 0; playerCount < countOfPlayersToWait; playerCount++){
                         Socket playerSocket = server.accept();
 
-                        String playerIp = playerSocket.getLocalAddress().getHostAddress();
+                        String playerIp = playerSocket.getInetAddress().getHostAddress();
 
                         // on vérifie que le joueur n'est pas déjà demandé
                         boolean alreadyExist = false;
 
                         for(Socket p : otherPlayersSocket){
-                            if(p.getLocalAddress().getHostAddress() == playerIp){
+                            if(p.getInetAddress().getHostAddress() == playerIp){
                                 alreadyExist = true;
                                 break;
                             }

@@ -78,13 +78,13 @@ public class ServerManager extends Communicator{
                             // récupération du joueur
                             Socket playerSocket = server.accept();
 
-                            String playerIp = playerSocket.getLocalAddress().getHostAddress();
+                            String playerIp = playerSocket.getInetAddress().getHostAddress();
 
                             // on vérifie que le joueur n'est pas déjà dans la partie
                             boolean alreadyExist = false;
 
                             for(Socket p : otherPlayersSocket){
-                                if(p.getLocalAddress().getHostAddress() == playerIp){
+                                if(p.getInetAddress().getHostAddress() == playerIp){
                                     alreadyExist = true;
                                     break;
                                 }
@@ -149,10 +149,10 @@ public class ServerManager extends Communicator{
         this.otherPlayersSocketOutput.forEach((socket,outputObject) -> {
             ArrayList<String> othersIp = new ArrayList<String>();
 
-            // on récupère la liste des 
+            // on récupère la liste des  ip
             this.otherPlayersSocket.forEach(playerSocket -> {
                 if(playerSocket != socket)
-                    othersIp.add(socket.getLocalAddress().getHostAddress() );
+                    othersIp.add(socket.getInetAddress().getHostAddress() );
             });
 
             // envoi de la liste d'ip des autres
