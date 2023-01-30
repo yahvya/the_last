@@ -34,6 +34,7 @@ public class EntrantMessageThread extends Thread{
                 this.linkedCommunicator.manageEntrantMessage(message);
             }
             catch(Exception e){
+                e.printStackTrace();
                 break;
             }
         }

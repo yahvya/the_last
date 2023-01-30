@@ -42,10 +42,22 @@ public class ServerManager extends Communicator{
             if(this.removeOnList(ipListToReduceOnConfirmConnexion,(String) clientIp) == 0)
                 this.sendSharePlayersMessageToEach();
         });
+        // gestion de réception de confirmation (tous les joueurs reçu)
         internalManagedMessages.put(MessageType.CONFIRM_RECEIVE_ALL_PLAYERS,(clientIp) -> {
             // si la taille est à 0 alors tout le monde à confirmé avoir reçu les joueurs des autres
             if(this.removeOnList(ipListToReduceOnConfirmSharePlayers,(String) clientIp) == 0)
                 this.sendStartGameToEach();
+        });
+        // gestion de la réception d'un joueur
+        internalManagedMessages.put(MessageType.RECEIVE_PLAYER,(playerObject) -> {
+            Player player = (Player) playerObject;
+
+            player.getCharacter().rebuildActionsMapSerializable();
+
+            MessageManager toDo = this.messagesLinkedActionsMap.get(MessageType.RECEIVE_PLAYER);
+            
+            if(toDo != null)
+                toDo.manageMessage(playerObject);
         });
 
         return internalManagedMessages;
@@ -96,7 +108,8 @@ public class ServerManager extends Communicator{
                             }
 
                             // sauvegarde de l'ip dans les listes à réduire
-                            ipListToReduceOnReceiveConnexion.add(playerIp);
+                            // ipListToReduceOnReceiveConnexion.add(playerIp);
+                            ipListToReduceOnReceiveConnexion.add("192.168.101.182");
                             // sauvegarde du joueur et création de son objet de sortie
                             addNewPlayerSocket(playerSocket);
                             // appel de l'action à exécuter quand un joueur rejoins

@@ -64,7 +64,19 @@ public class GameSession extends Configurable{
         this.canDoSuperAttack = true;
         this.canMoveS = true;
         this.canDoAction = true;
-        this.blockTime = new ConfigGetter<Long>(linkedGame).getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
+
+        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
+
+        this.blockTime = configLongGetter.getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
+        this.gameSessionScene = new GameSessionScene(this);
+        // placement du joueur sur la scène;
+
+        this.maxWidth = configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
+        this.linkedPlayer.setPosition(new Player.Position(30,30,this.maxWidth,configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
+
+        this.gameSessionScene
+            .addPlayer(this.linkedPlayer)
+            .updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
     }
 
     
@@ -231,7 +243,7 @@ public class GameSession extends Configurable{
         // ajout du joueur entrant dans la page (temporaire)
         map.put(MessageType.RECEIVE_PLAYER,(playerObject) -> {
             Player player = (Player) playerObject;
-
+            
             this.gameSessionScene
                 .addPlayer((Player) player)
                 .updatePlayer(player,Config.PlayerAction.STATIC_POSITION,null);
@@ -244,19 +256,8 @@ public class GameSession extends Configurable{
      * lance une partie
      */
     private void startGame(){
-        this.gameSessionScene = new GameSessionScene(this);
         // ajout de la gestion des évenements clavier 
         this.gameSessionScene.getPage().setOnKeyPressed((keyData) -> this.manageKeyEvent(keyData) );
-
-        // placement des joueurs sur la scène;
-        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
-
-        this.maxWidth = configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
-        this.linkedPlayer.setPosition(new Player.Position(30,30,this.maxWidth,configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
-
-        this.gameSessionScene
-            .addPlayer(this.linkedPlayer)
-            .updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
 
         // affichage de la scène
         this.gameSessionScene.putSceneInWindow();
