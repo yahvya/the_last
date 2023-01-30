@@ -79,9 +79,9 @@ public class ClientManager extends Communicator{
             // connexion du joueur à la partie du code donné
             this.server = new ServerSocket(Communicator.PORT);
             this.toDoWhenGameStart = toDoWhenGameStart;
-            this.ip = InetAddress.getLocalHost().getHostAddress();
-            // this.linkWithServerSocket = new Socket(Communicator.readCode(code²),Communicator.PORT);
-            this.linkWithServerSocket = new Socket("192.168.101.182",Communicator.PORT);
+            // this.ip = InetAddress.getLocalHost().getHostAddress();
+            this.ip = "192.168.101.182";
+            this.linkWithServerSocket = new Socket(Communicator.readCode(code),Communicator.PORT);
             // ajout du serveur dans la liste de propagation
             this.addNewPlayerSocket(this.linkWithServerSocket);
             this.startListening();
