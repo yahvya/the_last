@@ -38,8 +38,8 @@ public class ClientManager extends Communicator{
         internalManagedMessages.put(MessageType.RECEIVE_IP_LIST,(ipList) -> connectToIpList((ArrayList<String>) ipList) );
         internalManagedMessages.put(MessageType.RECEIVE_SIGNAL_TO_SHARE_PLAYER,(nullData) -> shareMyPlayer() );
         internalManagedMessages.put(MessageType.START_GAME,(nullData) -> {
-            if(toDoWhenGameStart != null)
-                toDoWhenGameStart.action();
+            if(this.toDoWhenGameStart != null)
+                this.toDoWhenGameStart.action();
         });
 
         // on remplace le message de gestion d'arrivé de joueur prédéfini si elle existe
@@ -77,8 +77,8 @@ public class ClientManager extends Communicator{
     public void joinEntryPoint(String code,GameCallback toDoOnFailure,GameCallback toDoWhenGameStart){
         try{  
             // connexion du joueur à la partie du code donné
-            this.server = new ServerSocket(Communicator.PORT);
             this.toDoWhenGameStart = toDoWhenGameStart;
+            this.server = new ServerSocket(Communicator.PORT);
             // this.ip = InetAddress.getLocalHost().getHostAddress();
             this.ip = "192.168.101.182";
             this.linkWithServerSocket = new Socket(Communicator.readCode(code),Communicator.PORT);
