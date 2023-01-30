@@ -69,6 +69,7 @@ public class GameSession extends Configurable{
 
         this.blockTime = configLongGetter.getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
         this.gameSessionScene = new GameSessionScene(this);
+        this.gameSessionScene.buildBefore();
         // placement du joueur sur la scène;
 
         this.maxWidth = configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
@@ -139,7 +140,6 @@ public class GameSession extends Configurable{
                     Platform.runLater(() -> toCallWhenGetCode.action(code,false) );
                 }
                 catch(Exception e){
-                    e.printStackTrace();
                     Platform.runLater(() -> {
                         // préviens d'une échec de recherche ou de création des joueurs
                         if(toCallOnFailure != null)

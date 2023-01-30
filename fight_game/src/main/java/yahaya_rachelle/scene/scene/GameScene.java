@@ -41,6 +41,12 @@ public abstract class GameScene {
         this.putSceneInWindow(false);
     }
 
+    /**
+     * construit la scène sans l'afficher
+     */
+    public void buildBefore(){
+        this.page = this.buildPage();
+    }
     
     /**
      * 
