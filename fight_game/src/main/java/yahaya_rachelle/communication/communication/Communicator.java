@@ -1,4 +1,4 @@
-package yahaya_rachelle.communication;
+package yahaya_rachelle.communication.communication;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,7 +13,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import yahaya_rachelle.actor.Player;
-import yahaya_rachelle.communication.Message.MessageType;
+import yahaya_rachelle.communication.message.IpMessage;
+import yahaya_rachelle.communication.message.Message;
+import yahaya_rachelle.communication.message.Message.MessageType;
 
 /**
  * gestion des communications de l'application
@@ -29,11 +31,9 @@ public abstract class Communicator {
         {"6","s"},
         {"7","e"},
         {"8","z"},
-        {"9","#"},
+        {"9","%"},
         {"\\.","-"}
     };
-
-    protected static final int PORT = 6666; 
 
     protected ArrayList<Socket> otherPlayersSocket;
 
@@ -136,7 +136,7 @@ public abstract class Communicator {
         
         // gestion interne du message
         if(toDo != null){
-            toDo.manageMessage(receivedMessage.getMessageData() );
+            toDo.manageMessage(receivedMessage);
             return this;
         }
 
@@ -144,7 +144,7 @@ public abstract class Communicator {
 
         // gestion externe du message
         if(toDo != null)
-            toDo.manageMessage(receivedMessage.getMessageData() );
+            toDo.manageMessage(receivedMessage);
 
         return this;
     }
@@ -174,7 +174,7 @@ public abstract class Communicator {
      * @param message
      * @return this
      */
-    public Communicator propagateMessage(Message message){
+    synchronized public Communicator propagateMessage(Message message){
         System.out.println("message à envoyer -> type : " + message.getMessageType() + " - message : " + message.getMessageData() );
 
         ArrayList<ObjectOutputStream> retryList = new ArrayList<ObjectOutputStream>();
@@ -217,8 +217,8 @@ public abstract class Communicator {
      * @return le code
      * @throws UnknownHostException
      */
-    public static String generateCode() throws UnknownHostException{
-        String code =  InetAddress.getLocalHost().getHostAddress();
+    public String generateCode() throws UnknownHostException{
+        String code =  InetAddress.getLocalHost().getHostAddress() + "#" + Integer.toString(this.server.getLocalPort() );
 
         // remplacement de chaque caractère dans le code par l'équivalent dans le tableau de remplacement
         for(String[] replaceMapItem : Communicator.REPLACES_MAP)
@@ -230,20 +230,27 @@ public abstract class Communicator {
     /**
      * 
      * @param code
-     * @return le code remis sous forme d'ip
+     * @return une class IpMessage contenant le ip et le port
      */
-    public static String readCode(String code){
-        // remplacement de chaque caractère dans le code par l'équivalent dans le tableau de remplacement à l'inverse
-        for(String[] replaceMapItem : Communicator.REPLACES_MAP)
-            code = code.replaceAll(replaceMapItem[1],replaceMapItem[0]);
+    public static IpMessage readCode(String code){
+        try{
+            // remplacement de chaque caractère dans le code par l'équivalent dans le tableau de remplacement à l'inverse
+            for(String[] replaceMapItem : Communicator.REPLACES_MAP)
+                code = code.replaceAll(replaceMapItem[1],replaceMapItem[0]);
 
-        return code;
+            String[] datas = code.split("#");
+
+            return new IpMessage(datas[0],Integer.parseInt(datas[1]) );
+        }
+        catch(Exception e){
+            return new IpMessage();
+        }
     }
 
     /**
      * permet la gestion des messages reçuw
      */
     public interface MessageManager{
-        public void manageMessage(Object messageData);
+        public void manageMessage(Message messageData);
     }
 }

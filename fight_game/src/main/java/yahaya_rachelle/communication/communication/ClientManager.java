@@ -1,4 +1,4 @@
-package yahaya_rachelle.communication;
+package yahaya_rachelle.communication.communication;
 
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import yahaya_rachelle.actor.Player;
-import yahaya_rachelle.communication.Message.MessageType;
+import yahaya_rachelle.communication.message.IpMessage;
+import yahaya_rachelle.communication.message.Message;
+import yahaya_rachelle.communication.message.Message.MessageType;
 import yahaya_rachelle.utils.GameCallback;
 
 /**
@@ -34,8 +36,8 @@ public class ClientManager extends Communicator{
         HashMap<MessageType,MessageManager> internalManagedMessages = new HashMap<MessageType,MessageManager>();
 
         // gestion de la réception du message (nombre de joueurs à accepté en tant que serveur)
-        internalManagedMessages.put(MessageType.RECEIVE_COUNT_OF_PLAYERS_TO_ACCEPT,(countOfPlayersToWait) -> startServerAccept((int)countOfPlayersToWait) );
-        internalManagedMessages.put(MessageType.RECEIVE_IP_LIST,(ipList) -> connectToIpList((ArrayList<String>) ipList) );
+        internalManagedMessages.put(MessageType.RECEIVE_COUNT_OF_PLAYERS_TO_ACCEPT,(countOfPlayersToWaitMessage) -> startServerAccept((int)countOfPlayersToWaitMessage.getMessageData() ) );
+        internalManagedMessages.put(MessageType.RECEIVE_IP_LIST,(serversListMessage) -> connectToIpList((ArrayList<IpMessage>) serversListMessage.getMessageData() ) );
         internalManagedMessages.put(MessageType.RECEIVE_SIGNAL_TO_SHARE_PLAYER,(nullData) -> shareMyPlayer() );
         internalManagedMessages.put(MessageType.START_GAME,(nullData) -> {
             if(this.toDoWhenGameStart != null)
@@ -49,18 +51,18 @@ public class ClientManager extends Communicator{
 
         // alors une action avait été défini pour cet évenement
         if(defaultManager != null){
-            finalManager = (playerObject) -> {
-                Player player = (Player) playerObject;
+            finalManager = (playerMessage) -> {
+                Player player = (Player) playerMessage.getMessageData();
 
                 System.out.println("pseudo du joueur recu -> " + player.getPseudo());
 
                 this.manageEntrantPlayer(player);
 
                 // appel de l'action prédéfini
-                defaultManager.manageMessage(player);
+                defaultManager.manageMessage(playerMessage);
             };
         }
-        else finalManager = (player) -> this.manageEntrantPlayer((Player) player);
+        else finalManager = (playerMessage) -> this.manageEntrantPlayer((Player) playerMessage.getMessageData() );
 
         internalManagedMessages.put(MessageType.RECEIVE_PLAYER,finalManager);
 
@@ -76,12 +78,16 @@ public class ClientManager extends Communicator{
      */
     public void joinEntryPoint(String code,GameCallback toDoOnFailure,GameCallback toDoWhenGameStart){
         try{  
+            IpMessage serverSocketData = Communicator.readCode(code);
+
+            if(!serverSocketData.getIsDefined() )
+                throw new Exception();
+
             // connexion du joueur à la partie du code donné
             this.toDoWhenGameStart = toDoWhenGameStart;
-            this.server = new ServerSocket(Communicator.PORT);
-            // this.ip = InetAddress.getLocalHost().getHostAddress();
-            this.ip = "192.168.101.182";
-            this.linkWithServerSocket = new Socket(Communicator.readCode(code),Communicator.PORT);
+            this.server = new ServerSocket(0);
+            this.linkWithServerSocket = new Socket(serverSocketData.getIp(),serverSocketData.getPort() );
+            this.ip = this.linkWithServerSocket.getInetAddress().getHostAddress();
             // ajout du serveur dans la liste de propagation
             this.addNewPlayerSocket(this.linkWithServerSocket);
             this.startListening();
@@ -109,19 +115,19 @@ public class ClientManager extends Communicator{
                         String playerIp = playerSocket.getInetAddress().getHostAddress();
 
                         // on vérifie que le joueur n'est pas déjà demandé
-                        boolean alreadyExist = false;
+                        // boolean alreadyExist = false;
 
-                        for(Socket p : otherPlayersSocket){
-                            if(p.getInetAddress().getHostAddress() == playerIp){
-                                alreadyExist = true;
-                                break;
-                            }
-                        }
+                        // for(Socket p : otherPlayersSocket){
+                        //     if(p.getInetAddress().getHostAddress() == playerIp){
+                        //         alreadyExist = true;
+                        //         break;
+                        //     }
+                        // }
 
-                        if(alreadyExist){
-                            playerCount--;
-                            continue;
-                        }
+                        // if(alreadyExist){
+                        //     playerCount--;
+                        //     continue;
+                        // }
 
                         // enregistrement du joueur et on ajoute son thread de lecture
                         addNewPlayerSocket(playerSocket).startListening();
@@ -146,7 +152,7 @@ public class ClientManager extends Communicator{
         }.start();
 
         // envoi du message de confirmation au serveur pour la réception de connexion, à ce stade unique membre de la liste
-        this.propagateMessage(new Message(MessageType.CONFIRM_CAN_RECEIVE_CONNEXIONS,this.ip) );
+        this.propagateMessage(new Message(MessageType.CONFIRM_CAN_RECEIVE_CONNEXIONS,new IpMessage(this.ip,this.server.getLocalPort() ) ) );
         return this;
     }
 
@@ -155,11 +161,15 @@ public class ClientManager extends Communicator{
      * @param ipList
      * @return this
      */
-    private ClientManager connectToIpList(ArrayList<String> ipList){
-        ipList.forEach(ip -> {
+    private ClientManager connectToIpList(ArrayList<IpMessage> serverSocketDatas){
+
+        serverSocketDatas.forEach(socketData -> {
             try{
+                if(!socketData.getIsDefined() )
+                    throw new Exception();
+
                 // connexion à l'ip et sauvegarde de la socket
-                this.addNewPlayerSocket(new Socket(ip,Communicator.PORT) );
+                this.addNewPlayerSocket(new Socket(socketData.getIp(),socketData.getPort() ) );
             }
             catch(Exception e){
                 this.exitSession();

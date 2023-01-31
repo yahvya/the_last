@@ -1,1 +1,2 @@
 gérer le cas ou il y a une erreur chez l'un
+re activer les commentaires pour gérer le cas où un joueur est déjà connecté

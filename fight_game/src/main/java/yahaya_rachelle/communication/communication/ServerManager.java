@@ -1,4 +1,4 @@
-package yahaya_rachelle.communication;
+package yahaya_rachelle.communication.communication;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import yahaya_rachelle.actor.Player;
-import yahaya_rachelle.communication.Message.MessageType;
+import yahaya_rachelle.communication.message.IpMessage;
+import yahaya_rachelle.communication.message.Message;
+import yahaya_rachelle.communication.message.Message.MessageType;
 import yahaya_rachelle.utils.GameCallback;
 
 /**
@@ -19,11 +21,14 @@ public class ServerManager extends Communicator{
     private ArrayList<String> ipListToReduceOnConfirmConnexion;
     private ArrayList<String> ipListToReduceOnConfirmSharePlayers;
 
+    private HashMap<Socket,Integer> clientsServerSocketPortMap;
+
     private GameCallback toDoWhenAllJoin;
 
     public ServerManager(HashMap<MessageType, MessageManager> messagesLinkedActionsMap,int countOfPlayersToWait,Player internalPlayer) {
         super(messagesLinkedActionsMap,internalPlayer);
         this.countOfPlayersToWait = countOfPlayersToWait;
+        this.clientsServerSocketPortMap = new HashMap<Socket,Integer>();
     }
 
     @Override
@@ -31,33 +36,37 @@ public class ServerManager extends Communicator{
         HashMap<MessageType,MessageManager> internalManagedMessages = new HashMap<MessageType,MessageManager>();
 
         // gestion de la réception du message indiquant la possibilité de recevoir des connexions
-        internalManagedMessages.put(MessageType.CONFIRM_CAN_RECEIVE_CONNEXIONS,(clientIp) -> {
+        internalManagedMessages.put(MessageType.CONFIRM_CAN_RECEIVE_CONNEXIONS,(clientSocketDataMessage) -> {
+            IpMessage socketData = (IpMessage) clientSocketDataMessage.getMessageData();
+
+            this.clientsServerSocketPortMap.put(clientSocketDataMessage.getSource(),socketData.getPort() );
+
             // si la taille est à 0 alors tout le monde à confirmé pouvoir recevoir les connexions
-            if(this.removeOnList(ipListToReduceOnReceiveConnexion,(String) clientIp) == 0)
-                this.shareOthersIpToEach();
+            if(this.removeOnList(ipListToReduceOnReceiveConnexion,socketData.getIp() ) == 0)
+                this.shareOthersSocketDataToEach();
         });
         // gestion de la réception du message indiquant la connexion aux autres
-        internalManagedMessages.put(MessageType.CONFIRM_CONNECT_TO_OTHERS,(clientIp) -> {
+        internalManagedMessages.put(MessageType.CONFIRM_CONNECT_TO_OTHERS,(clientIpMessage) -> {
             // si la taille est à 0 alors tout le monde à confirmé s'être connecté aux autres
-            if(this.removeOnList(ipListToReduceOnConfirmConnexion,(String) clientIp) == 0)
+            if(this.removeOnList(ipListToReduceOnConfirmConnexion,(String) clientIpMessage.getMessageData() ) == 0)
                 this.sendSharePlayersMessageToEach();
         });
         // gestion de réception de confirmation (tous les joueurs reçu)
-        internalManagedMessages.put(MessageType.CONFIRM_RECEIVE_ALL_PLAYERS,(clientIp) -> {
+        internalManagedMessages.put(MessageType.CONFIRM_RECEIVE_ALL_PLAYERS,(clientIpMessage) -> {
             // si la taille est à 0 alors tout le monde à confirmé avoir reçu les joueurs des autres
-            if(this.removeOnList(ipListToReduceOnConfirmSharePlayers,(String) clientIp) == 0)
+            if(this.removeOnList(ipListToReduceOnConfirmSharePlayers,(String) clientIpMessage.getMessageData() ) == 0)
                 this.sendStartGameToEach();
         });
         // gestion de la réception d'un joueur
-        internalManagedMessages.put(MessageType.RECEIVE_PLAYER,(playerObject) -> {
-            Player player = (Player) playerObject;
+        internalManagedMessages.put(MessageType.RECEIVE_PLAYER,(playerMessage) -> {
+            Player player = (Player) playerMessage.getMessageData();
 
             player.getCharacter().rebuildActionsMapSerializable();
 
             MessageManager toDo = this.messagesLinkedActionsMap.get(MessageType.RECEIVE_PLAYER);
             
             if(toDo != null)
-                toDo.manageMessage(playerObject);
+                toDo.manageMessage(playerMessage);
         });
 
         return internalManagedMessages;
@@ -73,7 +82,7 @@ public class ServerManager extends Communicator{
      */
     public ServerManager createEntryPoint(GameCallback toDoOnJoin,GameCallback toDoOnFailure,GameCallback toDoWhenAllJoin){
         try{
-            this.server = new ServerSocket(Communicator.PORT); 
+            this.server = new ServerSocket(0); 
             this.toDoWhenAllJoin = toDoWhenAllJoin;  
 
             // création et lancement du thread d'acceptation des joueurs
@@ -93,23 +102,22 @@ public class ServerManager extends Communicator{
                             String playerIp = playerSocket.getInetAddress().getHostAddress();
 
                             // on vérifie que le joueur n'est pas déjà dans la partie
-                            boolean alreadyExist = false;
+                            // boolean alreadyExist = false;
 
-                            for(Socket p : otherPlayersSocket){
-                                if(p.getInetAddress().getHostAddress() == playerIp){
-                                    alreadyExist = true;
-                                    break;
-                                }
-                            }
+                            // for(Socket p : otherPlayersSocket){
+                            //     if(p.getInetAddress().getHostAddress() == playerIp){
+                            //         alreadyExist = true;
+                            //         break;
+                            //     }
+                            // }
 
-                            if(alreadyExist){
-                                playerCount--;
-                                continue;
-                            }
+                            // if(alreadyExist){
+                            //     playerCount--;
+                            //     continue;
+                            // }
 
                             // sauvegarde de l'ip dans les listes à réduire
-                            // ipListToReduceOnReceiveConnexion.add(playerIp);
-                            ipListToReduceOnReceiveConnexion.add("192.168.101.182");
+                            ipListToReduceOnReceiveConnexion.add(playerIp);
                             // sauvegarde du joueur et création de son objet de sortie
                             addNewPlayerSocket(playerSocket);
                             // appel de l'action à exécuter quand un joueur rejoins
@@ -158,19 +166,19 @@ public class ServerManager extends Communicator{
      * partage la liste des ip de chaque participant aux autres
      * @return this
      */
-    private ServerManager shareOthersIpToEach(){
+    private ServerManager shareOthersSocketDataToEach(){
         this.otherPlayersSocketOutput.forEach((socket,outputObject) -> {
-            ArrayList<String> othersIp = new ArrayList<String>();
+            ArrayList<IpMessage> othersSocketData = new ArrayList<IpMessage>();
 
             // on récupère la liste des  ip
-            this.otherPlayersSocket.forEach(playerSocket -> {
-                if(playerSocket != socket)
-                    othersIp.add(socket.getInetAddress().getHostAddress() );
+            this.clientsServerSocketPortMap.forEach((clientSocket,port) -> {
+                if(clientSocket != socket)
+                    othersSocketData.add(new IpMessage(socket.getInetAddress().getHostAddress(),port) );
             });
 
             // envoi de la liste d'ip des autres
             try{
-                outputObject.writeObject(new Message(MessageType.RECEIVE_IP_LIST,othersIp) );
+                outputObject.writeObject(new Message(MessageType.RECEIVE_IP_LIST,othersSocketData) );
             }
             catch(Exception e){
                 // on déconnecte ce joueur de la session

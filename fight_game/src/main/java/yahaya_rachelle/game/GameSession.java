@@ -23,11 +23,11 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Duration;
 import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
-import yahaya_rachelle.communication.ClientManager;
-import yahaya_rachelle.communication.Communicator;
-import yahaya_rachelle.communication.ServerManager;
-import yahaya_rachelle.communication.Communicator.MessageManager;
-import yahaya_rachelle.communication.Message.MessageType;
+import yahaya_rachelle.communication.communication.ClientManager;
+import yahaya_rachelle.communication.communication.Communicator;
+import yahaya_rachelle.communication.communication.ServerManager;
+import yahaya_rachelle.communication.communication.Communicator.MessageManager;
+import yahaya_rachelle.communication.message.Message.MessageType;
 
 /**
  * représente une partie
@@ -104,8 +104,6 @@ public class GameSession extends Configurable{
             @Override
             public void run(){
                 try{
-                    String code = Communicator.generateCode();
-
                     ServerManager serverCommunicator = new ServerManager(createActionsMap(),countOfParticipants,linkedPlayer);
 
                     IntegerHelper valueObject = new IntegerHelper();
@@ -136,6 +134,8 @@ public class GameSession extends Configurable{
                     );
 
                     communicator = serverCommunicator;
+
+                    String code = serverCommunicator.generateCode();
 
                     Platform.runLater(() -> toCallWhenGetCode.action(code,false) );
                 }
@@ -241,8 +241,8 @@ public class GameSession extends Configurable{
         HashMap<MessageType,MessageManager> map = new HashMap<MessageType,MessageManager>();
 
         // ajout du joueur entrant dans la page (temporaire)
-        map.put(MessageType.RECEIVE_PLAYER,(playerObject) -> {
-            Player player = (Player) playerObject;
+        map.put(MessageType.RECEIVE_PLAYER,(playerMessage) -> {
+            Player player = (Player) playerMessage.getMessageData();
             
             this.gameSessionScene
                 .addPlayer((Player) player)

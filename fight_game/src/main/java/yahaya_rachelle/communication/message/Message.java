@@ -1,4 +1,4 @@
-package yahaya_rachelle.communication;
+package yahaya_rachelle.communication.message;
 
 import java.io.Serializable;
 import java.net.Socket;

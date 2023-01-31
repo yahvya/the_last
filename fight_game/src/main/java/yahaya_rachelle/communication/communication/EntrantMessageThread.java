@@ -1,7 +1,9 @@
-package yahaya_rachelle.communication;
+package yahaya_rachelle.communication.communication;
 
 import java.io.ObjectInputStream;
 import java.net.Socket;
+
+import yahaya_rachelle.communication.message.Message;
 
 /**
  * gère la lecture des messages entrants
