@@ -187,7 +187,7 @@ public class GameSessionScene extends GameScene{
 
             // mise à jour des dimensions des anchor pane
             for(AnchorPane p : new AnchorPane[]{lifeBar,redBar,this.toReduce} )
-                p.setPrefSize(PlayerManager.LIFEBAR_WIDTH, 30);
+                p.setPrefSize(PlayerManager.LIFEBAR_WIDTH, 20);
 
             lifeBar.getChildren().addAll(redBar,this.toReduce);
 

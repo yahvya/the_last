@@ -109,6 +109,9 @@ public class ClientManager extends Communicator{
             @Override
             public void run(){
                 try{
+                    // envoi du message de confirmation au serveur pour la réception de connexion, à ce stade unique membre de la liste
+                    propagateMessage(new Message(MessageType.CONFIRM_CAN_RECEIVE_CONNEXIONS,new IpMessage(ip,server.getLocalPort() ) ) );
+        
                     for(int playerCount = 0; playerCount < countOfPlayersToWait; playerCount++){
                         Socket playerSocket = server.accept();
 
@@ -131,8 +134,6 @@ public class ClientManager extends Communicator{
 
                         // enregistrement du joueur et on ajoute son thread de lecture
                         addNewPlayerSocket(playerSocket).startListening();
-
-                        System.out.println("nouveau lien");
                     }
 
                     try{
@@ -151,8 +152,6 @@ public class ClientManager extends Communicator{
             }
         }.start();
 
-        // envoi du message de confirmation au serveur pour la réception de connexion, à ce stade unique membre de la liste
-        this.propagateMessage(new Message(MessageType.CONFIRM_CAN_RECEIVE_CONNEXIONS,new IpMessage(this.ip,this.server.getLocalPort() ) ) );
         return this;
     }
 

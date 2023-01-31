@@ -52,6 +52,7 @@ public class Message implements Serializable{
         RECEIVE_SIGNAL_TO_SHARE_PLAYER, // réception du signal d'envoi de son joueur aux autres
         RECEIVE_PLAYER, // réception d'un joueur,
         CONFIRM_RECEIVE_ALL_PLAYERS, // confirmation de réception de tous les joueurs,
-        START_GAME // début de partie
+        START_GAME, // début de partie,
+        RECEIVE_PLAYER_ACTION // réceptioj d'une action d'un joueur
     };
 }

@@ -10,6 +10,7 @@ import yahaya_rachelle.utils.GameContainerCallback;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
@@ -27,6 +28,7 @@ import yahaya_rachelle.communication.communication.ClientManager;
 import yahaya_rachelle.communication.communication.Communicator;
 import yahaya_rachelle.communication.communication.ServerManager;
 import yahaya_rachelle.communication.communication.Communicator.MessageManager;
+import yahaya_rachelle.communication.message.Message;
 import yahaya_rachelle.communication.message.Message.MessageType;
 
 /**
@@ -57,6 +59,8 @@ public class GameSession extends Configurable{
 
     private Communicator communicator;
 
+    private HashMap<Socket,Player> otherPlayersMap;
+
     public GameSession(Game linkedGame,Character character,String pseudo,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.linkedGame = linkedGame;
         this.toCallOnEnd = toCallOnEnd;
@@ -64,6 +68,7 @@ public class GameSession extends Configurable{
         this.canDoSuperAttack = true;
         this.canMoveS = true;
         this.canDoAction = true;
+        this.otherPlayersMap = new HashMap<Socket,Player>();
 
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
 
@@ -243,10 +248,22 @@ public class GameSession extends Configurable{
         // ajout du joueur entrant dans la page (temporaire)
         map.put(MessageType.RECEIVE_PLAYER,(playerMessage) -> {
             Player player = (Player) playerMessage.getMessageData();
+
+            this.otherPlayersMap.put(playerMessage.getSource(),player);
             
             this.gameSessionScene
-                .addPlayer((Player) player)
+                .addPlayer(player)
                 .updatePlayer(player,Config.PlayerAction.STATIC_POSITION,null);
+        });
+        // test
+        map.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> {
+            Player player = this.otherPlayersMap.get(actionMessage.getSource() );
+
+            player.getPosition().moveOnCurrentDirection(GameSession.X_SPEED);
+
+            this.gameSessionScene.updatePlayer(player,PlayerAction.RUN,() -> {
+                this.gameSessionScene.updatePlayer(player,PlayerAction.STATIC_POSITION,null);
+            });
         });
 
         return map;
@@ -296,6 +313,8 @@ public class GameSession extends Configurable{
                     this.doAfterBlockTime(() -> this.canMoveS = true);
                 },this.canMoveS,this.linkedPlayer)
             .madeActionIf(code,KeyCode.RIGHT,PlayerAction.RUN,toDoAfter,() -> {
+                communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,null) );
+
                 this.linkedPlayer.getPosition()
                     .setCurrentDirection(Player.Position.Direction.RIGHT)
                     .moveOnCurrentDirection(GameSession.X_SPEED);
