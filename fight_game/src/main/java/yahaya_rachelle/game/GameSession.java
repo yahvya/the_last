@@ -29,6 +29,7 @@ import yahaya_rachelle.communication.communication.Communicator;
 import yahaya_rachelle.communication.communication.ServerManager;
 import yahaya_rachelle.communication.communication.Communicator.MessageManager;
 import yahaya_rachelle.communication.message.Message;
+import yahaya_rachelle.communication.message.PlayerActionMessage;
 import yahaya_rachelle.communication.message.Message.MessageType;
 
 /**
@@ -49,10 +50,6 @@ public class GameSession extends Configurable{
 
     private Player linkedPlayer;
 
-    private boolean canDoSuperAttack;
-    private boolean canMoveS;
-    private boolean canDoAction;
-
     private double maxWidth;
 
     private int blockTime;
@@ -65,9 +62,6 @@ public class GameSession extends Configurable{
         this.linkedGame = linkedGame;
         this.toCallOnEnd = toCallOnEnd;
         this.linkedPlayer = new Player(character,pseudo,this);
-        this.canDoSuperAttack = true;
-        this.canMoveS = true;
-        this.canDoAction = true;
         this.otherPlayersMap = new HashMap<Socket,Player>();
 
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
@@ -208,13 +202,17 @@ public class GameSession extends Configurable{
      * lance l'exécution d'unae action
      * @return this
      */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck,Player player){
+   synchronized public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck,Player player,boolean fromMessage){
         // aucune action n'est possible durant le saut
-        if(!this.canDoAction)
+        if(!player.getCanDoAction() )
             return this;
 
         if(code.compareTo(toCheck) == 0 && conditionToCheck)
         {
+            // envoi de l'action aux autres participants si l'exécution ne provient pas d'un message
+            if(!fromMessage)
+                this.communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,new PlayerActionMessage(code, action) ) );
+                
             if(toDoBeforeIfMatch != null)
                 toDoBeforeIfMatch.action();
 
@@ -227,15 +225,15 @@ public class GameSession extends Configurable{
     /*
      * alias
      */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,Player player){
-        return this.madeActionIf(code,toCheck,action,toDoAfter,null,true,player);
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,Player player,boolean fromMessage){
+        return this.madeActionIf(code,toCheck,action,toDoAfter,null,true,player,fromMessage);
     }
 
      /*
      * alias
      */
-    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,Player player){
-        return this.madeActionIf(code,toCheck,action,toDoAfter,toDoBeforeIfMatch,true,player);
+    public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,Player player,boolean fromMessage){
+        return this.madeActionIf(code,toCheck,action,toDoAfter,toDoBeforeIfMatch,true,player,fromMessage);
     }
 
     /**
@@ -245,7 +243,7 @@ public class GameSession extends Configurable{
     private HashMap<MessageType,MessageManager> createActionsMap(){
         HashMap<MessageType,MessageManager> map = new HashMap<MessageType,MessageManager>();
 
-        // ajout du joueur entrant dans la page (temporaire)
+        // ajout du joueur entrant dans la page
         map.put(MessageType.RECEIVE_PLAYER,(playerMessage) -> {
             Player player = (Player) playerMessage.getMessageData();
 
@@ -255,16 +253,8 @@ public class GameSession extends Configurable{
                 .addPlayer(player)
                 .updatePlayer(player,Config.PlayerAction.STATIC_POSITION,null);
         });
-        // test
-        map.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> {
-            Player player = this.otherPlayersMap.get(actionMessage.getSource() );
-
-            player.getPosition().moveOnCurrentDirection(GameSession.X_SPEED);
-
-            this.gameSessionScene.updatePlayer(player,PlayerAction.RUN,() -> {
-                this.gameSessionScene.updatePlayer(player,PlayerAction.STATIC_POSITION,null);
-            });
-        });
+        // gestion d'une action utilisateur dans la page
+        map.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> this.managePlayerEntrantAction(actionMessage) );
 
         return map;
     }
@@ -274,7 +264,7 @@ public class GameSession extends Configurable{
      */
     private void startGame(){
         // ajout de la gestion des évenements clavier 
-        this.gameSessionScene.getPage().setOnKeyPressed((keyData) -> this.manageKeyEvent(keyData) );
+        this.gameSessionScene.getPage().setOnKeyPressed((keyData) -> this.manageKeyEvent(keyData.getCode(),this.linkedPlayer,false) );
 
         // affichage de la scène
         this.gameSessionScene.putSceneInWindow();
@@ -283,47 +273,67 @@ public class GameSession extends Configurable{
     /**
      * gère les événements du clavier
      */
-    private void manageKeyEvent(KeyEvent keyData){
-        KeyCode code = keyData.getCode();
-
-        GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
+    private void manageKeyEvent(KeyCode code,Player player,boolean fromMessage){
+        GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayer(player,Config.PlayerAction.STATIC_POSITION,null);
 
         this
-            .madeActionIf(code,KeyCode.F,PlayerAction.ATTACK,toDoAfter,this.linkedPlayer)
+            .madeActionIf(code,KeyCode.F,PlayerAction.ATTACK,toDoAfter,player,fromMessage)
             .madeActionIf(code,KeyCode.D,PlayerAction.SUPER_ATTACK,toDoAfter,() -> {
                 // on bloque la super attaque pendant x temps
-                this.canDoSuperAttack = false;
+                player.setCanDoSuperAttack(false);
 
-                this.doAfterBlockTime(() -> this.canDoSuperAttack = true);
+                this.doAfterBlockTime(() -> player.setCanDoSuperAttack(true) );
 
-            },this.canDoSuperAttack,this.linkedPlayer)
+            },player.getCanDoSuperAttack(),player,fromMessage)
             .madeActionIf(code,KeyCode.SPACE,PlayerAction.JUMP,() -> {
                 // à la fin de la séquence de saut, on lance la séquence de descente
-                this.gameSessionScene.updatePlayer(this.linkedPlayer,Config.PlayerAction.FALL,() -> {
+                this.gameSessionScene.updatePlayer(player,Config.PlayerAction.FALL,() -> {
                     // quand la déscente est terminé on débloque les autres actions
-                    this.canDoAction = true;
-                    this.linkedPlayer.getPosition().moveOnCurrentDirection(GameSession.JUMP_X_SPEED);
+                    player.setCanDoAction(true);
+                    player.getPosition().moveOnCurrentDirection(GameSession.JUMP_X_SPEED);
                     toDoAfter.action();
                 });
-            },() -> this.canDoAction = false,this.linkedPlayer)
+            },() -> player.setCanDoAction(false),player,fromMessage)
             .madeActionIf(code,KeyCode.M,PlayerAction.STATIC_POSITION,null,() -> {
-                    // on bloque l'action pendant un certains pour la re activer
-                    this.linkedPlayer.getPosition().moveOnCurrentDirection(this.maxWidth);
-                    this.canMoveS = false;
-                    this.doAfterBlockTime(() -> this.canMoveS = true);
-                },this.canMoveS,this.linkedPlayer)
+                // on bloque l'action pendant un certains pour la re activer
+                player.getPosition().moveOnCurrentDirection(this.maxWidth);
+                player.setCanMoveS(false);
+                this.doAfterBlockTime(() -> player.setCanMoveS(true) );
+            },player.getCanMoveS(),player,fromMessage)
             .madeActionIf(code,KeyCode.RIGHT,PlayerAction.RUN,toDoAfter,() -> {
-                communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,null) );
-
-                this.linkedPlayer.getPosition()
+                player.getPosition()
                     .setCurrentDirection(Player.Position.Direction.RIGHT)
                     .moveOnCurrentDirection(GameSession.X_SPEED);
-            },this.linkedPlayer)  
+            },player,fromMessage)  
             .madeActionIf(code,KeyCode.LEFT,PlayerAction.RUN,toDoAfter,() -> {                
-                this.linkedPlayer.getPosition()
+                player.getPosition()
                     .setCurrentDirection(Player.Position.Direction.LEFT)
                     .moveOnCurrentDirection(GameSession.X_SPEED);
-            },this.linkedPlayer);
+            },player,fromMessage);
+    }
+
+    /**
+     * gère une action reçu d'un joueur
+     * @param actionMessage
+     */
+    synchronized private void managePlayerEntrantAction(Message actionMessage){
+        PlayerActionMessage messageData = (PlayerActionMessage) actionMessage.getMessageData();
+
+        Player player = this.otherPlayersMap.get(actionMessage.getSource() );
+
+        switch(messageData.getAction() ){
+            case ATTACK:
+                
+            ; break;
+
+            case SUPER_ATTACK:
+            
+            ; break;
+
+            default:;
+        }
+
+        this.manageKeyEvent(messageData.getCode(),player,true);
     }
 
     /**
@@ -344,21 +354,6 @@ public class GameSession extends Configurable{
 
     public Game getLinkedGame(){
         return this.linkedGame;
-    }
-
-    /**
-     * @see fonction de test
-     * @return void
-     */
-    public void testFunction(){
-        new Thread(){
-            @Override 
-            public void run(){
-                while(true){
-                    System.out.println("Bonjour comment allez vous ?");
-                }
-            }
-        }.start();
     }
 
     @Override

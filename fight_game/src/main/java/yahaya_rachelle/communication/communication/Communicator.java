@@ -181,7 +181,6 @@ public abstract class Communicator {
 
         this.otherPlayersSocketOutput.forEach((socket,output) -> {
             try{
-                System.out.println("ip -> " + socket.getInetAddress().getLocalHost().getHostAddress());
                 // envoie du message
                 output.writeObject(message);
             }

@@ -25,10 +25,17 @@ public class Player extends Configurable implements Serializable{
     private double height;
     private double currentLife;
 
+    private boolean canDoSuperAttack;
+    private boolean canDoAction;
+    private boolean canMoveS;
+
     public Player(Character character,String pseudo,GameSession linkedGameSession) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.setConfig();
         this.character = character;
         this.pseudo = pseudo;
+        this.canDoSuperAttack = true;
+        this.canDoAction = true;
+        this.canMoveS = true;
         
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this);
 
@@ -38,30 +45,6 @@ public class Player extends Configurable implements Serializable{
         configLongGetter = new ConfigGetter<Long>(linkedGameSession.getLinkedGame() );
 
         this.currentLife = configLongGetter.getValueOf(Config.App.PLAYERS_LIFE.key).doubleValue();
-    }
-
-    /**
-     * définis la position du joueur, doit être appellé avant un getPosition
-     * @param position
-     */
-    public void setPosition(Position position){
-        this.position = position;
-        this.position
-            .setLinkedElementHeight(this.height)
-            .setLinkedElementWidth(this.width)
-            .updateAll();
-    }
-
-    public Position getPosition(){
-        return this.position;
-    }
-
-    public Character getCharacter() {
-        return this.character;
-    }
-
-    public String getPseudo() {
-        return this.pseudo;
     }
 
     /**
@@ -94,6 +77,36 @@ public class Player extends Configurable implements Serializable{
         return this.currentLife <= 0;
     }
 
+    /**
+     * définis la position du joueur, doit être appellé avant un getPosition
+     * @param position
+     */
+    public void setPosition(Position position){
+        this.position = position;
+        this.position
+            .setLinkedElementHeight(this.height)
+            .setLinkedElementWidth(this.width)
+            .updateAll();
+    }
+
+    public Player setCanDoAction(boolean canDoAction){
+        this.canDoAction = canDoAction;
+
+        return this;
+    }
+
+    public Player setCanDoSuperAttack(boolean canDoSuperAttack){
+        this.canDoSuperAttack = canDoSuperAttack;
+        
+        return this;
+    }
+
+    public Player setCanMoveS(boolean canMoveS){
+        this.canMoveS = canMoveS;
+        
+        return this;
+    }
+
     public Position getposition() {
         return this.position;
     }
@@ -108,6 +121,30 @@ public class Player extends Configurable implements Serializable{
 
     public double getCurrentLife(){
         return this.currentLife;
+    }
+
+    public Position getPosition(){
+        return this.position;
+    }
+
+    public Character getCharacter() {
+        return this.character;
+    }
+
+    public String getPseudo() {
+        return this.pseudo;
+    }
+
+    synchronized public boolean getCanDoSuperAttack(){
+        return this.canDoSuperAttack;
+    }
+
+    synchronized public boolean getCanDoAction(){
+        return this.canDoAction;
+    }
+
+   synchronized public boolean getCanMoveS(){
+        return this.canMoveS;
     }
 
     @Override
@@ -133,7 +170,7 @@ public class Player extends Configurable implements Serializable{
             this.containerHeight = containerHeight;       
             this.currentX = currentX;
             this.currentY = currentY;  
-            this.currentDirection = Direction.RIGHT;   
+            this.currentDirection = Direction.RIGHT;
         }
 
         /**

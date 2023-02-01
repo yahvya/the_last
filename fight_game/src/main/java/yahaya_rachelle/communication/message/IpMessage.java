@@ -2,6 +2,9 @@ package yahaya_rachelle.communication.message;
 
 import java.io.Serializable;
 
+/**
+ * représente un ip et un port
+ */
 public class IpMessage implements Serializable{
     private String ip;
 

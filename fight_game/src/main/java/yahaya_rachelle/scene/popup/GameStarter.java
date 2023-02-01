@@ -267,8 +267,14 @@ public class GameStarter extends ScenePopup{
         return button;
     }
 
+    /**
+     * représente l'action choisi par le joueur
+     */
     public enum Action{JOIN,CREATE};
 
+    /**
+     * représente le retour de l'action choisi par le joueur dans la popup lancement de jeux
+     */
     public class ChoosedData{
         private ScrollPane container;
         
