@@ -80,7 +80,7 @@ public class GameSessionScene extends GameScene{
      * @param action
      * @param toDoOnEnd
      */
-    public GameSessionScene updatePlayer(Player player,Config.PlayerAction action,GameCallback toDoOnEnd){
+   synchronized public GameSessionScene updatePlayer(Player player,Config.PlayerAction action,GameCallback toDoOnEnd){
 
         try{
             PlayerManager manager = this.playersMap.get(player);
@@ -131,6 +131,15 @@ public class GameSessionScene extends GameScene{
 
     /**
      * 
+     * @param player
+     * @return le gestionnaire du joueur
+     */
+    public PlayerManager getPlayerManager(Player player){
+        return this.playersMap.get(player);
+    }
+
+    /**
+     * 
      * @return le boutton de gestion des bouttons
      */
     private AnchorPane createGestionButton(){
@@ -142,7 +151,7 @@ public class GameSessionScene extends GameScene{
     /**
      * gère les animations et placement du joueur dans la page de jeux
      */
-    class PlayerManager{
+    public class PlayerManager{
         private Player player;
 
         private Timeline timeline;

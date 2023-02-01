@@ -4,17 +4,24 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.json.simple.parser.ParseException;
 
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable;
+import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.game.GameSession;
 
 /**
  * représente un joueur
  */
 public class Player extends Configurable implements Serializable{
+
+    public static final List<PlayerAction> playerHitActions = Arrays.asList(PlayerAction.ATTACK,PlayerAction.SUPER_ATTACK);
+
+
     private Character character;
 
     private String pseudo;
@@ -30,6 +37,7 @@ public class Player extends Configurable implements Serializable{
     private boolean canMoveS;
 
     public Player(Character character,String pseudo,GameSession linkedGameSession) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
+
         this.setConfig();
         this.character = character;
         this.pseudo = pseudo;
@@ -48,27 +56,21 @@ public class Player extends Configurable implements Serializable{
     }
 
     /**
-     * prend un coup du personnage par son attaque basique
-     * @param opponent
-     * @return this
+     * 
+     * @param fromPlayer
+     * @param attackType
+     * @return
      */
-    public Player receiveHitFromAttackOf(Player opponent){
-        this.currentLife -= opponent.getCharacter().getForce();
-
+    public Player receiveHitFrom(Player fromPlayer,PlayerAction attackType){
+        switch(attackType){
+            case ATTACK: this.currentLife -= fromPlayer.getCharacter().getForce() ; break;
+            case SUPER_ATTACK: this.currentLife -= fromPlayer.getCharacter().getSuperForce(); break;
+            default:;
+        }
+        
         return this;
     }
-
-    /**
-     * prend un coup du personnsage par sa super attaque
-     * @param opponent
-     * @return this
-     */
-    public Player takeHitFromSuperAttackOf(Player opponent){
-        this.currentLife -= opponent.getCharacter().getSuperForce();
-
-        return this;
-    }
-
+   
     /**
      * 
      * @return si le joueur est mort
@@ -179,7 +181,27 @@ public class Player extends Configurable implements Serializable{
          * @return this
          */
         public Position moveOnCurrentDirection(double speed){
-            switch(this.currentDirection)
+            return this.moveOnDirection(speed,this.currentDirection);
+        }
+
+        /**
+         * bouge dans la direction opposé
+         * @param speed
+         * @return this
+         */
+        public Position moveOnOppositeDirection(double speed){
+            return this.moveOnDirection(speed,this.currentDirection == Direction.RIGHT ? Direction.LEFT : Direction.RIGHT);
+        }
+
+        /**
+         * bouge dans la direction indiqué
+         * @param speed
+         * @param direction
+         * @return this
+         */
+        private Position moveOnDirection(double speed,Direction direction){
+            
+            switch(direction)
             {
                 case RIGHT:
                     if(this.currentX + this.linkedElementWidth + speed < this.containerWidth)

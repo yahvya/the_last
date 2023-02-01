@@ -127,7 +127,7 @@ public abstract class Communicator {
      * @return this
      */
     synchronized protected Communicator manageEntrantMessage(Message receivedMessage){
-        System.out.println("message recu -> type : " + receivedMessage.getMessageType() + " - message : " + receivedMessage.getMessageData() );
+        // System.out.println("message recu -> type : " + receivedMessage.getMessageType() + " - message : " + receivedMessage.getMessageData() );
 
         MessageType messageType = receivedMessage.getMessageType();
 
@@ -175,7 +175,7 @@ public abstract class Communicator {
      * @return this
      */
     synchronized public Communicator propagateMessage(Message message){
-        System.out.println("message à envoyer -> type : " + message.getMessageType() + " - message : " + message.getMessageData() );
+        // System.out.println("message à envoyer -> type : " + message.getMessageType() + " - message : " + message.getMessageData() );
 
         ArrayList<ObjectOutputStream> retryList = new ArrayList<ObjectOutputStream>();
 

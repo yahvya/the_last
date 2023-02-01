@@ -159,7 +159,7 @@ public class HomeScene extends GameScene{
      */
     public void addBackgroundSong(AnchorPane container)
     {
-        final double defaultVolumePercent = 10;
+        final double defaultVolumePercent = 0;
 
         double window_width = new ConfigGetter<Long>(this.game).getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
 
