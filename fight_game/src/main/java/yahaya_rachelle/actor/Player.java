@@ -199,7 +199,7 @@ public class Player extends Configurable implements Serializable{
          * @param direction
          * @return this
          */
-        private Position moveOnDirection(double speed,Direction direction){
+        synchronized private Position moveOnDirection(double speed,Direction direction){
             
             switch(direction)
             {

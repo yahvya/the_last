@@ -4,6 +4,7 @@ package yahaya_rachelle.configuration;
  * regroupe les configurations de l'application
  */ 
 public abstract class Config {
+
     /**
      * configuration du fichier de l'application
      */

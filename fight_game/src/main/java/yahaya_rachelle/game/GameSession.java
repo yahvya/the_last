@@ -245,7 +245,7 @@ public class GameSession extends Configurable{
      * @param player
      * @param fromMessage
      * @param toAddOnEnd
-     * @return
+     * @return this
      */
    synchronized public GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck,Player player,boolean fromMessage,GameCallback toAddOnEnd){
         // aucune action n'est possible durant le saut
@@ -254,6 +254,9 @@ public class GameSession extends Configurable{
 
         if(code.compareTo(toCheck) == 0 && conditionToCheck)
         {   
+            if(toDoBeforeIfMatch != null)
+                toDoBeforeIfMatch.action();
+                
             // envoi de l'action aux autres participants si l'exécution ne provient pas d'un message
             if(!fromMessage){
                 this.communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,new PlayerActionMessage(code, action) ) );
@@ -266,20 +269,20 @@ public class GameSession extends Configurable{
                         toDo.forEach(actionToDo -> actionToDo.action() );
                         if(toAddOnEnd != null)
                             toAddOnEnd.action();
-                        toDoAfter.action();
+                        
+                        if(toDoAfter != null)
+                            toDoAfter.action();
                     });
 
                     return this;
                 }
             }
-                
-            if(toDoBeforeIfMatch != null)
-                toDoBeforeIfMatch.action();
 
             // s'il y a une action supplémentaire à ajouter on défini une fonction qui appellera les deux action
             this.gameSessionScene.updatePlayer(player,action,toAddOnEnd != null ? () -> {
                 toAddOnEnd.action();
-                toDoAfter.action();
+                if(toDoAfter != null)
+                    toDoAfter.action();
             } : toDoAfter); 
         }
 
@@ -403,6 +406,7 @@ public class GameSession extends Configurable{
      * @param attacker
      * @param attackAction
      * @param playerToIgnoreSocket
+     * @param checkMe
      * @return une liste d'actions à faire après l'attaque si une / des personnes sonttouché
      */
     synchronized private ArrayList<GameCallback> doIfAttackFrom(Player attacker,PlayerAction attackAction,Socket playerToIgnoreSocket,boolean checkMe){
@@ -471,7 +475,6 @@ public class GameSession extends Configurable{
                 return () -> this.gameSessionScene.updatePlayer(toAttack,PlayerAction.TAKE_HIT,() -> this.gameSessionScene.updatePlayer(toAttack,PlayerAction.STATIC_POSITION,null) );
             }
             else return () -> this.gameSessionScene.updatePlayer(toAttack,PlayerAction.DEATH,() -> this.gameSessionScene.removePlayer(toAttack) );
-
         }
 
         return null;
@@ -513,6 +516,10 @@ public class GameSession extends Configurable{
         unlockTimeline.play();
         
         return this;
+    }
+
+    public Player getLinkedPlayer(){
+        return this.linkedPlayer;
     }
 
     public Game getLinkedGame(){

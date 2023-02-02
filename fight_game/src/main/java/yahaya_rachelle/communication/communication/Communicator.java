@@ -74,23 +74,52 @@ public abstract class Communicator {
             // fermeture du serveur
             if(this.server != null)
                 this.server.close();
-
-            // fermeture des sockets interne et des objets de sorties
-            this.otherPlayersSocketOutput.forEach((socket,output) -> {
-                try{
-                    socket.close();
-                    output.close();
-                    this.otherPlayersSocketInput.get(socket).close();
-                    
-                    EntrantMessageThread thread =  this.entrantMessageThreads.get(socket);
-
-                    if(thread != null)
-                        thread.stopReading();
-                }
-                catch(Exception e){} 
-            });
         }
         catch(Exception e){}
+
+        // fermeture des resources sockets
+        this.otherPlayersSocket.forEach(socket -> this.close(socket) );
+
+        return this;
+    }
+
+    /**
+     * ferme les resources liés à cette socket
+     * @param socket
+     * @return this
+     */
+    synchronized public Communicator close(Socket socket){   
+
+        EntrantMessageThread entrantThreadManager = this.entrantMessageThreads.get(socket);
+
+        if(entrantThreadManager != null){
+            entrantThreadManager.stopReading();
+            this.entrantMessageThreads.remove(socket);
+        }
+
+        ObjectOutputStream outputObject = this.otherPlayersSocketOutput.get(socket);
+
+        if(outputObject != null){
+            try{
+                outputObject.close();
+            }
+            catch(Exception e){}
+            
+            this.otherPlayersSocketOutput.remove(socket);
+        }
+
+        ObjectInputStream inputObject = this.otherPlayersSocketInput.get(socket);
+
+        if(inputObject != null){
+            try{
+                inputObject.close();
+            }
+            catch(Exception e){}
+            
+            this.otherPlayersSocketInput.remove(socket);
+        }
+
+        this.otherPlayersSocket.remove(socket);
 
         return this;
     }

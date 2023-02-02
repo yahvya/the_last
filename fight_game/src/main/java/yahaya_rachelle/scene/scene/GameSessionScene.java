@@ -10,6 +10,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -32,6 +33,8 @@ import yahaya_rachelle.utils.GameCallback;
  * représente la page d'affichage d'une partie
  */
 public class GameSessionScene extends GameScene{
+    public static final int STATUS_SHOW_TIME = 3000;
+
     private GameSession gameSession;
 
     private ObservableList<Node> children;
@@ -122,7 +125,14 @@ public class GameSessionScene extends GameScene{
 
             this.children.remove(manager.getView() );
             this.playersMap.remove(player);
-            this.lifebarsList.remove(manager.getLifebar());
+            this.lifebarsList.remove(manager.getLifebar() );
+
+            Player linkedPlayer = this.gameSession.getLinkedPlayer();
+
+            if(player == linkedPlayer)
+                this.showWinStatusMessage("Vous avez perdu",GameSessionScene.STATUS_SHOW_TIME, null);
+            else if(this.playersMap.size() == 1 && this.playersMap.get(linkedPlayer) != null)
+                this.showWinStatusMessage("Vous avez gagné",GameSessionScene.STATUS_SHOW_TIME,null);
         }
         catch(Exception e){}
 
@@ -136,6 +146,46 @@ public class GameSessionScene extends GameScene{
      */
     public PlayerManager getPlayerManager(Player player){
         return this.playersMap.get(player);
+    }
+
+    /**
+     * affiche un message sur l'écran durant un certains temps et appelle le callback après
+     * @param message
+     * @param showTimeInMs
+     * @param toDoAfterShowTime
+     * @return this
+     */
+    public GameSessionScene showWinStatusMessage(String message,int showTimeInMs,GameCallback toDoAfterShowTime){
+        Label text = new Label(message);
+
+        text.setFont(this.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,40) );
+
+        ConfigGetter<Long> longConfigGetter = new ConfigGetter<Long>(this.game);
+
+        double width = longConfigGetter.getValueOf(Config.App.WINDOW_WIDTH.key);
+        double height = longConfigGetter.getValueOf(Config.App.WINDOW_HEIGHT.key);
+
+        text.setTranslateX((width - text.getWidth() ) / 2);
+        text.setTranslateY((height - text.getHeight() ) / 2);
+
+        children.add(text);
+        
+        // création de l'animation
+        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(50),(e) -> text.setOpacity(text.getOpacity() - 0.2) ) );
+
+        timeline.setCycleCount(4);
+        timeline.setDelay(Duration.millis(showTimeInMs) );
+        timeline.play();
+
+        if(toDoAfterShowTime != null){
+            timeline.setOnFinished((e) ->{
+                children.remove(text);
+                toDoAfterShowTime.action();   
+            });
+        }
+        else timeline.setOnFinished((e) -> children.remove(text) );
+
+        return this;
     }
 
     /**
@@ -337,6 +387,5 @@ public class GameSessionScene extends GameScene{
         public AnchorPane getLifebar() {
             return this.lifebar;
         }
-    
     }   
 }
