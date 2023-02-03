@@ -37,7 +37,7 @@ public class EntrantMessageThread extends Thread{
             }
             catch(Exception e){
                 this.stopThis = true;
-                // à gérer
+                // à gérer (probablement envoyer un message simulant la mort du personnage)
             }
         }
     }

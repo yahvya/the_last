@@ -144,6 +144,7 @@ public abstract class Communicator {
      * @return this
      */
     protected Communicator shareMyPlayer(){
+        System.out.println("je viens de partager mon joueur");
         this.propagateMessage(new Message(MessageType.RECEIVE_PLAYER,this.internalPlayer) );
 
         return this;
@@ -156,7 +157,7 @@ public abstract class Communicator {
      * @return this
      */
     synchronized protected Communicator manageEntrantMessage(Message receivedMessage){
-        // System.out.println("message recu -> type : " + receivedMessage.getMessageType() + " - message : " + receivedMessage.getMessageData() );
+        System.out.println("message recu -> type : " + receivedMessage.getMessageType() + " - message : " + receivedMessage.getMessageData() );
 
         MessageType messageType = receivedMessage.getMessageType();
 

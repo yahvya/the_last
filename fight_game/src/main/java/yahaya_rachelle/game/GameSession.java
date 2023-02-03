@@ -259,7 +259,7 @@ public class GameSession extends Configurable{
                 
             // envoi de l'action aux autres participants si l'exécution ne provient pas d'un message
             if(!fromMessage){
-                this.communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,new PlayerActionMessage(code, action) ) );
+                this.communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,new PlayerActionMessage(code,action) ) );
 
                 // gestion de l'attaque de mon côté
                 if(Player.playerHitActions.contains(action) ){
@@ -323,7 +323,11 @@ public class GameSession extends Configurable{
                 .updatePlayer(player,Config.PlayerAction.STATIC_POSITION,null);
         });
         // gestion d'une action utilisateur dans la page
-        map.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> this.managePlayerEntrantAction(actionMessage) );
+        map.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> {
+            // si le joueur n'est pas dans la map alors il a propablement été supprimé
+            if(this.otherPlayersMap.get(actionMessage.getSource() ) != null)
+                this.managePlayerEntrantAction(actionMessage);
+        });
 
         return map;
     }
@@ -474,7 +478,28 @@ public class GameSession extends Configurable{
 
                 return () -> this.gameSessionScene.updatePlayer(toAttack,PlayerAction.TAKE_HIT,() -> this.gameSessionScene.updatePlayer(toAttack,PlayerAction.STATIC_POSITION,null) );
             }
-            else return () -> this.gameSessionScene.updatePlayer(toAttack,PlayerAction.DEATH,() -> this.gameSessionScene.removePlayer(toAttack) );
+            else {
+                return () -> this.gameSessionScene.updatePlayer(toAttack,PlayerAction.DEATH,() -> {
+                    this.gameSessionScene.removePlayer(toAttack);
+
+                    // si le joueur mort n'est pas moi on ferme les ressources
+                    if(toAttack != this.linkedPlayer){
+                        // recherche de la socket lié au joueur
+                        for(Map.Entry<Socket,Player> entry : this.otherPlayersMap.entrySet() ){
+
+                            if(entry.getValue() == toAttack){
+                                Socket playerSocket = entry.getKey();
+                                
+                                // fermeture des resources et suppression de la liste des joueurs géré
+                                this.communicator.close(playerSocket);
+                                this.otherPlayersMap.remove(playerSocket);
+                            
+                                break;
+                            }   
+                        }   
+                    }
+                });
+            }
         }
 
         return null;

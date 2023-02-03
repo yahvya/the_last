@@ -218,7 +218,7 @@ public class GameSessionScene extends GameScene{
         private Player.Position.Direction currentDirection;
 
         private static final int MAX_MS_PER_ACTION = 700;
-        private static final int LIFEBAR_WIDTH = 180;
+        private static final int LIFEBAR_WIDTH = 70;
 
         public PlayerManager(Player player,double playersMaxLife){
             this.player = player;
@@ -246,7 +246,7 @@ public class GameSessionScene extends GameScene{
 
             // mise à jour des dimensions des anchor pane
             for(AnchorPane p : new AnchorPane[]{lifeBar,redBar,this.toReduce} )
-                p.setPrefSize(PlayerManager.LIFEBAR_WIDTH, 20);
+                p.setPrefSize(PlayerManager.LIFEBAR_WIDTH, 15);
 
             lifeBar.getChildren().addAll(redBar,this.toReduce);
 
