@@ -27,13 +27,13 @@ import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
 import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
-import yahaya_rachelle.communication.communication.ClientManager;
 import yahaya_rachelle.communication.communication.Communicator;
-import yahaya_rachelle.communication.communication.ServerManager;
 import yahaya_rachelle.communication.communication.Communicator.MessageManager;
 import yahaya_rachelle.communication.message.Message;
 import yahaya_rachelle.communication.message.PlayerActionMessage;
 import yahaya_rachelle.communication.message.Message.MessageType;
+import yahaya_rachelle.communication.communication.ClientManager;
+import yahaya_rachelle.communication.communication.ServerManager;
 import yahaya_rachelle.actor.Player.Position.Direction;
 
 /**
@@ -128,7 +128,7 @@ public class GameSession extends Configurable{
             @Override
             public void run(){
                 try{
-                    ServerManager serverCommunicator = new ServerManager(createActionsMap(),countOfParticipants,linkedPlayer);
+                    ServerManager serverCommunicator = new ServerManager(createActionsMap(),linkedPlayer,countOfParticipants);
 
                     IntegerHelper valueObject = new IntegerHelper();
 

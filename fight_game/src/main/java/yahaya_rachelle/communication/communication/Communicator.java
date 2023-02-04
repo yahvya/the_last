@@ -144,7 +144,6 @@ public abstract class Communicator {
      * @return this
      */
     protected Communicator shareMyPlayer(){
-        System.out.println("je viens de partager mon joueur");
         this.propagateMessage(new Message(MessageType.RECEIVE_PLAYER,this.internalPlayer) );
 
         return this;
@@ -157,8 +156,6 @@ public abstract class Communicator {
      * @return this
      */
     synchronized protected Communicator manageEntrantMessage(Message receivedMessage){
-        System.out.println("message recu -> type : " + receivedMessage.getMessageType() + " - message : " + receivedMessage.getMessageData() );
-
         MessageType messageType = receivedMessage.getMessageType();
 
         // on vérifie si le message doit être géré à l'interne
@@ -205,8 +202,6 @@ public abstract class Communicator {
      * @return this
      */
     synchronized public Communicator propagateMessage(Message message){
-        // System.out.println("message à envoyer -> type : " + message.getMessageType() + " - message : " + message.getMessageData() );
-
         ArrayList<ObjectOutputStream> retryList = new ArrayList<ObjectOutputStream>();
 
         this.otherPlayersSocketOutput.forEach((socket,output) -> {
@@ -215,7 +210,6 @@ public abstract class Communicator {
                 output.writeObject(message);
             }
             catch(Exception e){
-                e.printStackTrace();
                 // sauvegarde dans la liste des personnes à renotifier
                 retryList.add(output);
             }
@@ -237,6 +231,26 @@ public abstract class Communicator {
             retryTimeline.setDelay(Duration.millis(300) );
             retryTimeline.play();
         }
+
+        return this;
+    }
+
+    /**
+     * envoi un message au destinataire spécifié
+     * @param dest
+     * @param toSend
+     * @return this
+     */
+    synchronized public Communicator sendMessageTo(Socket dest,Message toSend){
+        try{
+            // récupération du destinataire
+            ObjectOutputStream outputObject = this.otherPlayersSocketOutput.get(dest);
+
+            // envoi du message
+            if(outputObject != null)
+                outputObject.writeObject(toSend);
+        }
+        catch(Exception e){}
 
         return this;
     }

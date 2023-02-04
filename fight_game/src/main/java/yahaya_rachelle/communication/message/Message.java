@@ -41,6 +41,11 @@ public class Message implements Serializable{
         return this.source;
     }
 
+    @Override
+    public String toString(){
+        return "Type de message -> " + this.messageType + " - objet du message -> " + this.messageData;
+    }
+
     /**
      * représente les types de messages pouvant être envoyé et reçu
      */
