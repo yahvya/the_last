@@ -126,13 +126,6 @@ public class GameSessionScene extends GameScene{
             this.children.remove(manager.getView() );
             this.playersMap.remove(player);
             this.lifebarsList.remove(manager.getLifebar() );
-
-            Player linkedPlayer = this.gameSession.getLinkedPlayer();
-
-            if(player == linkedPlayer)
-                this.showWinStatusMessage("Vous avez perdu",GameSessionScene.STATUS_SHOW_TIME, null);
-            else if(this.playersMap.size() == 1 && this.playersMap.get(linkedPlayer) != null)
-                this.showWinStatusMessage("Vous avez gagné",GameSessionScene.STATUS_SHOW_TIME,null);
         }
         catch(Exception e){}
 

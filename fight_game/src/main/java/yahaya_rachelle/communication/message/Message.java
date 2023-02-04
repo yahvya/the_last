@@ -41,11 +41,6 @@ public class Message implements Serializable{
         return this.source;
     }
 
-    @Override
-    public String toString(){
-        return "Type de message -> " + this.messageType + " - objet du message -> " + this.messageData;
-    }
-
     /**
      * représente les types de messages pouvant être envoyé et reçu
      */
@@ -58,6 +53,6 @@ public class Message implements Serializable{
         RECEIVE_PLAYER, // réception d'un joueur,
         CONFIRM_RECEIVE_ALL_PLAYERS, // confirmation de réception de tous les joueurs,
         START_GAME, // début de partie,
-        RECEIVE_PLAYER_ACTION // réceptioj d'une action d'un joueur
+        RECEIVE_PLAYER_ACTION, // réception d'une action d'un joueur
     };
 }

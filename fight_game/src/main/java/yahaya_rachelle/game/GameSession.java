@@ -63,6 +63,8 @@ public class GameSession extends Configurable{
 
     private HashMap<Socket,Player> otherPlayersMap;
 
+    private boolean lost;
+
     /**
      * lance une nouvelle partie
      * @param linkedGame
@@ -337,6 +339,8 @@ public class GameSession extends Configurable{
      * @return this
      */
     private GameSession startGame(){
+        this.lost = false;
+
         // ajout de la gestion des évenements clavier 
         this.gameSessionScene.getPage().setOnKeyPressed((keyData) -> this.manageKeyEvent(keyData.getCode(),this.linkedPlayer) );
 
@@ -482,7 +486,7 @@ public class GameSession extends Configurable{
                 return () -> this.gameSessionScene.updatePlayer(toAttack,PlayerAction.DEATH,() -> {
                     this.gameSessionScene.removePlayer(toAttack);
 
-                    // si le joueur mort n'est pas moi on ferme les ressources
+                    // si le joueur mort n'est pas moi on ferme les ressources sinon on affiche le message de défaite
                     if(toAttack != this.linkedPlayer){
                         // recherche de la socket lié au joueur
                         for(Map.Entry<Socket,Player> entry : this.otherPlayersMap.entrySet() ){
@@ -496,7 +500,25 @@ public class GameSession extends Configurable{
                             
                                 break;
                             }   
-                        }   
+                        } 
+
+                        int countOfRestantPlayers = this.otherPlayersMap.size();
+
+                        /* 
+                            si tous les autres joueurs ont perdu alors j'ai gagné
+                            on affiche le message de victoire et on finis la partie après l'affichage
+                            s'il reste un joueur et que j'ai perdu alors il a gagné de son côté (fin de partie)
+                        */
+                        if(countOfRestantPlayers == 0)
+                            this.gameSessionScene.showWinStatusMessage("Vous avez gagne",GameSessionScene.STATUS_SHOW_TIME,() ->  this.endGame() );
+                        else if(countOfRestantPlayers == 1 && this.lost)
+                            this.endGame();
+                    }
+                    else {
+                        this.lost = true;
+
+                        // s'il reste un joueur quand je perd alors fin de partie
+                        this.gameSessionScene.showWinStatusMessage("Vous avez perdu",GameSessionScene.STATUS_SHOW_TIME,this.otherPlayersMap.size() == 1 ? () -> this.endGame() : null);
                     }
                 });
             }
