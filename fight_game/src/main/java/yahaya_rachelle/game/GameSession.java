@@ -140,7 +140,7 @@ public class GameSession extends Configurable{
                             int value = valueObject
                                 .addOne()
                                 .getValue();
-
+                                    
                             Platform.runLater(() -> toCallOnNewPlayer.action(value,value == countOfParticipants) );
                         },
                         () -> {
@@ -329,7 +329,7 @@ public class GameSession extends Configurable{
             // si le joueur n'est pas dans la map alors il a propablement été supprimé
             if(this.otherPlayersMap.get(actionMessage.getSource() ) != null)
                 this.managePlayerEntrantAction(actionMessage);
-        });
+        }); 
 
         return map;
     }
@@ -555,7 +555,6 @@ public class GameSession extends Configurable{
      * @return this
      */
     private GameSession doAfterBlockTime(GameCallback toDo){
-        // timeline pour débloquer la super attaque
         Timeline unlockTimeline = new Timeline(new KeyFrame(Duration.ONE,(e) -> toDo.action() ) );
 
         unlockTimeline.setCycleCount(1);

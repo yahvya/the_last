@@ -30,6 +30,10 @@ public class IpMessage implements Serializable{
         return this.ip;
     }
 
+    /**
+     * 
+     * @return si les données internes sont définis
+     */
     public boolean getIsDefined(){
         return this.isDefined;
     }

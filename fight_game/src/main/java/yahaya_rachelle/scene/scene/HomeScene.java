@@ -317,8 +317,7 @@ public class HomeScene extends GameScene{
 
             GameCallback removeAndFailure = () -> {
                 Platform.runLater(() -> {
-                    loadingAnimationTimeline.stop();
-                    container.getChildren().remove(waitingBox);
+                    removeWaitingZone.action();
                     this.someActionIsPerforming = false;
                     this.showStartGameFailure();
                 }); 
@@ -369,7 +368,7 @@ public class HomeScene extends GameScene{
                     // action en cas d'échec de recherche
                     removeAndFailure,
                     // action appelé à chaque nouveau joueur trouvé
-                    (playerIndex,isLast) -> newPlayers.setText(String.join(" sur ",Integer.toString((Integer) playerIndex),countOfParticipantsStr) )
+                    (playerIndex,noNeeed) -> newPlayers.setText(String.join(" sur ",Integer.toString((Integer) playerIndex),countOfParticipantsStr) )
                 );
             }
             else{

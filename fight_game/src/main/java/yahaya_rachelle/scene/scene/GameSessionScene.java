@@ -20,6 +20,7 @@ import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import yahaya_rachelle.actor.Player;
@@ -105,11 +106,11 @@ public class GameSessionScene extends GameScene{
      * @return GameSessionScene
      */
     public GameSessionScene addPlayer(Player player){
-        PlayerManager manager = new PlayerManager(player,this.playersMaxLife);
+        PlayerManager manager = new PlayerManager(player,this.playersMaxLife,this);
 
         this.playersMap.put(player,manager);
         this.children.add(manager.getView() );
-        this.lifebarsList.add(manager.getLifebar() );
+        this.lifebarsList.add(manager.getLifebarContainer() );
                
         return this;
     }
@@ -125,7 +126,7 @@ public class GameSessionScene extends GameScene{
 
             this.children.remove(manager.getView() );
             this.playersMap.remove(player);
-            this.lifebarsList.remove(manager.getLifebar() );
+            this.lifebarsList.remove(manager.getLifebarContainer() );
         }
         catch(Exception e){}
 
@@ -203,7 +204,7 @@ public class GameSessionScene extends GameScene{
 
         private double playersMaxLife;
 
-        private AnchorPane lifebar;
+        private VBox lifebarContainer;
         private AnchorPane toReduce;
 
         private Config.PlayerAction currentAction;
@@ -211,12 +212,15 @@ public class GameSessionScene extends GameScene{
         private Player.Position.Direction currentDirection;
 
         private static final int MAX_MS_PER_ACTION = 700;
-        private static final int LIFEBAR_WIDTH = 70;
+        private static final int LIFEBAR_WIDTH = 120;
 
-        public PlayerManager(Player player,double playersMaxLife){
+        private GameSessionScene linkedScene;
+
+        public PlayerManager(Player player,double playersMaxLife,GameSessionScene linkedScene){
             this.player = player;
             this.playersMaxLife = playersMaxLife;
-            this.lifebar = this.createLifeBar();
+            this.linkedScene = linkedScene;
+            this.lifebarContainer = this.createLifeBar();
             this.timeline = new Timeline();
             this.view = new ImageView();
             this.currentAction = null;
@@ -229,7 +233,7 @@ public class GameSessionScene extends GameScene{
          * crée une barre de vie
          * @return la barre de vie
          */
-        private AnchorPane createLifeBar() {
+        private VBox createLifeBar() {
             AnchorPane lifeBar = new AnchorPane();
             AnchorPane redBar = new AnchorPane();
             this.toReduce = new AnchorPane();
@@ -239,11 +243,19 @@ public class GameSessionScene extends GameScene{
 
             // mise à jour des dimensions des anchor pane
             for(AnchorPane p : new AnchorPane[]{lifeBar,redBar,this.toReduce} )
-                p.setPrefSize(PlayerManager.LIFEBAR_WIDTH, 15);
+                p.setPrefSize(PlayerManager.LIFEBAR_WIDTH,25);
 
             lifeBar.getChildren().addAll(redBar,this.toReduce);
 
-            return lifeBar;
+            VBox container = new VBox(10);
+
+            Label playerPseudo = new Label(this.player.getPseudo() );
+
+            playerPseudo.setFont(this.linkedScene.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,14) );
+
+            container.getChildren().addAll(lifeBar,playerPseudo);
+
+            return container;
         }
 
         /**
@@ -377,8 +389,8 @@ public class GameSessionScene extends GameScene{
             return this.view;
         }
     
-        public AnchorPane getLifebar() {
-            return this.lifebar;
+        public VBox getLifebarContainer() {
+            return this.lifebarContainer;
         }
     }   
 }

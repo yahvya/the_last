@@ -97,16 +97,16 @@ public abstract class Communicator {
             this.entrantMessageThreads.remove(socket);
         }
 
-        ObjectOutputStream outputObject = this.otherPlayersSocketOutput.get(socket);
+        // ObjectOutputStream outputObject = this.otherPlayersSocketOutput.get(socket);
 
-        if(outputObject != null){
-            try{
-                outputObject.close();
-            }
-            catch(Exception e){}
+        // if(outputObject != null){
+        //     try{
+        //         outputObject.close();
+        //     }
+        //     catch(Exception e){}
             
-            this.otherPlayersSocketOutput.remove(socket);
-        }
+        //     this.otherPlayersSocketOutput.remove(socket);
+        // }
 
         ObjectInputStream inputObject = this.otherPlayersSocketInput.get(socket);
 
@@ -181,9 +181,9 @@ public abstract class Communicator {
      * @return this
      */
     protected Communicator startListening(){
-        this.entrantMessageThreads.forEach((socket,inputObject) -> {
+        this.entrantMessageThreads.forEach((socket,readThread) -> {
             // vérifie si l'objet n'a pas déjà un thread de lecture en cours
-            if(inputObject == null){
+            if(readThread == null){
                 // crée le thread d'écoute
                 EntrantMessageThread readingThread = new EntrantMessageThread(socket,this.otherPlayersSocketInput.get(socket), this);
 

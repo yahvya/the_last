@@ -21,7 +21,6 @@ public class Player extends Configurable implements Serializable{
 
     public static final List<PlayerAction> playerHitActions = Arrays.asList(PlayerAction.ATTACK,PlayerAction.SUPER_ATTACK);
 
-
     private Character character;
 
     private String pseudo;
