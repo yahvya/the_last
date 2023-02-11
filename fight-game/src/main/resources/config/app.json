@@ -1,0 +1,20 @@
+{
+    "window_width" : 900,
+    "window_height" : 550,
+    "game_name" : "The last game",
+    "favicon" : "/images/app/favicon.png",
+    "loading_poster" : "/images/app/loading-poster.png",
+    "loading_font" : "/fonts/basic.ttf",
+    "loading_on_color" : "#a0714bdb",
+    "characters_path" : "/characters/",
+    "custom_characters_path" : "/custom-characters/",
+    "saved_games_path" : "/saved-games/",
+    "saved_games_index_file_name" : "index.txt",
+    "custom_characters_index_file_name" : "index.txt",
+    "characters_config_file_name" : "config.json",
+    "players_life" : 1000,
+    "characters_max_force" : 80,
+    "characters_super_attack_adding" : 20,
+    "characters_super_attack_block_time_ms" : 4000,
+    "game_max_participants": 3
+}

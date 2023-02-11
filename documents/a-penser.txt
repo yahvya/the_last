@@ -1,4 +1,4 @@
 gérer le cas ou il y a une erreur chez l'un
-re activer les commentaires pour gérer le cas où un joueur est déjà connecté
 décider si on garde les attaques groupés où si on récupère le joueur le plus proche de l'attaque
-voir si on crée un décalage pour la colision
+close les ressources quand fenetre fermé en pleine partie
+voir si les données sauvegardés suffisent
