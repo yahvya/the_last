@@ -27,6 +27,8 @@ public class GameDataManager {
 
     private ArrayList<Character> characters;
 
+    private SavedGames savedGames;
+
     private Game linkedGame;
 
     public GameDataManager(Game linkedGame){
@@ -42,16 +44,15 @@ public class GameDataManager {
         // lancement du thread de chargement des données
         new Thread(){
             @Override
-            public void run()
-            { 
-                try
-                {
+            public void run(){ 
+                try{
                     // chargement des données  
                     manager.fonts = new Fonts();
                     manager.appSongs = new AppSongs();
                     manager.gameSongs = new GameSongs();
                     manager.items = new Items();
                     manager.scenes = new Scenes();
+                    manager.savedGames = new SavedGames(linkedGame);
 
                     // récupération et ajout des personnages du jeux
                     ConfigGetter<String> configStringGetter = new ConfigGetter<String>(manager.linkedGame);
@@ -104,5 +105,9 @@ public class GameDataManager {
 
     public Scenes getScenes(){
         return this.scenes;
+    }
+
+    public SavedGames getSavedGames(){
+        return this.savedGames;
     }
 }

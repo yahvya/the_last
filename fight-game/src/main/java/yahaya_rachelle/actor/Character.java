@@ -22,7 +22,7 @@ import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.game.Game;
 
 /**
- * représente un personnage du jeyx
+ * représente un personnage du jeux
  */
 public class Character extends Configurable implements Serializable{
     
@@ -184,7 +184,7 @@ public class Character extends Configurable implements Serializable{
         String toIgnore = configStringGetter.getValueOf(Config.App.CUSTOM_CHARACTERS_INDEX_FILENAME.key);
         String charactersConfigFileName = configStringGetter.getValueOf(Config.App.CHARACTERS_CONFIG_FILENAME.key);
 
-        // parcours du nom des éléments du dossuer
+        // parcours du nom des éléments du dossier
         for(String subDirectory : directory.list() )
         {
             if(!subDirectory.equals(toIgnore) )

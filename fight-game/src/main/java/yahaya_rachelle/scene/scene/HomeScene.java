@@ -31,9 +31,11 @@ import javafx.util.Duration;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.game.Game;
+import yahaya_rachelle.game.GameDataToSave;
 import yahaya_rachelle.game.GameSession;
 import yahaya_rachelle.scene.popup.CreatePlayer;
 import yahaya_rachelle.scene.popup.GameStarter;
+import yahaya_rachelle.scene.popup.SavedGamesPopup;
 import yahaya_rachelle.scene.popup.GameStarter.Action;
 import yahaya_rachelle.scene.popup.GameStarter.ChoosedData;
 import yahaya_rachelle.utils.GameCallback;
@@ -75,16 +77,14 @@ public class HomeScene extends GameScene{
      * ajoute l'image de fond
      * @param list
      */
-    public void addBackgroundImage(AnchorPane container)
-    {
+    public void addBackgroundImage(AnchorPane container){
         container.setBackground(new Background(new BackgroundImage(this.gameDataManager.getItems().getImage(Config.Items.HOME_BACKGROUND.key),BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.DEFAULT,new BackgroundSize(100,100,true,false,false,true) ) ) );
     }
 
     /**
      * ajoute le menu
      */
-    public void addMenu(AnchorPane container)
-    {
+    public void addMenu(AnchorPane container){
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.game);
 
         VBox menu = new VBox(20);
@@ -209,11 +209,17 @@ public class HomeScene extends GameScene{
      */
     public void eventOnLoadGame(Label loadGame,AnchorPane container){
         loadGame.setOnMouseClicked((e) -> {
-            if(this.canDoAction() )
-            {
+            if(this.canDoAction() ){
                 this.someActionIsPerforming = true;
 
-                System.out.println("on veut charger une partie");
+                ObservableList<Node> children = container.getChildren();
+
+                // ajout de la popup dans la page
+                AnchorPane popup = (AnchorPane) new SavedGamesPopup(this,(savedGame,isCanceled) -> {
+                    
+                },this.gameDataManager.getSavedGames() ).getPopup();
+
+                children.add(popup);
             }
         });
     }

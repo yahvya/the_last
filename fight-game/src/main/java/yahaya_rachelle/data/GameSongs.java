@@ -19,7 +19,4 @@ public class GameSongs extends MediaDatas {
     protected String getConfigFilePath() {
         return "/config/game-songs.json";
     }
-
-    
-
 }

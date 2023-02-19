@@ -14,10 +14,12 @@ public class GameDataToSave implements Serializable{
     private Player savedPlayer;
 
     private String gameSessionCode;
+    private String saveName;
 
-    public GameDataToSave(Player savedPlayer,String gameSessionCode){
+    public GameDataToSave(Player savedPlayer,String gameSessionCode,String saveName){
         this.savedPlayer = savedPlayer;
         this.gameSessionCode = gameSessionCode;
+        this.saveName = saveName;
     }
 
     /**
@@ -49,10 +51,9 @@ public class GameDataToSave implements Serializable{
      * @param sourcePath
      * @return un objet de ce type si succès ou null en cas d'échec
      */
-    public static GameDataToSave getObjectFrom(URI sourcePath){
-        
+    public static GameDataToSave getObjectFrom(File sourceFile){
         try{
-            FileInputStream fileInputStream = new FileInputStream(new File(sourcePath) );
+            FileInputStream fileInputStream = new FileInputStream(sourceFile);
 
             ObjectInputStream inputStream = new ObjectInputStream(fileInputStream);
 
@@ -75,5 +76,9 @@ public class GameDataToSave implements Serializable{
 
     public String getGameSessionCode(){
         return this.gameSessionCode;
+    }
+
+    public String getSaveName(){
+        return this.saveName;
     }
 }

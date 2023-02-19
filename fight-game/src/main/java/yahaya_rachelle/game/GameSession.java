@@ -3,6 +3,7 @@ package yahaya_rachelle.game;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable;
 import yahaya_rachelle.configuration.Config.PlayerAction;
+import yahaya_rachelle.data.SavedGames;
 import yahaya_rachelle.scene.scene.GameSessionScene;
 import yahaya_rachelle.scene.scene.HomeScene;
 import yahaya_rachelle.scene.scene.GameSessionScene.PlayerManager;
@@ -134,8 +135,6 @@ public class GameSession extends Configurable{
             }
         }   
     }
-
-    
     /**
      * permet de lancer une partie à partir d'une sauvegarde
      * @param saveGameFilePath
@@ -283,9 +282,9 @@ public class GameSession extends Configurable{
      */
     public boolean saveGame(){
         try{
-            String savePath = GameSession.SAVED_GAMES_PATH + Integer.toString(GameSession.LAST_SAVED_GAME_INDEX) + ".game";
+            String savePath = GameSession.SAVED_GAMES_PATH + Integer.toString(GameSession.LAST_SAVED_GAME_INDEX) + SavedGames.SAVED_GAMES_EXTENSION;
 
-            GameDataToSave saver = new GameDataToSave(this.linkedPlayer,this.gameSessionCode);
+            GameDataToSave saver = new GameDataToSave(this.linkedPlayer,this.gameSessionCode,this.linkedPlayer.getPseudo() );
 
             // tentative de sauvegarde du jeux
             if(saver.saveIn(URI.create(savePath) ) ){
@@ -417,7 +416,6 @@ public class GameSession extends Configurable{
         }); 
         // gestion de la sauvegarde de la partie lancé par un autre
         map.put(MessageType.SAVE_GAME,(saveMessage) -> {
-            try{
             String sourcePlayerName = this.otherPlayersMap.get(saveMessage.getSource() ).getPseudo();
 
             Platform.runLater(() -> {
@@ -428,8 +426,6 @@ public class GameSession extends Configurable{
                         this.endGame();
                 });
             });
-        }
-        catch(Exception e){}
         });
 
         return map;
