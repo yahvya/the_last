@@ -31,7 +31,6 @@ import javafx.util.Duration;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.game.Game;
-import yahaya_rachelle.game.GameDataToSave;
 import yahaya_rachelle.game.GameSession;
 import yahaya_rachelle.scene.popup.CreatePlayer;
 import yahaya_rachelle.scene.popup.GameStarter;

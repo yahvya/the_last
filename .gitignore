@@ -1,6 +1,3 @@
-documents/html
-documents/latex
-documents/rtf
-documents/xml
-documents/doxygen-config
+documents/*
+cahier-des-charges/*
 fight-game/target

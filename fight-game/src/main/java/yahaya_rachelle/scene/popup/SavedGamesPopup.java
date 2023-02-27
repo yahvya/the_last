@@ -43,32 +43,9 @@ public class SavedGamesPopup extends ScenePopup{
         this.addGamesInPopup();
     }
 
-    /**
-     * 
-     * @return l'indice min et max des valeurs à afficher
-     */
-    private int[] getIndexesToShow(Arrow direction){
-        int[] indexes = new int[2];
-
-        if(direction == Arrow.UP){
-            indexes[0] = this.currentIndex - SavedGamesPopup.MAX_SHOWED_SAVED_GAMES;
-            indexes[1] = this.currentIndex - 1;
-        }
-        else{
-            indexes[0] = this.currentIndex + SavedGamesPopup.MAX_SHOWED_SAVED_GAMES;
-            this.currentIndex = indexes[0];
-            indexes[1] = this.currentIndex + SavedGamesPopup.MAX_SHOWED_SAVED_GAMES > 
-            this.countOfSavedGames ? ((this.countOfSavedGames - 1) - this.currentIndex) + this.currentIndex : 
-            this.currentIndex + (SavedGamesPopup.MAX_SHOWED_SAVED_GAMES - 1);
-        }
-
-        this.currentIndex = indexes[0];
-
-        return indexes;
-    }
-
     @Override
     protected Parent buildPopup(){
+        // création de la popup
         AnchorPane popup = new AnchorPane();
 
         GameDataManager dataManager = this.linkedScene.getGameDataManager();
@@ -82,6 +59,7 @@ public class SavedGamesPopup extends ScenePopup{
         popup.setMinWidth(width);
         popup.setMinHeight(height);
 
+        // création du conteneur de la liste de parties
         VBox gamesNameContainer = new VBox(20);
 
         this.showedGames = gamesNameContainer.getChildren();
@@ -90,8 +68,9 @@ public class SavedGamesPopup extends ScenePopup{
         gamesNameContainer.setTranslateY(60);
         gamesNameContainer.setMaxWidth(width - 80);
 
-        Polygon upArrow = this.getArrow();
-        Polygon downArrow = this.getArrow();
+        // création des flèches de changement
+        Polygon upArrow = this.createArrow();
+        Polygon downArrow = this.createArrow();
 
         upArrow.setTranslateX(width - 60);
         upArrow.setTranslateY((height / 2) - 30);
@@ -105,6 +84,29 @@ public class SavedGamesPopup extends ScenePopup{
         popup.setTranslateY((configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() / 2) - (height / 2) );
 
         return popup;
+    }
+
+    /**
+     * calcule les indices min et max à afficher en fonction de la flèche appuyé
+     * @return l'indice min et max sous forme d'un tableau à deux cases [min,max]
+     */
+    private int[] getIndexesToShow(Arrow direction){
+        int[] indexes = new int[2];
+
+        if(direction == Arrow.UP){
+            indexes[0] = this.currentIndex - SavedGamesPopup.MAX_SHOWED_SAVED_GAMES;
+            indexes[1] = this.currentIndex - 1;
+            this.currentIndex = indexes[0];
+        }
+        else{
+            indexes[0] = this.currentIndex + SavedGamesPopup.MAX_SHOWED_SAVED_GAMES;
+            this.currentIndex = indexes[0];
+            indexes[1] = this.currentIndex + SavedGamesPopup.MAX_SHOWED_SAVED_GAMES > 
+            this.countOfSavedGames ? ((this.countOfSavedGames - 1) - this.currentIndex) + this.currentIndex : 
+            this.currentIndex + (SavedGamesPopup.MAX_SHOWED_SAVED_GAMES - 1);
+        }
+
+        return indexes;
     }
 
     /**
@@ -124,6 +126,11 @@ public class SavedGamesPopup extends ScenePopup{
 
     }
 
+    /**
+     * crée un Label en le mettant en forme
+     * @param text
+     * @return le label crée
+     */
     private Label getCustomLabel(String text){
         Label custom = new Label(text);
 
@@ -140,7 +147,7 @@ public class SavedGamesPopup extends ScenePopup{
      * créer une flèche
      * @return la flèche
      */
-    private Polygon getArrow(){
+    private Polygon createArrow(){
         Polygon arrow = new Polygon();
 
         arrow.getPoints().addAll(new Double[]{
