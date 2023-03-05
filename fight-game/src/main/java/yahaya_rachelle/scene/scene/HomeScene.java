@@ -31,12 +31,16 @@ import javafx.util.Duration;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.game.Game;
+import yahaya_rachelle.game.GameDataToSave;
 import yahaya_rachelle.game.GameSession;
 import yahaya_rachelle.scene.popup.CreatePlayer;
 import yahaya_rachelle.scene.popup.GameStarter;
+import yahaya_rachelle.scene.popup.SavedGameStarter;
 import yahaya_rachelle.scene.popup.SavedGamesPopup;
 import yahaya_rachelle.scene.popup.GameStarter.Action;
 import yahaya_rachelle.scene.popup.GameStarter.ChoosedData;
+import yahaya_rachelle.scene.popup.SavedGameStarter.SavedGameStarterPopupResult;
+import yahaya_rachelle.scene.popup.SavedGamesPopup.SavedGamePopupResult;
 import yahaya_rachelle.utils.GameCallback;
 
 /**
@@ -48,6 +52,8 @@ public class HomeScene extends GameScene{
 
     private MediaPlayer refusedActionSongPlayer;
     private MediaPlayer gameBackgroundSong;
+
+    private AnchorPane container;
 
     public HomeScene(Game game) {
         super(game);
@@ -63,11 +69,11 @@ public class HomeScene extends GameScene{
     @Override 
     protected Scene buildPage() {
 
-        AnchorPane container = new AnchorPane();
+        this.container = new AnchorPane();
 
-        this.addBackgroundImage(container);
-        this.addMenu(container);
-        this.addBackgroundSong(container);
+        this.addBackgroundImage();
+        this.addMenu();
+        this.addBackgroundSong();
 
         return new Scene(container);
     }
@@ -76,14 +82,14 @@ public class HomeScene extends GameScene{
      * ajoute l'image de fond
      * @param list
      */
-    public void addBackgroundImage(AnchorPane container){
-        container.setBackground(new Background(new BackgroundImage(this.gameDataManager.getItems().getImage(Config.Items.HOME_BACKGROUND.key),BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.DEFAULT,new BackgroundSize(100,100,true,false,false,true) ) ) );
+    public void addBackgroundImage(){
+        this.container.setBackground(new Background(new BackgroundImage(this.gameDataManager.getItems().getImage(Config.Items.HOME_BACKGROUND.key),BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.DEFAULT,new BackgroundSize(100,100,true,false,false,true) ) ) );
     }
 
     /**
      * ajoute le menu
      */
-    public void addMenu(AnchorPane container){
+    public void addMenu(){
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.game);
 
         VBox menu = new VBox(20);
@@ -119,9 +125,9 @@ public class HomeScene extends GameScene{
         startGame.setFont(font);
 
         // ajout des évenements sur les actions
-        this.eventOnCreateNewPlayer(createPlayer,container);
-        this.eventOnLoadGame(loadGame,container);
-        this.eventOnStartGame(startGame,container);
+        this.eventOnCreateNewPlayer(createPlayer);
+        this.eventOnLoadGame(loadGame);
+        this.eventOnStartGame(startGame);
 
         ObservableList<Node> children = menu.getChildren();
         
@@ -156,7 +162,7 @@ public class HomeScene extends GameScene{
     /**
      * ajoute la musique de fond du jeux
      */
-    public void addBackgroundSong(AnchorPane container)
+    public void addBackgroundSong()
     {
         final double defaultVolumePercent = 0;
 
@@ -168,7 +174,7 @@ public class HomeScene extends GameScene{
         gameBackgroundSongVolumeController.setTranslateX(((window_width / 2) + (window_width / 4) ) - 20);
         gameBackgroundSongVolumeController.setTranslateY(10);
 
-        container.getChildren().add(gameBackgroundSongVolumeController);
+        this.container.getChildren().add(gameBackgroundSongVolumeController);
 
         this.gameBackgroundSong = new MediaPlayer(this.gameDataManager.getAppSongs().getMedia(Config.AppSongs.HOME.key) );
         this.gameBackgroundSong.setOnEndOfMedia(() -> this.gameBackgroundSong.seek(Duration.ZERO) );
@@ -182,13 +188,13 @@ public class HomeScene extends GameScene{
      * place l'évenement pour la création d'un joueur
      * @param createPlayer
      */
-    public void eventOnCreateNewPlayer(Label createPlayer,AnchorPane container){
+    public void eventOnCreateNewPlayer(Label createPlayer){
         createPlayer.setOnMouseClicked((e) ->  {
             if(this.canDoAction() )
             {
                 this.someActionIsPerforming = true;
 
-                ObservableList<Node> children = container.getChildren();
+                ObservableList<Node> children = this.container.getChildren();
 
                 // crée la zone de création d'un personnage
                 ScrollPane creationBox = (ScrollPane) new CreatePlayer(this,(box,isCanceled) -> {
@@ -206,16 +212,20 @@ public class HomeScene extends GameScene{
      * place l'évenement pour le chargement d'une partie
      * @param loadGame
      */
-    public void eventOnLoadGame(Label loadGame,AnchorPane container){
+    public void eventOnLoadGame(Label loadGame){
         loadGame.setOnMouseClicked((e) -> {
             if(this.canDoAction() ){
                 this.someActionIsPerforming = true;
 
-                ObservableList<Node> children = container.getChildren();
+                ObservableList<Node> children = this.container.getChildren();
 
                 // ajout de la popup dans la page
-                AnchorPane popup = (AnchorPane) new SavedGamesPopup(this,(savedGame,isCanceled) -> {
-                    
+                AnchorPane popup = (AnchorPane) new SavedGamesPopup(this,(result,isCanceled) -> {
+                    SavedGamePopupResult popupResult = (SavedGamePopupResult) result;
+
+                    children.remove(popupResult.getPopup() );
+
+                    this.startNewGame(popupResult.getSavedGameData() );
                 },this.gameDataManager.getSavedGames() ).getPopup();
 
                 children.add(popup);
@@ -227,13 +237,13 @@ public class HomeScene extends GameScene{
      * 
      * @param startGame
      */
-    public void eventOnStartGame(Label startGame,AnchorPane container){
+    public void eventOnStartGame(Label startGame){
         startGame.setOnMouseClicked((e) -> {
             if(this.canDoAction() )
             {
                 this.someActionIsPerforming = true;
 
-                ObservableList<Node> children = container.getChildren();
+                ObservableList<Node> children = this.container.getChildren();
 
                 ScrollPane chooser = (ScrollPane) new GameStarter(this,(result,isCanceled) -> {
                     ChoosedData choiceResult = (ChoosedData) result;
@@ -242,7 +252,7 @@ public class HomeScene extends GameScene{
 
                     // si l'action non annulé alors on démarre une nouvelle partie
                     if(!isCanceled)
-                        this.startNewGame(choiceResult,container);
+                        this.startNewGame(choiceResult);
                     else
                         this.someActionIsPerforming = false;
                 }).getPopup();
@@ -255,7 +265,7 @@ public class HomeScene extends GameScene{
     /**
      * lance une nouvelle partie
      */
-    public void startNewGame(ChoosedData choiceData,AnchorPane container){
+    public void startNewGame(ChoosedData choiceData){
         try{
             // création de l'objet de gestion d'une partie
             GameSession session = new GameSession(this.game,choiceData.getChoosedCharacter(),choiceData.getChoosedPseudo(),() -> {
@@ -385,12 +395,31 @@ public class HomeScene extends GameScene{
                 session.waitGameStart(choiceData.getGameCode(),removeWaitingZone,removeAndFailure);
             }
 
-            container.getChildren().add(waitingBox);
+            this.container.getChildren().add(waitingBox);
         }
         catch(Exception e){
             this.someActionIsPerforming = false;
             this.showStartGameFailure();
         }
+    }
+
+    /**
+     * lance une partie sauvegardé
+     * @param savedGameData
+     */
+    public void startNewGame(GameDataToSave savedGameData){
+        VBox popup = (VBox) new SavedGameStarter(this,(result,isCanceled) -> {
+            SavedGameStarterPopupResult popupResult = (SavedGameStarterPopupResult) result;
+
+            this.container.getChildren().remove(popupResult.getPopup() );
+
+            if(popupResult.getChoosedToJoin() ){
+                System.out.println("decide de rejoindre avec le code -> " + popupResult.getCode() );
+            }
+            else System.out.println("décide de créer");
+        }).getPopup();  
+
+        this.container.getChildren().add(popup);
     }
 
     /**
