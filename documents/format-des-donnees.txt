@@ -10,6 +10,6 @@ actions sur le clavier:
 
     fleche gauche aller à gauche 
     fleche droite aller à droite
-    fleche haute sauter
+    espace sauter
     touche d super attaque
     touche f attaque

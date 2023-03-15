@@ -5,7 +5,6 @@ import yahaya_rachelle.configuration.Configurable;
 import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.data.SavedGames;
 import yahaya_rachelle.scene.scene.GameSessionScene;
-import yahaya_rachelle.scene.scene.HomeScene;
 import yahaya_rachelle.scene.scene.GameSessionScene.PlayerManager;
 import yahaya_rachelle.utils.GameCallback;
 import yahaya_rachelle.utils.GameContainerCallback;
@@ -72,6 +71,7 @@ public class GameSession extends Configurable{
     private double maxWidth;
 
     private int blockTime;
+    private int countOfPlayers;
 
     private Communicator communicator;
 
@@ -79,6 +79,22 @@ public class GameSession extends Configurable{
 
     private boolean lost;
     private boolean isBlockInDialog;
+
+    private GameSession(Game linkedGame,GameCallback toCallOnEnd){
+        this.linkedGame = linkedGame;
+        this.toCallOnEnd = toCallOnEnd;
+        this.countOfPlayers = 0;
+        this.otherPlayersMap = new HashMap<Socket,Player>();
+        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
+
+        this.blockTime = configLongGetter.getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
+        this.gameSessionScene = new GameSessionScene(this);
+        this.gameSessionScene.buildBefore();
+
+        // placement du joueur sur la scène;
+
+        this.maxWidth = configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
+    }
 
     /**
      * lance une nouvelle partie
@@ -92,65 +108,30 @@ public class GameSession extends Configurable{
      * @throws URISyntaxException
      */
     public GameSession(Game linkedGame,Character character,String pseudo,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
-        this.linkedGame = linkedGame;
-        this.toCallOnEnd = toCallOnEnd;
+        this(linkedGame,toCallOnEnd);
         this.linkedPlayer = new Player(character,pseudo,this);
-        this.otherPlayersMap = new HashMap<Socket,Player>();
 
-        ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.linkedGame);
-
-        this.blockTime = configLongGetter.getValueOf(Config.App.CHARACTERS_SUPPER_ATTACK_BLOCK_TIME.key).intValue();
-        this.gameSessionScene = new GameSessionScene(this);
-        this.gameSessionScene.buildBefore();
-        // placement du joueur sur la scène;
-
-        this.maxWidth = configLongGetter.getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
-        this.linkedPlayer.setPosition(new Player.Position(30,30,this.maxWidth,configLongGetter.getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
+        this.linkedPlayer.setPosition(new Player.Position(30,30,this.maxWidth,new ConfigGetter<Long>(this.linkedGame).getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
 
         this.gameSessionScene
             .addPlayer(this.linkedPlayer)
             .updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
 
-        // si null alors premier jeux crée on récupère le chemin de sauvegarde des parties et le dernier index de sauvegarde
-        if(GameSession.SAVED_GAMES_PATH == null){
-            ConfigGetter<String> configStringGetter = new ConfigGetter<String>(this.linkedGame);
-
-            GameSession.SAVED_GAMES_PATH = this.getClass().getResource(configStringGetter.getValueOf(Config.App.SAVED_GAMES_PATH.key) ).toURI().toString();
-
-            String indexFileName = configStringGetter.getValueOf(Config.App.SAVED_GAMES_INDEX_FILENAME.key);
-
-            GameSession.INDEX_FILE = new File(URI.create(GameSession.SAVED_GAMES_PATH + indexFileName) );
-
-            Scanner reader = new Scanner(GameSession.INDEX_FILE);
-
-            try{
-                GameSession.LAST_SAVED_GAME_INDEX = reader.nextInt();
-                
-                reader.close();
-            }
-            catch(Exception e){
-                reader.close();
-
-                throw e;
-            }
-        }   
+        this.manageSavedGames();
     }
-    /**
-     * permet de lancer une partie à partir d'une sauvegarde
-     * @param saveGameFilePath
-     * @param linkedGame
-     * @param homeScene
-     * @param toCallOnEnd
-     * @throws FileNotFoundException
-     * @throws ParseException
-     * @throws IOException
-     * @throws URISyntaxException
-     */
-    public GameSession(String saveGameFilePath,Game linkedGame,HomeScene homeScene,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
-        this.saveGameFilePath = saveGameFilePath;
-        this.toCallOnEnd = toCallOnEnd;
 
-        this.setConfig();
+    public GameSession(Game linkedGame,GameDataToSave savedGameData,GameCallback toCallOnEnd) throws FileNotFoundException, URISyntaxException{
+        this(linkedGame,toCallOnEnd);
+
+        this.linkedPlayer = savedGameData.getSavedPlayer();
+
+        this.linkedPlayer.setPosition(new Player.Position(30,30,this.maxWidth,new ConfigGetter<Long>(this.linkedGame).getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
+
+        this.gameSessionScene
+            .addPlayer(this.linkedPlayer)
+            .updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
+        
+        this.manageSavedGames();
     }
 
     /**
@@ -276,15 +257,21 @@ public class GameSession extends Configurable{
         return this;
     }
 
+    public GameSession askSaveName(GameContainerCallback toCallOnChoose){
+        this.gameSessionScene.askSaveName(toCallOnChoose);
+
+        return this;
+    }
+
     /**
      * sauvegarde cette partie
      * @return si la sauvegarde a réussi
      */
-    public boolean saveGame(){
+    public boolean saveGame(String saveName){
         try{
             String savePath = GameSession.SAVED_GAMES_PATH + Integer.toString(GameSession.LAST_SAVED_GAME_INDEX) + SavedGames.SAVED_GAMES_EXTENSION;
 
-            GameDataToSave saver = new GameDataToSave(this.linkedPlayer,this.gameSessionCode,this.linkedPlayer.getPseudo() );
+            GameDataToSave saver = new GameDataToSave(this.linkedPlayer,this.gameSessionCode,saveName,this.countOfPlayers);
 
             // tentative de sauvegarde du jeux
             if(saver.saveIn(URI.create(savePath) ) ){
@@ -403,6 +390,8 @@ public class GameSession extends Configurable{
             Player player = (Player) playerMessage.getMessageData();
 
             this.otherPlayersMap.put(playerMessage.getSource(),player);
+
+            this.countOfPlayers++;
             
             this.gameSessionScene
                 .addPlayer(player)
@@ -421,9 +410,11 @@ public class GameSession extends Configurable{
             Platform.runLater(() -> {
                 // affichage préventif au joueur puis sauvegarde et arrêt automatique de la partie chez lui
                 this.gameSessionScene.showWinStatusMessage("Partie en cours de sauvegarde lancé par " + sourcePlayerName,GameSessionScene.STATUS_SHOW_TIME,() -> {
-                    // on arrête la partie même en cas d'échec de sauvegarde
-                    if(!this.saveGame() )
-                        this.endGame();
+                    this.askSaveName((choosedName,unused) -> {
+                        // on arrête la partie même en cas d'échec de sauvegarde
+                        if(!this.saveGame((String) choosedName) )
+                            this.endGame();
+                    });
                 });
             });
         });
@@ -654,6 +645,34 @@ public class GameSession extends Configurable{
         ArrayList<GameCallback> toDo = this.doIfAttackFrom(player,action,source,true);
 
         this.manageKeyEvent(messageData.getCode(),player,true,() -> toDo.forEach(actionToDo -> actionToDo.action() ) );
+
+        return this;
+    }
+
+    private GameSession manageSavedGames() throws URISyntaxException, FileNotFoundException{
+        // si null alors premier jeux crée on récupère le chemin de sauvegarde des parties et le dernier index de sauvegarde
+        if(GameSession.SAVED_GAMES_PATH == null){
+            ConfigGetter<String> configStringGetter = new ConfigGetter<String>(this.linkedGame);
+
+            GameSession.SAVED_GAMES_PATH = this.getClass().getResource(configStringGetter.getValueOf(Config.App.SAVED_GAMES_PATH.key) ).toURI().toString();
+
+            String indexFileName = configStringGetter.getValueOf(Config.App.SAVED_GAMES_INDEX_FILENAME.key);
+
+            GameSession.INDEX_FILE = new File(URI.create(GameSession.SAVED_GAMES_PATH + indexFileName) );
+
+            Scanner reader = new Scanner(GameSession.INDEX_FILE);
+
+            try{
+                GameSession.LAST_SAVED_GAME_INDEX = reader.nextInt();
+                
+                reader.close();
+            }
+            catch(Exception e){
+                reader.close();
+
+                throw e;
+            }
+        }
 
         return this;
     }

@@ -33,6 +33,8 @@ public class SavedGameStarter extends ScenePopup{
 
         Label title = new Label("Lancer ou rejoindre la partie");
 
+        title.setFont(this.linkedScene.getGameDataManager().getFonts().getFont(Config.Fonts.BASIC.key,13) );
+
         HBox container = new HBox(10);
 
         TextField codeInput = new TextField();

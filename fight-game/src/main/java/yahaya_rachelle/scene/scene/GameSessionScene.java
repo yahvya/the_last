@@ -6,6 +6,7 @@ import java.util.HashMap;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -13,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -32,6 +34,7 @@ import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.game.GameSession;
 import yahaya_rachelle.utils.GameCallback;
+import yahaya_rachelle.utils.GameContainerCallback;
 
 /**
  * représente la page d'affichage d'une partie
@@ -172,15 +175,25 @@ public class GameSessionScene extends GameScene{
         timeline.play();
 
         if(toDoAfterShowTime != null){
-            timeline.setOnFinished((e) ->{
+            timeline.setOnFinished((e) -> {
                 children.remove(text);
-                toDoAfterShowTime.action();   
+                Platform.runLater(() -> toDoAfterShowTime.action() );   
             });
         }
         else timeline.setOnFinished((e) -> children.remove(text) );
 
         return this;
     }
+
+    public void askSaveName(GameContainerCallback toCallOnChoose){
+        TextInputDialog textInput = new TextInputDialog();
+
+        textInput.setContentText("Veuillez entrer un nom");
+        
+        try {
+            toCallOnChoose.action(textInput.showAndWait().get(),true);
+        } catch(Exception e) {}
+    }   
 
     /**
      * propose la sauvegarde de la partie et appel les méthode de la GameSession lié en fonction de l'annulation ou non de l'action
@@ -193,7 +206,7 @@ public class GameSessionScene extends GameScene{
 
             // si la personne confirme alors on sauvegarde la partie
             if(choiceAlert.showAndWait().get() == ButtonType.OK)
-                this.gameSession.saveGame();
+                this.askSaveName((choosedName,unused) -> this.gameSession.saveGame((String) choosedName) );
             else    
                 this.gameSession.cancelSave();
         }

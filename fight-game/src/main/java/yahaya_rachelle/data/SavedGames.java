@@ -45,14 +45,12 @@ public class SavedGames {
         for(int count = 0; count <= countOfSavedGames; count++){
             File gameFile = new File(URI.create(folderPath + count + SavedGames.SAVED_GAMES_EXTENSION) );
 
-            if(!gameFile.exists() )
-                continue;
+            if(!gameFile.exists() ) continue;
 
             GameDataToSave savedGame = GameDataToSave.getObjectFrom(gameFile);
 
             // alors échec de lecture du fichier
-            if(savedGame == null)
-                continue;
+            if(savedGame == null) continue; 
                 
             this.savedGames.put(savedGame.getSaveName(),savedGame);
         }

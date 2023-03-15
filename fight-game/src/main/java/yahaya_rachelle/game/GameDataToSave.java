@@ -16,10 +16,13 @@ public class GameDataToSave implements Serializable{
     private String gameSessionCode;
     private String saveName;
 
-    public GameDataToSave(Player savedPlayer,String gameSessionCode,String saveName){
+    private int countOfPlayers;
+
+    public GameDataToSave(Player savedPlayer,String gameSessionCode,String saveName,int countOfPlayers){
         this.savedPlayer = savedPlayer;
         this.gameSessionCode = gameSessionCode;
         this.saveName = saveName;
+        this.countOfPlayers = countOfPlayers;
     }
 
     /**
@@ -60,6 +63,8 @@ public class GameDataToSave implements Serializable{
             // lecture de l'objet sauvegardé
             GameDataToSave savedObject = (GameDataToSave) inputStream.readObject();
 
+            savedObject.savedPlayer.getCharacter().rebuildActionsMapSerializable();
+
             fileInputStream.close();
             inputStream.close();
 
@@ -80,5 +85,9 @@ public class GameDataToSave implements Serializable{
 
     public String getSaveName(){
         return this.saveName;
+    }
+
+    public int getCountOfPlayers(){
+        return this.countOfPlayers;
     }
 }

@@ -267,11 +267,18 @@ public class HomeScene extends GameScene{
      */
     public void startNewGame(ChoosedData choiceData){
         try{
-            // création de l'objet de gestion d'une partie
-            GameSession session = new GameSession(this.game,choiceData.getChoosedCharacter(),choiceData.getChoosedPseudo(),() -> {
+            GameSession session;
+
+            GameCallback toDoOnEnd = () -> {
                 this.someActionIsPerforming = false;
                 this.putSceneInWindow();
-            });
+            };
+
+            // création de l'objet de gestion d'une partie
+            if(!choiceData.getRestart() )   
+                session = new GameSession(this.game,choiceData.getChoosedCharacter(),choiceData.getChoosedPseudo(),toDoOnEnd);
+            else
+                session = new GameSession(this.game,choiceData.getSavedGameData(),toDoOnEnd);
 
             VBox waitingBox = new VBox(20);
             
@@ -413,10 +420,7 @@ public class HomeScene extends GameScene{
 
             this.container.getChildren().remove(popupResult.getPopup() );
 
-            if(popupResult.getChoosedToJoin() ){
-                System.out.println("decide de rejoindre avec le code -> " + popupResult.getCode() );
-            }
-            else System.out.println("décide de créer");
+            this.startNewGame(popupResult.getChoosedToJoin() ? new ChoosedData(popupResult.getCode(),savedGameData) : new ChoosedData(savedGameData) );
         }).getPopup();  
 
         this.container.getChildren().add(popup);

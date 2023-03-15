@@ -25,6 +25,7 @@ import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
 import yahaya_rachelle.data.GameDataManager;
+import yahaya_rachelle.game.GameDataToSave;
 import yahaya_rachelle.scene.scene.GameScene;
 import yahaya_rachelle.utils.GameContainerCallback;
 
@@ -275,7 +276,7 @@ public class GameStarter extends ScenePopup{
     /**
      * représente le retour de l'action choisi par le joueur dans la popup lancement de jeux
      */
-    public class ChoosedData{
+    public static class ChoosedData{
         private ScrollPane container;
         
         private Character choosedCharacter;
@@ -285,11 +286,16 @@ public class GameStarter extends ScenePopup{
         private Action actionToDo;
 
         private String gameCode;
+        
+        private GameDataToSave savedGameData;
 
         private int countOfParticipants;
 
+        private boolean restart;
+
         public ChoosedData(ScrollPane container){
             this.container = container;
+            this.restart = false;
         }
 
         public ChoosedData(ScrollPane container,Character choosedCharacter,String choosedPseudo,Action actionToDo){
@@ -297,6 +303,28 @@ public class GameStarter extends ScenePopup{
             this.choosedCharacter = choosedCharacter;
             this.choosedPseudo = choosedPseudo;
             this.actionToDo = actionToDo;
+        }
+
+        /**
+         * constructeur décrivant une partie reprise et crée par le joueur
+         * @param savedGameData données de la partie sauvegardé
+         */
+        public ChoosedData(GameDataToSave savedGameData){
+            this.restart = true;
+            this.actionToDo = Action.CREATE;
+            this.savedGameData = savedGameData;
+            this.countOfParticipants = savedGameData.getCountOfPlayers();
+        }   
+
+        /**
+         * constructeur décrivant une partie reprise et rejoins par le joueur
+         * @param gameCode le code de la partie
+         * @param savedGameData données de la partie sauvegardé
+         */
+        public ChoosedData(String gameCode,GameDataToSave savedGameData){
+            this(savedGameData);
+            this.actionToDo = Action.JOIN;
+            this.gameCode = gameCode;
         }
 
         public void setGameCode(String gameCode){
@@ -337,6 +365,14 @@ public class GameStarter extends ScenePopup{
          */
         public int getCountOfParticipants(){
             return this.countOfParticipants;
+        }
+
+        public boolean getRestart(){
+            return this.restart;
+        }
+
+        public GameDataToSave getSavedGameData(){
+            return this.savedGameData;
         }
     }
 }
