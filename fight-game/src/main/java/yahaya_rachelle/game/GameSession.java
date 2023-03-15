@@ -80,6 +80,8 @@ public class GameSession extends Configurable{
     private boolean lost;
     private boolean isBlockInDialog;
 
+    private GameDataToSave savedGame;
+
     private GameSession(Game linkedGame,GameCallback toCallOnEnd){
         this.linkedGame = linkedGame;
         this.toCallOnEnd = toCallOnEnd;
@@ -110,6 +112,7 @@ public class GameSession extends Configurable{
     public GameSession(Game linkedGame,Character character,String pseudo,GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this(linkedGame,toCallOnEnd);
         this.linkedPlayer = new Player(character,pseudo,this);
+        this.savedGame = null;
 
         this.linkedPlayer.setPosition(new Player.Position(30,30,this.maxWidth,new ConfigGetter<Long>(this.linkedGame).getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
 
@@ -124,6 +127,7 @@ public class GameSession extends Configurable{
         this(linkedGame,toCallOnEnd);
 
         this.linkedPlayer = savedGameData.getSavedPlayer();
+        this.savedGame = savedGameData;
 
         this.linkedPlayer.setPosition(new Player.Position(30,30,this.maxWidth,new ConfigGetter<Long>(this.linkedGame).getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 ) );
 
@@ -242,10 +246,23 @@ public class GameSession extends Configurable{
     }
 
     /**
-     * finis le jeux et retourne à la page d'accueil
-     * @return this
+     * alias
      */
     public GameSession endGame(){
+        // alors partie sauvegardé à supprimé
+        if(this.savedGame != null) this.savedGame.deleteFile();
+
+        this.endGame(true);
+
+        return this;
+    }
+
+    /**
+     * finis le jeux et retourne à la page d'accueil
+     * @param afterSave état
+     * @return this
+     */
+    public GameSession endGame(boolean afterSave){
         try{
             this.communicator.closeAll();
         }
@@ -288,7 +305,7 @@ public class GameSession extends Configurable{
                 // envoi du message de sauvegarde
                 this.communicator.propagateMessage(new Message(MessageType.SAVE_GAME,null) );
                 // fin de la partie
-                this.endGame();
+                this.endGame(true);
 
                 return true;
             }

@@ -185,6 +185,10 @@ public class GameSessionScene extends GameScene{
         return this;
     }
 
+    /**
+     * demande le nom de la partie à sauvargdé
+     * @param toCallOnChoose action à exécuté une fois le nom récupéré
+     */
     public void askSaveName(GameContainerCallback toCallOnChoose){
         TextInputDialog textInput = new TextInputDialog();
 

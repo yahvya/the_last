@@ -58,7 +58,7 @@ public class Player extends Configurable implements Serializable{
      * 
      * @param fromPlayer
      * @param attackType
-     * @return
+     * @return this
      */
     public Player receiveHitFrom(Player fromPlayer,PlayerAction attackType){
         switch(attackType){

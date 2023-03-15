@@ -15,14 +15,29 @@ public class GameDataToSave implements Serializable{
 
     private String gameSessionCode;
     private String saveName;
+    private URI myFilePath;
 
     private int countOfPlayers;
+
 
     public GameDataToSave(Player savedPlayer,String gameSessionCode,String saveName,int countOfPlayers){
         this.savedPlayer = savedPlayer;
         this.gameSessionCode = gameSessionCode;
         this.saveName = saveName;
         this.countOfPlayers = countOfPlayers;
+    }
+
+    /**
+     * supprime le fichier de la partie sauvegardé
+     * @return si la suppresion a reussie
+     */
+    public boolean deleteFile(){
+        try{
+            return new File(this.myFilePath).delete();
+        }
+        catch(Exception e){}
+
+        return false;
     }
 
     /**
@@ -35,6 +50,8 @@ public class GameDataToSave implements Serializable{
             FileOutputStream fileOutputStream = new FileOutputStream(new File(savePath) );
 
             ObjectOutputStream outputStream = new ObjectOutputStream(fileOutputStream );
+
+            this.myFilePath = savePath;
 
             // écriture de cet objet dans le fichier
             outputStream.writeObject(this);
