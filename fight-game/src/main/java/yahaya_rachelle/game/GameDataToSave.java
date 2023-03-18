@@ -10,6 +10,9 @@ import java.net.URI;
 
 import yahaya_rachelle.actor.Player;
 
+/**
+ * class des élements à sauvegarder
+ */
 public class GameDataToSave implements Serializable{
     private Player savedPlayer;
 

@@ -1,0 +1,49 @@
+Manuel d'utilisation
+
+Réglez le volume en utilisant le slider prévu
+
+Listes des actions possibles:
+    - Lancer une partie
+    - Reprendre une partie
+    - Créer son joueur
+
+Lancer une partie:
+    Sur la page d'accueil appuyez sur lancer une partie
+    Remplir le champs pseudo
+
+    Pour créer la partie :
+        - choisir le nombre de joueur via le picker 
+        - Cliquez sur le personnage choisi pour lancer la partie
+        - Le code de la partie sera généré et vous pouvez le copier en cliquant dessus
+        - Partagez le code avec les autres joueurs
+
+    Pour rejoindre une partie créer par un autre:
+        - Cliquer sur le bouton rejoindre une partie
+        - Saisir le code de la partie dans le champs prévu
+        - Cliquez sur le personnage pour lancer la partie
+
+Reprendre une partie:
+    - Sur la page d'accueil appuyez sur reprendre une partie
+    - Choisissez la partie à reprendre parmis la liste affiché (utilisé les flèches sur le côté pour defiler)
+    - Choisissez si vous devenez créateur ou si vous rejoignez la partie
+        - Cliquez sur créer pour devenir créateur puis appuyez sur le code pour partager
+        - Pour rejoindre saisissez le nouveau code de la partie puis cliquez sur reprendre
+
+Créer son joueur:
+    - Sur la page d'accueil appuyez sur créer son joueur
+    - Saisissez le nom du personnage-
+    - Pour chaque champs appuyez sur le boutton à droite pour ajouter une image à l'action
+    - Une fois tous les champs rempli d'au moins deux images vous pouvez confirmer avec le boutton
+
+Règles de jeu :
+
+    fleche droite : aller vers la droite
+    fleche gauche : aller vers la gauche
+    espace : sauter
+    d : attaque spécial (bloque un certains temps après chaque utilisation)
+    f : attaque normal
+    m : aller du côté de l'endroit où le joueur regarde (bloque un certains temps après chaque utilisation)
+    p : sauvegarde
+
+
+    
