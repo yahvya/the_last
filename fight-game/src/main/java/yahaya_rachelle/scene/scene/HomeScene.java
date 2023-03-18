@@ -59,11 +59,11 @@ public class HomeScene extends GameScene{
         super(game);
 
         this.someActionIsPerforming = false;
-        this.refusedActionSongPlayer = new MediaPlayer(this.gameDataManager.getAppSongs().getMedia(Config.AppSongs.REFUSED.key) );
-        this.refusedActionSongPlayer.setOnEndOfMedia(() -> {
-            this.refusedActionSongPlayer.seek(Duration.ZERO);
-            this.refusedActionSongPlayer.stop();
-        });
+        // this.refusedActionSongPlayer = new MediaPlayer(this.gameDataManager.getAppSongs().getMedia(Config.AppSongs.REFUSED.key) );
+        // this.refusedActionSongPlayer.setOnEndOfMedia(() -> {
+        //     this.refusedActionSongPlayer.seek(Duration.ZERO);
+        //     this.refusedActionSongPlayer.stop();
+        // });
     }
 
     @Override 
@@ -73,7 +73,7 @@ public class HomeScene extends GameScene{
 
         this.addBackgroundImage();
         this.addMenu();
-        this.addBackgroundSong();
+        // this.addBackgroundSong();
 
         return new Scene(container);
     }
