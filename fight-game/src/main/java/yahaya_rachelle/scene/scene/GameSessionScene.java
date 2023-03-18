@@ -27,6 +27,7 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 import yahaya_rachelle.actor.Player;
 import yahaya_rachelle.configuration.Config;
@@ -155,18 +156,25 @@ public class GameSessionScene extends GameScene{
     public GameSessionScene showWinStatusMessage(String message,int showTimeInMs,GameCallback toDoAfterShowTime){
         Label text = new Label(message);
 
-        text.setFont(this.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,40) );
+        Font font = this.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,40);
+
+        text.setFont(font);
+
+        final double charWidth = 20; 
+        final double labelHeight = 15; 
+        double labelWidth = charWidth * message.length();
 
         ConfigGetter<Long> longConfigGetter = new ConfigGetter<Long>(this.game);
 
         double width = longConfigGetter.getValueOf(Config.App.WINDOW_WIDTH.key);
         double height = longConfigGetter.getValueOf(Config.App.WINDOW_HEIGHT.key);
 
-        text.setTranslateX((width - text.getWidth() ) / 2);
-        text.setTranslateY((height - text.getHeight() ) / 2);
-
         children.add(text);
+
+        text.setTranslateX((width - labelWidth) / 2);
+        text.setTranslateY((height - labelHeight) / 2);
         
+
         // création de l'animation
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(50),(e) -> text.setOpacity(text.getOpacity() - 0.2) ) );
 

@@ -99,16 +99,16 @@ public abstract class Communicator {
             this.entrantMessageThreads.remove(socket);
         }
 
-        // ObjectOutputStream outputObject = this.otherPlayersSocketOutput.get(socket);
+        ObjectOutputStream outputObject = this.otherPlayersSocketOutput.get(socket);
 
-        // if(outputObject != null){
-        //     try{
-        //         outputObject.close();
-        //     }
-        //     catch(Exception e){}
+        if(outputObject != null){
+            try{
+                outputObject.close();
+            }
+            catch(Exception e){}
             
-        //     this.otherPlayersSocketOutput.remove(socket);
-        // }
+            this.otherPlayersSocketOutput.remove(socket);
+        }
 
         ObjectInputStream inputObject = this.otherPlayersSocketInput.get(socket);
 
@@ -292,7 +292,7 @@ public abstract class Communicator {
             if(ip == null) 
                 return "";
 
-            // String code =  InetAddress.getLocalHost().getHostAddress() + "#" + Integer.toString(this.server.getLocalPort() );
+                
             String code =  ip + "#" + Integer.toString(this.server.getLocalPort() );
 
             // remplacement de chaque caractère dans le code par l'équivalent dans le tableau de remplacement

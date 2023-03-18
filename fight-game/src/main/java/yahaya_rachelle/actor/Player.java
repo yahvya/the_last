@@ -66,6 +66,8 @@ public class Player extends Configurable implements Serializable{
             case SUPER_ATTACK: this.currentLife -= fromPlayer.getCharacter().getSuperForce(); break;
             default:;
         }
+
+        this.currentLife = 0;
         
         return this;
     }
