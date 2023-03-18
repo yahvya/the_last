@@ -299,7 +299,7 @@ public class HomeScene extends GameScene{
 
             final int circleRadius = 10;
             final int rotationSpeed = 95;
-            final int fixedWidth = 360;
+            final int fixedWidth = 460;
             final int fixedHeight = 160;
 
             Circle loadingCircle = new Circle();

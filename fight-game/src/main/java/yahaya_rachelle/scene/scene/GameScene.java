@@ -1,6 +1,7 @@
 package yahaya_rachelle.scene.scene;
 
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 import yahaya_rachelle.data.GameDataManager;
 import yahaya_rachelle.game.Game;
 
@@ -30,8 +31,12 @@ public abstract class GameScene {
     public void putSceneInWindow(boolean update){
         if(this.page == null || update)
             this.page = this.buildPage();
-            
-        this.game.getWindow().setScene(this.page);
+
+        Stage window = this.game.getWindow();
+
+        window.setScene(this.page);
+        window.setX(window.getX() - 1);
+        window.setX(window.getX() + 1);
     }
 
     /**
