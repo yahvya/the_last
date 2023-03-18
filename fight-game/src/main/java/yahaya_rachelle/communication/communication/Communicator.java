@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -261,13 +263,47 @@ public abstract class Communicator {
      * @throws UnknownHostException
      */
     public String generateCode() throws UnknownHostException{
-        String code =  InetAddress.getLocalHost().getHostAddress() + "#" + Integer.toString(this.server.getLocalPort() );
+        try{
 
-        // remplacement de chaque caractère dans le code par l'équivalent dans le tableau de remplacement
-        for(String[] replaceMapItem : Communicator.REPLACES_MAP)
-            code = code.replaceAll(replaceMapItem[0],replaceMapItem[1]);
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 
-        return code;
+            String ip = null;
+
+            boolean stop = false;
+
+            while(interfaces.hasMoreElements() && !stop){
+                Enumeration<InetAddress> adresses = interfaces.nextElement().getInetAddresses();
+
+                while(adresses.hasMoreElements() ){
+                    InetAddress address = adresses.nextElement();
+
+                    String containedIp = address.getHostAddress();
+
+                    if(containedIp.startsWith("192.168") ){
+                        ip = containedIp;
+
+                        stop = true;
+
+                        break;
+                    }
+                }
+            }
+
+            if(ip == null) 
+                return "";
+
+            // String code =  InetAddress.getLocalHost().getHostAddress() + "#" + Integer.toString(this.server.getLocalPort() );
+            String code =  ip + "#" + Integer.toString(this.server.getLocalPort() );
+
+            // remplacement de chaque caractère dans le code par l'équivalent dans le tableau de remplacement
+            for(String[] replaceMapItem : Communicator.REPLACES_MAP)
+                code = code.replaceAll(replaceMapItem[0],replaceMapItem[1]);
+
+            return code;
+        }
+        catch(Exception e){}
+
+        return "";
     }
 
     /**

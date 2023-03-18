@@ -73,7 +73,7 @@ public class HomeScene extends GameScene{
 
         this.addBackgroundImage();
         this.addMenu();
-        // this.addBackgroundSong();
+        this.addBackgroundSong();
 
         return new Scene(container);
     }
@@ -176,10 +176,16 @@ public class HomeScene extends GameScene{
 
         this.container.getChildren().add(gameBackgroundSongVolumeController);
 
+        try{
+
         this.gameBackgroundSong = new MediaPlayer(this.gameDataManager.getAppSongs().getMedia(Config.AppSongs.HOME.key) );
         this.gameBackgroundSong.setOnEndOfMedia(() -> this.gameBackgroundSong.seek(Duration.ZERO) );
         this.gameBackgroundSong.setVolume(defaultVolumePercent / 100);
         this.gameBackgroundSong.play();
+        }
+        catch(Exception e){
+            System.out.println(e);
+        }
 
         gameBackgroundSongVolumeController.valueProperty().addListener((e) -> this.gameBackgroundSong.setVolume(gameBackgroundSongVolumeController.getValue() / 100) );
     }
