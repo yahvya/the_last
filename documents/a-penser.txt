@@ -1,4 +1,0 @@
-gérer le cas ou il y a une erreur chez l'un
-décider si on garde les attaques groupés où si on récupère le joueur le plus proche de l'attaque
-close les ressources quand fenetre fermé en pleine partie
-voir si les données sauvegardés suffisent

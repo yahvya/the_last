@@ -2,8 +2,11 @@ Guide d'installation
 
 Pour lancer le projet à partir du code
     - Installez maven (https://linuxize.com/post/how-to-install-apache-maven-on-ubuntu-20-04/)
+    - pour les utilisateurs ubuntu une librairie peut être à installer :
+    sudo apt-get install libavformat-dev
     - Installez un éditeur supportant maven (ex : vscode) (https://fr.joecomp.com/how-install-visual-studio-code-ubuntu-18)
     - installer l'extension maven (https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
+    - Ouvrir le dossier dans vscode documents/code-source
     - Ouvrir le fichier App.java (src/main/App.java)
     - Utilisez le boutton de lancement en haut à droite
 

@@ -1,0 +1,6 @@
+changer la souris
+ajouter le coup attraction
+pour la sauvegarde:
+on garde le code et les données du joueur actuel de la personne
+on relance une partie comme on lance une partie normal
+et simplement le joueur de la personne sera son joueur sauvegardé sérializer

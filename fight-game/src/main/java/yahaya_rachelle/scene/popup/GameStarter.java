@@ -34,13 +34,13 @@ import yahaya_rachelle.utils.GameContainerCallback;
  */
 public class GameStarter extends ScenePopup{
 
-    private Action actionToDo;
+    protected Action actionToDo;
 
-    private TextField gameCode;
+    protected TextField gameCode;
 
-    private Spinner<Integer> countOfParticipants;
+    protected Spinner<Integer> countOfParticipants;
 
-    private ScrollPane parent;
+    protected ScrollPane parent;
 
     public GameStarter(GameScene linkedScene, GameContainerCallback toDoOnConfirm) {
         super(linkedScene, toDoOnConfirm);
@@ -96,7 +96,7 @@ public class GameStarter extends ScenePopup{
      * crée la zone de choix de l'action à faire (rejoindre une partie / créer une partie)
      * @return
      */
-    private VBox createActionChooserZone(GameDataManager manager){
+    protected VBox createActionChooserZone(GameDataManager manager){
         VBox chooseZone = new VBox(20);
 
         String startDescription = "Voulez vous rejoindre ou creer une partie - Action choisie .";
@@ -170,7 +170,7 @@ public class GameStarter extends ScenePopup{
      * 
      * @return la zone scrollable d'affichage des personnages
      */
-    private ScrollPane createCharactersChooserZone(VBox parent,TextField pseudoChooser){
+    protected ScrollPane createCharactersChooserZone(VBox parent,TextField pseudoChooser){
         ArrayList<Character> characters = this.linkedScene.getGameDataManager().getCharacters();
 
         HBox container = new HBox(10);
@@ -192,7 +192,7 @@ public class GameStarter extends ScenePopup{
      * crée le boutton d'annulation
      * @return
      */
-    private Button addExitButton(VBox container){
+    protected Button addExitButton(VBox container){
         Button button = this.getCustomButton("Quitter");
 
         button.setOnMouseClicked((e) -> this.toDoOnConfirm.action(new ChoosedData(this.parent),true) );
@@ -205,7 +205,7 @@ public class GameStarter extends ScenePopup{
      * @param children
      * @param character
      */
-    private void addNewCharacter(VBox container,ObservableList<Node> children,Character character,TextField pseudoChooser){
+    protected void addNewCharacter(VBox container,ObservableList<Node> children,Character character,TextField pseudoChooser){
         VBox characterContainer = new VBox(10);
 
         Label nameLabel = new Label(character.getName() );
@@ -252,7 +252,7 @@ public class GameStarter extends ScenePopup{
      * @param buttonText
      * @return le boutton
      */
-    private Button getCustomButton(String buttonText){
+    protected Button getCustomButton(String buttonText){
         Button button = new Button(buttonText);
 
         String color = "#C77F4F";
@@ -277,21 +277,21 @@ public class GameStarter extends ScenePopup{
      * représente le retour de l'action choisi par le joueur dans la popup lancement de jeux
      */
     public static class ChoosedData{
-        private ScrollPane container;
+        protected ScrollPane container;
         
-        private Character choosedCharacter;
+        protected Character choosedCharacter;
         
-        private String choosedPseudo;
+        protected String choosedPseudo;
 
-        private Action actionToDo;
+        protected Action actionToDo;
 
-        private String gameCode;
+        protected String gameCode;
         
-        private GameDataToSave savedGameData;
+        protected GameDataToSave savedGameData;
 
-        private int countOfParticipants;
+        protected int countOfParticipants;
 
-        private boolean restart;
+        protected boolean restart;
 
         public ChoosedData(ScrollPane container){
             this.container = container;

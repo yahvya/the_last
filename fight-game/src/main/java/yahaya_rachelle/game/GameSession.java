@@ -49,40 +49,40 @@ public class GameSession extends Configurable{
     public static final int JUMP_HEIGHT = 230;
     public static final int HIT_DISTANCE = 80;
 
-    private static String SAVED_GAMES_PATH = null;
+    protected static String SAVED_GAMES_PATH = null;
     
-    private static int LAST_SAVED_GAME_INDEX;
+    protected static int LAST_SAVED_GAME_INDEX;
     
-    private static File INDEX_FILE;
+    protected static File INDEX_FILE;
 
     public static final KeyCode SAVE_TOUCH = KeyCode.P;
 
-    private Game linkedGame;
+    protected Game linkedGame;
 
-    private String saveGameFilePath;
-    private String gameSessionCode;
+    protected String saveGameFilePath;
+    protected String gameSessionCode;
 
-    private GameSessionScene gameSessionScene;
+    protected GameSessionScene gameSessionScene;
 
-    private GameCallback toCallOnEnd;
+    protected GameCallback toCallOnEnd;
 
-    private Player linkedPlayer;
+    protected Player linkedPlayer;
 
-    private double maxWidth;
+    protected double maxWidth;
 
-    private int blockTime;
-    private int countOfPlayers;
+    protected int blockTime;
+    protected int countOfPlayers;
 
-    private Communicator communicator;
+    protected Communicator communicator;
 
-    private HashMap<Socket,Player> otherPlayersMap;;
+    protected HashMap<Socket,Player> otherPlayersMap;;
 
-    private boolean lost;
-    private boolean isBlockInDialog;
+    protected boolean lost;
+    protected boolean isBlockInDialog;
 
-    private GameDataToSave savedGame;
+    protected GameDataToSave savedGame;
 
-    private GameSession(Game linkedGame,GameCallback toCallOnEnd){
+    protected GameSession(Game linkedGame,GameCallback toCallOnEnd){
         this.linkedGame = linkedGame;
         this.toCallOnEnd = toCallOnEnd;
         this.countOfPlayers = 0;
@@ -337,7 +337,7 @@ public class GameSession extends Configurable{
      * @param toAddOnEnd
      * @return this
      */
-   synchronized private GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck,Player player,boolean fromMessage,GameCallback toAddOnEnd){
+   synchronized protected GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,boolean conditionToCheck,Player player,boolean fromMessage,GameCallback toAddOnEnd){
         // aucune action n'est possible durant le saut
         if(!player.getCanDoAction() )
             return this;
@@ -383,7 +383,7 @@ public class GameSession extends Configurable{
      * alias
      * @return this
      */
-    private GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,Player player,boolean fromMessage,GameCallback toAddOnEnd){
+    protected GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,Player player,boolean fromMessage,GameCallback toAddOnEnd){
         return this.madeActionIf(code,toCheck,action,toDoAfter,null,true,player,fromMessage,toAddOnEnd);
     }
 
@@ -391,7 +391,7 @@ public class GameSession extends Configurable{
      * alias
      * @return this
      */
-    private GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,Player player,boolean fromMessage,GameCallback toAddOnEnd){
+    protected GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,Player player,boolean fromMessage,GameCallback toAddOnEnd){
         return this.madeActionIf(code,toCheck,action,toDoAfter,toDoBeforeIfMatch,true,player,fromMessage,toAddOnEnd);
     }
 
@@ -399,7 +399,7 @@ public class GameSession extends Configurable{
      * 
      * @return la map des actions liés aux types de message
      */
-    private HashMap<MessageType,MessageManager> createActionsMap(){
+    protected HashMap<MessageType,MessageManager> createActionsMap(){
         HashMap<MessageType,MessageManager> map = new HashMap<MessageType,MessageManager>();
 
         // ajout du joueur entrant dans la page
@@ -409,7 +409,7 @@ public class GameSession extends Configurable{
             this.otherPlayersMap.put(playerMessage.getSource(),player);
 
             this.countOfPlayers++;
-            
+
             this.gameSessionScene
                 .addPlayer(player)
                 .updatePlayer(player,Config.PlayerAction.STATIC_POSITION,null);
@@ -443,7 +443,8 @@ public class GameSession extends Configurable{
      * lance une partie
      * @return this
      */
-    private GameSession startGame(){
+    protected GameSession startGame(){
+        this.linkedGame.getWindow().setOnCloseRequest((e) -> this.endGame() );
         this.lost = false;
         this.isBlockInDialog = false;
 
@@ -464,7 +465,7 @@ public class GameSession extends Configurable{
      * @param toAddOnEnd
      * @return this
      */
-    private GameSession manageKeyEvent(KeyCode code,Player player,boolean fromMessage,GameCallback toAddOnEnd){
+    synchronized protected GameSession manageKeyEvent(KeyCode code,Player player,boolean fromMessage,GameCallback toAddOnEnd){
 
         if(code.compareTo(GameSession.SAVE_TOUCH) != 0){
             // on autorise l'accès à la gestion si l'action provient d'un message ou que le joueur n'est pas bloqué
@@ -522,7 +523,7 @@ public class GameSession extends Configurable{
      * @param player
      * @return this
      */
-    private GameSession manageKeyEvent(KeyCode code,Player player){
+    protected GameSession manageKeyEvent(KeyCode code,Player player){
         return this.manageKeyEvent(code,player,false,null);
     }   
 
@@ -534,7 +535,7 @@ public class GameSession extends Configurable{
      * @param checkMe
      * @return une liste d'actions à faire après l'attaque si une / des personnes sonttouché
      */
-    synchronized private ArrayList<GameCallback> doIfAttackFrom(Player attacker,PlayerAction attackAction,Socket playerToIgnoreSocket,boolean checkMe){
+    synchronized protected ArrayList<GameCallback> doIfAttackFrom(Player attacker,PlayerAction attackAction,Socket playerToIgnoreSocket,boolean checkMe){
         ArrayList<GameCallback> toDo = new ArrayList<GameCallback>();
 
         // si l'action est un coup alors 
@@ -573,7 +574,7 @@ public class GameSession extends Configurable{
      * @param attackAction
      * @return une action à faire après l'attaque si une personne est touché
      */
-    synchronized private GameCallback doAttackIfFrom(ImageView messagePlayerView,Player attacker,Player toAttack,PlayerAction attackAction){
+    synchronized protected GameCallback doAttackIfFrom(ImageView messagePlayerView,Player attacker,Player toAttack,PlayerAction attackAction){
         // vérification de colision
         PlayerManager manager = this.gameSessionScene.getPlayerManager(toAttack);
 
@@ -649,7 +650,7 @@ public class GameSession extends Configurable{
      * @param actionMessage
      * @return this
      */
-    synchronized private GameSession managePlayerEntrantAction(Message actionMessage){
+    synchronized protected GameSession managePlayerEntrantAction(Message actionMessage){
         PlayerActionMessage messageData = (PlayerActionMessage) actionMessage.getMessageData();
 
         Socket source = actionMessage.getSource();
@@ -666,7 +667,7 @@ public class GameSession extends Configurable{
         return this;
     }
 
-    private GameSession manageSavedGames() throws URISyntaxException, FileNotFoundException{
+    protected GameSession manageSavedGames() throws URISyntaxException, FileNotFoundException{
         // si null alors premier jeux crée on récupère le chemin de sauvegarde des parties et le dernier index de sauvegarde
         if(GameSession.SAVED_GAMES_PATH == null){
             ConfigGetter<String> configStringGetter = new ConfigGetter<String>(this.linkedGame);
@@ -699,7 +700,7 @@ public class GameSession extends Configurable{
      * @param toDo
      * @return this
      */
-    private GameSession doAfterBlockTime(GameCallback toDo){
+    protected GameSession doAfterBlockTime(GameCallback toDo){
         Timeline unlockTimeline = new Timeline(new KeyFrame(Duration.ONE,(e) -> toDo.action() ) );
 
         unlockTimeline.setCycleCount(1);
@@ -726,7 +727,7 @@ public class GameSession extends Configurable{
      * aide interne à l'incrémentation d'entier dans un lambda
      */
     class IntegerHelper{
-        private int value;
+        protected int value;
 
         public IntegerHelper(){
             this.value = 0;

@@ -95,6 +95,21 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
+        <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <stripDebug>true</stripDebug>
+                    <compress>2</compress>
+                    <noHeaderFiles>true</noHeaderFiles>
+                    <noManPages>true</noManPages>
+                    <launcher>nesri-discount</launcher>
+                    <jlinkImageName>game</jlinkImageName>
+                    <jlinkZipName>game-app</jlinkZipName>
+                    <mainClass>yahaya_rachelle.App</mainClass>
+                </configuration>
+            </plugin>
       </plugins>
     </pluginManagement>
   </build>

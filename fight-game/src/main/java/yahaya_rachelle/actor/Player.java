@@ -21,19 +21,19 @@ public class Player extends Configurable implements Serializable{
 
     public static final List<PlayerAction> playerHitActions = Arrays.asList(PlayerAction.ATTACK,PlayerAction.SUPER_ATTACK);
 
-    private Character character;
+    protected Character character;
 
-    private String pseudo;
+    protected String pseudo;
 
-    private Position position;
+    protected Position position;
 
-    private double width;
-    private double height;
-    private double currentLife;
+    protected double width;
+    protected double height;
+    protected double currentLife;
 
-    private boolean canDoSuperAttack;
-    private boolean canDoAction;
-    private boolean canMoveS;
+    protected boolean canDoSuperAttack;
+    protected boolean canDoAction;
+    protected boolean canMoveS;
 
     public Player(Character character,String pseudo,GameSession linkedGameSession) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
 
@@ -66,8 +66,6 @@ public class Player extends Configurable implements Serializable{
             case SUPER_ATTACK: this.currentLife -= fromPlayer.getCharacter().getSuperForce(); break;
             default:;
         }
-
-        this.currentLife = 0;
         
         return this;
     }
@@ -159,14 +157,14 @@ public class Player extends Configurable implements Serializable{
      * représente la position d'un joueur
      */
     public static class Position implements Serializable{
-        private double currentX;
-        private double currentY;
-        private double containerWidth;
-        private double containerHeight;
-        private double linkedElementWidth;
-        private double linkedElementHeight;
+        protected double currentX;
+        protected double currentY;
+        protected double containerWidth;
+        protected double containerHeight;
+        protected double linkedElementWidth;
+        protected double linkedElementHeight;
 
-        private Direction currentDirection;
+        protected Direction currentDirection;
 
         public Position(double currentX,double currentY,double containerWidth,double containerHeight){
             this.containerWidth = containerWidth;       
@@ -200,7 +198,7 @@ public class Player extends Configurable implements Serializable{
          * @param direction
          * @return this
          */
-        synchronized private Position moveOnDirection(double speed,Direction direction){
+        synchronized protected Position moveOnDirection(double speed,Direction direction){
             
             switch(direction)
             {

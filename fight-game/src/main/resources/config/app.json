@@ -12,7 +12,7 @@
     "saved_games_index_file_name" : "index.txt",
     "custom_characters_index_file_name" : "index.txt",
     "characters_config_file_name" : "config.json",
-    "players_life" : 1000,
+    "players_life" : 400,
     "characters_max_force" : 80,
     "characters_super_attack_adding" : 20,
     "characters_super_attack_block_time_ms" : 4000,

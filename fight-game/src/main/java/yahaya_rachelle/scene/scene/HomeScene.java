@@ -30,9 +30,11 @@ import javafx.scene.text.Font;
 import javafx.util.Duration;
 import yahaya_rachelle.configuration.Config;
 import yahaya_rachelle.configuration.Configurable.ConfigGetter;
+import yahaya_rachelle.game.AiGameSession;
 import yahaya_rachelle.game.Game;
 import yahaya_rachelle.game.GameDataToSave;
 import yahaya_rachelle.game.GameSession;
+import yahaya_rachelle.scene.popup.AiGameStarter;
 import yahaya_rachelle.scene.popup.CreatePlayer;
 import yahaya_rachelle.scene.popup.GameStarter;
 import yahaya_rachelle.scene.popup.SavedGameStarter;
@@ -59,11 +61,11 @@ public class HomeScene extends GameScene{
         super(game);
 
         this.someActionIsPerforming = false;
-        // this.refusedActionSongPlayer = new MediaPlayer(this.gameDataManager.getAppSongs().getMedia(Config.AppSongs.REFUSED.key) );
-        // this.refusedActionSongPlayer.setOnEndOfMedia(() -> {
-        //     this.refusedActionSongPlayer.seek(Duration.ZERO);
-        //     this.refusedActionSongPlayer.stop();
-        // });
+        this.refusedActionSongPlayer = new MediaPlayer(this.gameDataManager.getAppSongs().getMedia(Config.AppSongs.REFUSED.key) );
+        this.refusedActionSongPlayer.setOnEndOfMedia(() -> {
+            this.refusedActionSongPlayer.seek(Duration.ZERO);
+            this.refusedActionSongPlayer.stop();
+        });
     }
 
     @Override 
@@ -92,9 +94,9 @@ public class HomeScene extends GameScene{
     public void addMenu(){
         ConfigGetter<Long> configLongGetter = new ConfigGetter<Long>(this.game);
 
-        VBox menu = new VBox(20);
+        VBox menu = new VBox(10);
 
-        final int width = 280;
+        final int width = 270;
         final int height = 350;
         
         menu.setMinWidth(width);
@@ -111,43 +113,45 @@ public class HomeScene extends GameScene{
         Label createPlayer = new Label("Creer un personnage");
         Label loadGame = new Label("Reprendre une partie");
         Label startGame = new Label("Lancer une partie");
+        Label gameAgainstAi = new Label("Jouer contre la machine");
 
-        Font font = this.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,25);
+        Font font = this.gameDataManager.getFonts().getFont(Config.Fonts.BASIC.key,22);
 
         // on coupe le texte s'il est trop grand
         createPlayer.setWrapText(true);
         loadGame.setWrapText(true);
         startGame.setWrapText(true);
+        gameAgainstAi.setWrapText(true);
 
         // changement de la police
         createPlayer.setFont(font);
         loadGame.setFont(font);
         startGame.setFont(font);
+        gameAgainstAi.setFont(font);
 
         // ajout des évenements sur les actions
         this.eventOnCreateNewPlayer(createPlayer);
         this.eventOnLoadGame(loadGame);
         this.eventOnStartGame(startGame);
+        this.eventOnStartAiGame(gameAgainstAi);
 
         ObservableList<Node> children = menu.getChildren();
         
-        children.addAll(createPlayer,loadGame,startGame);
-        // ajout de l'évenement hower pour le changement de couleur
+        children.addAll(createPlayer,loadGame,startGame,gameAgainstAi);
+        // ajout de l'évenement hover pour le changement de couleur
         children.forEach(item -> {
             item.setOnMouseEntered((e) -> {
                 Label label = (Label) e.getSource();
 
                 label.setTextFill(Paint.valueOf("brown") );
             });
-        }); 
-
-        children.forEach(item -> {
+        
             item.setOnMouseExited((e) -> {
                 Label label = (Label) e.getSource();
 
                 label.setTextFill(Paint.valueOf("black") );
             });
-        }); 
+        });
 
         Label gameName = new Label(new ConfigGetter<String>(this.game).getValueOf(Config.App.GAME_NAME.key) );
 
@@ -261,6 +265,44 @@ public class HomeScene extends GameScene{
                         this.startNewGame(choiceResult);
                     else
                         this.someActionIsPerforming = false;
+                }).getPopup();
+
+                children.add(chooser);
+            }
+        });
+    }
+
+    /**
+     * place l'évenement de jeux contre l'ia
+     * @param aiGame
+     */
+    public void eventOnStartAiGame(Label aiGame){
+        aiGame.setOnMouseClicked((e) -> {
+            if(this.canDoAction() )
+            {
+                this.someActionIsPerforming = true;
+
+                ObservableList<Node> children = this.container.getChildren();
+
+                ScrollPane chooser = (ScrollPane) new AiGameStarter(this,(result,isCanceled) -> {
+                    ChoosedData choiceResult = (ChoosedData) result;
+
+                    children.remove(choiceResult.getContainer() );
+
+                    // si l'action non annulé alors on démarre une nouvelle partie
+                    if(!isCanceled){
+                        try{
+                            AiGameSession aiGameSession = new AiGameSession(game,choiceResult.getChoosedCharacter(),choiceResult.getChoosedPseudo(),() -> {
+                                someActionIsPerforming = false;
+                                putSceneInWindow();
+                            });
+                        }
+                        catch(Exception exception){
+                            this.someActionIsPerforming = false;
+                            this.showStartGameFailure();
+                        }
+                    }
+                    else this.someActionIsPerforming = false;
                 }).getPopup();
 
                 children.add(chooser);

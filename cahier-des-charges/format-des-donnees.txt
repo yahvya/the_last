@@ -1,0 +1,15 @@
+les clés à utiliser dans les maps partagés sont à définir dans l'énumération Key
+
+format du nom d'une clé : PREFIX_NOM_REEL
+exemple pour une clé de chemin: PATH_FONTS
+
+les personnsages ont une force en pourcentage sur une limite définis dans le fichier app.json
+une valeur aussi définis dans le fichier app.json ajoute une force d'attaque (non en pourcentage) pour leurs super attaque
+
+actions sur le clavier:
+
+    fleche gauche aller à gauche 
+    fleche droite aller à droite
+    espace sauter
+    touche d super attaque
+    touche f attaque

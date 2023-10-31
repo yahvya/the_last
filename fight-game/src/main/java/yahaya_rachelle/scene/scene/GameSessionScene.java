@@ -43,15 +43,15 @@ import yahaya_rachelle.utils.GameContainerCallback;
 public class GameSessionScene extends GameScene{
     public static final int STATUS_SHOW_TIME = 3000;
 
-    private GameSession gameSession;
+    protected GameSession gameSession;
 
-    private ObservableList<Node> children;
+    protected ObservableList<Node> children;
 
-    private HashMap<Player,PlayerManager> playersMap;
+    protected HashMap<Player,PlayerManager> playersMap;
 
-    private double playersMaxLife;
+    protected double playersMaxLife;
 
-    private ObservableList<Node> lifebarsList;
+    protected ObservableList<Node> lifebarsList;
 
     public GameSessionScene(GameSession gameSession) {
         super(gameSession.getLinkedGame() );
@@ -231,25 +231,25 @@ public class GameSessionScene extends GameScene{
      * gère les animations et placement du joueur dans la page de jeux
      */
     public class PlayerManager{
-        private Player player;
+        protected Player player;
 
-        private Timeline timeline;
+        protected Timeline timeline;
         
-        private ImageView view;
+        protected ImageView view;
 
-        private double playersMaxLife;
+        protected double playersMaxLife;
 
-        private VBox lifebarContainer;
-        private AnchorPane toReduce;
+        protected VBox lifebarContainer;
+        protected AnchorPane toReduce;
 
-        private Config.PlayerAction currentAction;
+        protected Config.PlayerAction currentAction;
         
-        private Player.Position.Direction currentDirection;
+        protected Player.Position.Direction currentDirection;
 
-        private static final int MAX_MS_PER_ACTION = 700;
-        private static final int LIFEBAR_WIDTH = 120;
+        protected static final int MAX_MS_PER_ACTION = 700;
+        protected static final int LIFEBAR_WIDTH = 120;
 
-        private GameSessionScene linkedScene;
+        protected GameSessionScene linkedScene;
 
         public PlayerManager(Player player,double playersMaxLife,GameSessionScene linkedScene){
             this.player = player;
@@ -268,7 +268,7 @@ public class GameSessionScene extends GameScene{
          * crée une barre de vie
          * @return la barre de vie
          */
-        private VBox createLifeBar() {
+        protected VBox createLifeBar() {
             AnchorPane lifeBar = new AnchorPane();
             AnchorPane redBar = new AnchorPane();
             this.toReduce = new AnchorPane();
