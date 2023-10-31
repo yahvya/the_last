@@ -10,8 +10,6 @@
         <module name="fight_game (1)" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="fight_game" target="1.8" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="15" />
   </component>
 </project>

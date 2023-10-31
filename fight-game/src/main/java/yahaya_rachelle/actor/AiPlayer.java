@@ -8,7 +8,12 @@ import java.util.Random;
 
 import org.json.simple.parser.ParseException;
 
+import javafx.scene.input.KeyCode;
 import yahaya_rachelle.communication.communication.AiCommunicator;
+import yahaya_rachelle.communication.message.Message;
+import yahaya_rachelle.communication.message.PlayerActionMessage;
+import yahaya_rachelle.communication.message.Message.MessageType;
+import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.game.GameSession;
 
 /**
@@ -86,9 +91,10 @@ public class AiPlayer extends Player implements Runnable{
     public void run(){
         this.stop = false; 
         
-        while(!stop){
-            System.out.println("position x de l'opposant : " + opponent.getPosition().currentX);
+        while(!stop && !this.isDead() ){
+            System.out.println("position x de l'opposant : " + opponent.getPosition().currentX + " - ma vie : " + this.currentLife + " - mon x : " + this.position.currentX);
             try{
+                this.communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,new PlayerActionMessage(KeyCode.F,PlayerAction.ATTACK)) );
                 Thread.sleep(1000);
             }
             catch(Exception e){

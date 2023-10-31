@@ -13,8 +13,9 @@ import yahaya_rachelle.actor.Player;
 import yahaya_rachelle.communication.communication.AiCommunicator;
 import yahaya_rachelle.communication.communication.Communicator.MessageManager;
 import yahaya_rachelle.communication.message.Message.MessageType;
+import yahaya_rachelle.communication.message.PlayerActionMessage;
 import yahaya_rachelle.configuration.Config;
-import yahaya_rachelle.scene.scene.AiGameSessionScene;
+import yahaya_rachelle.configuration.Config.PlayerAction;
 import yahaya_rachelle.scene.scene.CustomGameSessionScene;
 import yahaya_rachelle.utils.GameCallback;
 
@@ -33,10 +34,7 @@ public class AiGameSession extends GameSession{
         // définition du communicateur ia
         HashMap<MessageType,MessageManager> actionsMap = this.createActionsMap();
 
-        actionsMap.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> {
-            System.out.println("reception de message au niveau du joueur");
-            this.managePlayerEntrantAction(actionMessage);
-        }); 
+        actionsMap.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> this.managePlayerEntrantAction(actionMessage) ); 
 
         // suppression des évenements non utiles
         actionsMap.remove(MessageType.SAVE_GAME);
@@ -85,10 +83,6 @@ public class AiGameSession extends GameSession{
      * @return le gestion de message de l'ia
      */
     protected HashMap<MessageType,MessageManager> createIaActionsMap(){
-        AiGameSessionScene aiSceneContext = new AiGameSessionScene(this);
-
-        aiSceneContext.buildBefore();
-
         HashMap<MessageType,MessageManager> map = new HashMap<MessageType,MessageManager>();
 
         // ajout du joueur entrant dans la page
@@ -96,10 +90,24 @@ public class AiGameSession extends GameSession{
             Player player = (Player) playerMessage.getMessageData();
 
             this.aiPlayer.setOpponent(player);
+        });
+        
+        map.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> {
+            PlayerActionMessage messageData = (PlayerActionMessage) actionMessage.getMessageData();
 
-            aiSceneContext
-                .addPlayer(player)
-                .updatePlayer(player,Config.PlayerAction.STATIC_POSITION,null);
+            PlayerAction action = messageData.getAction();
+
+            if(Player.playerHitActions.contains(action) ){
+                // gestion de si c'est une attaque et mise à jour de la scène
+                GameCallback toDo = this.doAttackIfFrom(
+                    this.gameSessionScene.getPlayerManager(this.linkedPlayer).getView(),
+                    this.linkedPlayer,
+                    this.aiPlayer,
+                    action
+                );
+
+                if(toDo != null) toDo.action();
+            }
         });
 
         return map;
