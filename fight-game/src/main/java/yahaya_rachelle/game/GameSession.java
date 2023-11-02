@@ -49,6 +49,14 @@ public class GameSession extends Configurable{
     public static final int JUMP_HEIGHT = 230;
     public static final int HIT_DISTANCE = 80;
 
+    public static final HashMap<PlayerAction,KeyCode> ACTIONS_KEY_MAP = new HashMap<PlayerAction,KeyCode>(){{
+        put(PlayerAction.ATTACK,KeyCode.F);
+        put(PlayerAction.SUPER_ATTACK,KeyCode.D);
+        put(PlayerAction.JUMP,KeyCode.SPACE);
+        put(PlayerAction.STATIC_POSITION,KeyCode.M);
+        // left et right run cas spéciaux
+    }};
+
     protected static String SAVED_GAMES_PATH = null;
     
     protected static int LAST_SAVED_GAME_INDEX;
@@ -353,7 +361,7 @@ public class GameSession extends Configurable{
 
                 // gestion de l'attaque de mon côté
                 if(Player.playerHitActions.contains(action) ){
-                    ArrayList<GameCallback> toDo = this.doIfAttackFrom(this.linkedPlayer,action,null,false); 
+                    ArrayList<GameCallback> toDo = this.doIfAttackFrom(this.linkedPlayer,action,null,false);
 
                     this.gameSessionScene.updatePlayer(player,action,() -> {
                         toDo.forEach(actionToDo -> actionToDo.action() );
@@ -383,7 +391,7 @@ public class GameSession extends Configurable{
      * alias
      * @return this
      */
-    protected GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,Player player,boolean fromMessage,GameCallback toAddOnEnd){
+    synchronized protected GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,Player player,boolean fromMessage,GameCallback toAddOnEnd){
         return this.madeActionIf(code,toCheck,action,toDoAfter,null,true,player,fromMessage,toAddOnEnd);
     }
 
@@ -391,7 +399,7 @@ public class GameSession extends Configurable{
      * alias
      * @return this
      */
-    protected GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,Player player,boolean fromMessage,GameCallback toAddOnEnd){
+    synchronized protected GameSession madeActionIf(KeyCode code,KeyCode toCheck,Config.PlayerAction action,GameCallback toDoAfter,GameCallback toDoBeforeIfMatch,Player player,boolean fromMessage,GameCallback toAddOnEnd){
         return this.madeActionIf(code,toCheck,action,toDoAfter,toDoBeforeIfMatch,true,player,fromMessage,toAddOnEnd);
     }
 
@@ -399,7 +407,7 @@ public class GameSession extends Configurable{
      * 
      * @return la map des actions liés aux types de message
      */
-    protected HashMap<MessageType,MessageManager> createActionsMap(){
+    synchronized protected HashMap<MessageType,MessageManager> createActionsMap(){
         HashMap<MessageType,MessageManager> map = new HashMap<MessageType,MessageManager>();
 
         // ajout du joueur entrant dans la page
@@ -466,22 +474,21 @@ public class GameSession extends Configurable{
      * @return this
      */
     synchronized protected GameSession manageKeyEvent(KeyCode code,Player player,boolean fromMessage,GameCallback toAddOnEnd){
-
         if(code.compareTo(GameSession.SAVE_TOUCH) != 0){
             // on autorise l'accès à la gestion si l'action provient d'un message ou que le joueur n'est pas bloqué
             if(fromMessage || !this.isBlockInDialog){
                 GameCallback toDoAfter = () -> this.gameSessionScene.updatePlayer(player,Config.PlayerAction.STATIC_POSITION,null);
 
                 this
-                    .madeActionIf(code,KeyCode.F,PlayerAction.ATTACK,toDoAfter,player,fromMessage,toAddOnEnd)
-                    .madeActionIf(code,KeyCode.D,PlayerAction.SUPER_ATTACK,toDoAfter,() -> {
+                    .madeActionIf(code,GameSession.ACTIONS_KEY_MAP.get(PlayerAction.ATTACK),PlayerAction.ATTACK,toDoAfter,player,fromMessage,toAddOnEnd)
+                    .madeActionIf(code,GameSession.ACTIONS_KEY_MAP.get(PlayerAction.SUPER_ATTACK),PlayerAction.SUPER_ATTACK,toDoAfter,() -> {
                         // on bloque la super attaque pendant x temps
                         player.setCanDoSuperAttack(false);
 
                         this.doAfterBlockTime(() -> player.setCanDoSuperAttack(true) );
 
                     },player.getCanDoSuperAttack(),player,fromMessage,toAddOnEnd)
-                    .madeActionIf(code,KeyCode.SPACE,PlayerAction.JUMP,() -> {
+                    .madeActionIf(code,GameSession.ACTIONS_KEY_MAP.get(PlayerAction.JUMP),PlayerAction.JUMP,() -> {
                         // à la fin de la séquence de saut, on lance la séquence de descente
                         this.gameSessionScene.updatePlayer(player,Config.PlayerAction.FALL,() -> {
                             // quand la déscente est terminé on débloque les autres actions
@@ -490,7 +497,7 @@ public class GameSession extends Configurable{
                             toDoAfter.action();
                         });
                     },() -> player.setCanDoAction(false),player,fromMessage,toAddOnEnd)
-                    .madeActionIf(code,KeyCode.M,PlayerAction.STATIC_POSITION,null,() -> {
+                    .madeActionIf(code,GameSession.ACTIONS_KEY_MAP.get(PlayerAction.STATIC_POSITION),PlayerAction.STATIC_POSITION,null,() -> {
                         // on bloque l'action pendant un certains pour la re activer
                         player.getPosition().moveOnCurrentDirection(this.maxWidth);
                         player.setCanMoveS(false);
@@ -523,7 +530,7 @@ public class GameSession extends Configurable{
      * @param player
      * @return this
      */
-    protected GameSession manageKeyEvent(KeyCode code,Player player){
+    synchronized protected GameSession manageKeyEvent(KeyCode code,Player player){
         return this.manageKeyEvent(code,player,false,null);
     }   
 
@@ -565,7 +572,7 @@ public class GameSession extends Configurable{
 
         return toDo;
     }
-    
+
     /**
      * gère une attaque entrante si l'action en est une
      * @param messagePlayerView
@@ -579,7 +586,7 @@ public class GameSession extends Configurable{
         PlayerManager manager = this.gameSessionScene.getPlayerManager(toAttack);
 
         ImageView currentPlayerView = manager.getView();
-    
+
         // s'ils se touchent alors colision
         if(messagePlayerView.getBoundsInParent().intersects(currentPlayerView.getBoundsInParent() ) ){
             Player.Position toAttackPosition = toAttack.getPosition();
@@ -602,7 +609,6 @@ public class GameSession extends Configurable{
             }
             else {
                 return () -> this.gameSessionScene.updatePlayer(toAttack,PlayerAction.DEATH,() -> {
-                    this.gameSessionScene.removePlayer(toAttack);
 
                     // si le joueur mort n'est pas moi on ferme les ressources sinon on affiche le message de défaite
                     if(toAttack != this.linkedPlayer){
@@ -611,18 +617,18 @@ public class GameSession extends Configurable{
 
                             if(entry.getValue() == toAttack){
                                 Socket playerSocket = entry.getKey();
-                                
+
                                 // fermeture des resources et suppression de la liste des joueurs géré
                                 this.communicator.close(playerSocket);
                                 this.otherPlayersMap.remove(playerSocket);
-                            
+
                                 break;
-                            }   
-                        } 
+                            }
+                        }
 
                         int countOfRestantPlayers = this.otherPlayersMap.size();
 
-                        /* 
+                        /*
                             si tous les autres joueurs ont perdu alors j'ai gagné
                             on affiche le message de victoire et on finis la partie après l'affichage
                             s'il reste un joueur et que j'ai perdu alors il a gagné de son côté (fin de partie)
@@ -700,7 +706,7 @@ public class GameSession extends Configurable{
      * @param toDo
      * @return this
      */
-    protected GameSession doAfterBlockTime(GameCallback toDo){
+    synchronized protected GameSession doAfterBlockTime(GameCallback toDo){
         Timeline unlockTimeline = new Timeline(new KeyFrame(Duration.ONE,(e) -> toDo.action() ) );
 
         unlockTimeline.setCycleCount(1);

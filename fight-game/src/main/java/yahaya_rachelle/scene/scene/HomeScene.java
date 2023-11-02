@@ -168,7 +168,7 @@ public class HomeScene extends GameScene{
      */
     public void addBackgroundSong()
     {
-        final double defaultVolumePercent = 0;
+        final double defaultVolumePercent = 20;
 
         double window_width = new ConfigGetter<Long>(this.game).getValueOf(Config.App.WINDOW_WIDTH.key).doubleValue();
 

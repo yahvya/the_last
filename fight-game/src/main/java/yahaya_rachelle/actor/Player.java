@@ -60,7 +60,7 @@ public class Player extends Configurable implements Serializable{
      * @param attackType
      * @return this
      */
-    public Player receiveHitFrom(Player fromPlayer,PlayerAction attackType){
+    synchronized public Player receiveHitFrom(Player fromPlayer,PlayerAction attackType){
         switch(attackType){
             case ATTACK: this.currentLife -= fromPlayer.getCharacter().getForce() ; break;
             case SUPER_ATTACK: this.currentLife -= fromPlayer.getCharacter().getSuperForce(); break;
@@ -74,7 +74,7 @@ public class Player extends Configurable implements Serializable{
      * 
      * @return si le joueur est mort
      */
-    public boolean isDead(){
+    synchronized public boolean isDead(){
         return this.currentLife <= 0;
     }
 
@@ -82,7 +82,7 @@ public class Player extends Configurable implements Serializable{
      * définis la position du joueur, doit être appellé avant un getPosition
      * @param position
      */
-    public void setPosition(Position position){
+    synchronized public void setPosition(Position position){
         this.position = position;
         this.position
             .setLinkedElementHeight(this.height)
@@ -90,25 +90,25 @@ public class Player extends Configurable implements Serializable{
             .updateAll();
     }
 
-    public Player setCanDoAction(boolean canDoAction){
+    synchronized public Player setCanDoAction(boolean canDoAction){
         this.canDoAction = canDoAction;
 
         return this;
     }
 
-    public Player setCanDoSuperAttack(boolean canDoSuperAttack){
+    synchronized public Player setCanDoSuperAttack(boolean canDoSuperAttack){
         this.canDoSuperAttack = canDoSuperAttack;
         
         return this;
     }
 
-    public Player setCanMoveS(boolean canMoveS){
+    synchronized public Player setCanMoveS(boolean canMoveS){
         this.canMoveS = canMoveS;
         
         return this;
     }
 
-    public Position getposition() {
+    synchronized public Position getposition() {
         return this.position;
     }
 
@@ -176,10 +176,10 @@ public class Player extends Configurable implements Serializable{
 
         /**
          * bouge la position dans la direction actuelle
-         * @param direction
+         * @param speed
          * @return this
          */
-        public Position moveOnCurrentDirection(double speed){
+        synchronized public Position moveOnCurrentDirection(double speed){
             return this.moveOnDirection(speed,this.currentDirection);
         }
 
@@ -188,7 +188,7 @@ public class Player extends Configurable implements Serializable{
          * @param speed
          * @return this
          */
-        public Position moveOnOppositeDirection(double speed){
+        synchronized public Position moveOnOppositeDirection(double speed){
             return this.moveOnDirection(speed,this.currentDirection == Direction.RIGHT ? Direction.LEFT : Direction.RIGHT);
         }
 
@@ -222,7 +222,7 @@ public class Player extends Configurable implements Serializable{
         /**
          * met à jour les valeurs après affectation des données linkedElement...
          */
-        public Position updateAll(){
+        synchronized public Position updateAll(){
             this.currentY = this.containerHeight - this.linkedElementHeight;
             
             return this;
@@ -233,7 +233,7 @@ public class Player extends Configurable implements Serializable{
          * @param linkedElementWidth
          * @return this
          */
-        public Position setLinkedElementWidth(double linkedElementWidth){
+        synchronized public Position setLinkedElementWidth(double linkedElementWidth){
             this.linkedElementWidth = linkedElementWidth;
 
             return this;
@@ -244,7 +244,7 @@ public class Player extends Configurable implements Serializable{
          * @param linkedElementHeight
          * @return this
          */
-        public Position setLinkedElementHeight(double linkedElementHeight){
+        synchronized public Position setLinkedElementHeight(double linkedElementHeight){
             this.linkedElementHeight = linkedElementHeight;
 
             return this;
@@ -255,27 +255,27 @@ public class Player extends Configurable implements Serializable{
          * @param currentDirection
          * @return this
          */
-        public Position setCurrentDirection(Direction currentDirection){
+        synchronized public Position setCurrentDirection(Direction currentDirection){
             this.currentDirection = currentDirection;
 
             return this;
         }
 
-        public Direction getCurrentDirection(){
+        synchronized public Direction getCurrentDirection(){
             return this.currentDirection;
         }
 
-        public Position setCurrentY(double currentY){
+        synchronized public Position setCurrentY(double currentY){
             this.currentY = currentY;
 
             return this;
         }
 
-        public double getCurrentX(){
+        synchronized public double getCurrentX(){
             return this.currentX;
         }
 
-        public double getCurrentY(){
+        synchronized public double getCurrentY(){
             return this.currentY;
         }
 

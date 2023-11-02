@@ -59,7 +59,7 @@ public class AiGameStarter extends GameStarter{
         imageViewer.setOnMouseClicked((e) -> {
             String choosedPseudo = pseudoChooser.getText();
 
-            if(choosedPseudo.length() < 2 || (this.actionToDo == Action.JOIN && this.gameCode.getText().length() < 1) )
+            if(choosedPseudo.length() < 2 || (this.actionToDo == Action.JOIN && this.gameCode.getText().isEmpty()) )
                 return;
 
             ChoosedData data = new ChoosedData(this.parent,character,choosedPseudo,null);

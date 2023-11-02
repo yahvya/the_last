@@ -1,22 +1,28 @@
 {
     "scenes" : [
         {
-            "image" : "/images/scenes/1.gif"
+            "image" : "/images/scenes/1.gif",
+            "upp-color" : "red"
         },
         {
-            "image" : "/images/scenes/2.gif"
+            "image" : "/images/scenes/2.gif",
+            "upp-color" : "red"
         },
         {
-            "image" : "/images/scenes/3.gif"
+            "image" : "/images/scenes/3.gif",
+            "upp-color" : "red"
         },
         {
-            "image" : "/images/scenes/4.gif"
+            "image" : "/images/scenes/4.gif",
+            "upp-color" : "red"
         },
         {
-            "image" : "/images/scenes/5.gif"
+            "image" : "/images/scenes/5.gif",
+            "upp-color" : "red"
         },
         {
-            "image" : "/images/scenes/6.gif"
+            "image" : "/images/scenes/6.gif",
+            "upp-color" : "red"
         }
     ]   
 }

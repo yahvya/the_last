@@ -5,13 +5,16 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
+import javafx.application.Platform;
 import org.json.simple.parser.ParseException;
 
 import yahaya_rachelle.actor.AiPlayer;
 import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
+import yahaya_rachelle.algorithm.MiniMaxAiManager;
 import yahaya_rachelle.communication.communication.AiCommunicator;
 import yahaya_rachelle.communication.communication.Communicator.MessageManager;
+import yahaya_rachelle.communication.message.Message;
 import yahaya_rachelle.communication.message.Message.MessageType;
 import yahaya_rachelle.communication.message.PlayerActionMessage;
 import yahaya_rachelle.configuration.Config;
@@ -34,7 +37,7 @@ public class AiGameSession extends GameSession{
         // définition du communicateur ia
         HashMap<MessageType,MessageManager> actionsMap = this.createActionsMap();
 
-        actionsMap.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> this.managePlayerEntrantAction(actionMessage) ); 
+        actionsMap.put(MessageType.RECEIVE_PLAYER_ACTION,(actionMessage) -> this.managePlayerEntrantAction(actionMessage) );
 
         // suppression des évenements non utiles
         actionsMap.remove(MessageType.SAVE_GAME);
@@ -48,7 +51,7 @@ public class AiGameSession extends GameSession{
             .updatePlayer(this.linkedPlayer,Config.PlayerAction.STATIC_POSITION,null);
 
         // création du personnage de l'ia
-        this.aiPlayer = new AiPlayer(this);
+        this.aiPlayer = new AiPlayer(this,new MiniMaxAiManager(this.linkedGame) );
 
         this.aiPlayer.setPosition(
             new Player.Position(
@@ -98,7 +101,7 @@ public class AiGameSession extends GameSession{
             PlayerAction action = messageData.getAction();
 
             if(Player.playerHitActions.contains(action) ){
-                // gestion de si c'est une attaque et mise à jour de la scène
+                // gestion de si c'est une attaque et mise à jour de la scène ainsi que des données de vie
                 GameCallback toDo = this.doAttackIfFrom(
                     this.gameSessionScene.getPlayerManager(this.linkedPlayer).getView(),
                     this.linkedPlayer,
@@ -111,6 +114,13 @@ public class AiGameSession extends GameSession{
         });
 
         return map;
+    }
+
+    @Override
+    protected synchronized GameSession managePlayerEntrantAction(Message actionMessage) {
+        Platform.runLater(() -> super.managePlayerEntrantAction(actionMessage) );
+
+        return this;
     }
 
     /**

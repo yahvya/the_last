@@ -21,6 +21,18 @@ import yahaya_rachelle.game.GameSession;
  */
 public class AiPlayer extends Player implements Runnable{
     /**
+     * vitesse de jeux supposé d'un humain (réglage de la vitesse de frappe)
+     * 100 à 250 ms
+     * 100 -> les meilleurs
+     */
+    public static final int HUMAN_SPEED = 230;
+
+    /**
+     * vitesse de jeux supposé d'un humain de la course en restant appuyé (réglage de la vitesse de course)
+     */
+    public static final int HUMAN_RUN_SPEED = 40;
+
+    /**
      * défini l'arrêt du thread
      */
     private boolean stop;
@@ -35,7 +47,21 @@ public class AiPlayer extends Player implements Runnable{
      */
     protected Player opponent;
 
-    public AiPlayer(GameSession linkedGameSession)throws FileNotFoundException, ParseException, IOException, URISyntaxException {
+    /**
+     * gestion des actions de l'ia
+     */
+    protected AiPlayerActionManager manager;
+
+    /**
+     *
+     * @param linkedGameSession session de jeux
+     * @param manager l'algorithme de calcul des actions à utilisé
+     * @throws FileNotFoundException erreur de traitement interne
+     * @throws ParseException erreur de traitement interne
+     * @throws IOException erreur de traitement interne
+     * @throws URISyntaxException erreur de traitement interne
+     */
+    public AiPlayer(GameSession linkedGameSession,AiPlayerActionManager manager)throws FileNotFoundException, ParseException, IOException, URISyntaxException {
         super(null,"Zvheer", linkedGameSession);
 
         // récupération d'un personnage aléatoire
@@ -44,6 +70,7 @@ public class AiPlayer extends Player implements Runnable{
         int countOfCharacters = characters.size();
         
         this.character = characters.get(new Random().nextInt(0,countOfCharacters - 1) );
+        this.manager = manager;
     }
 
     /**
@@ -89,17 +116,30 @@ public class AiPlayer extends Player implements Runnable{
      */
     @Override
     public void run(){
-        this.stop = false; 
-        
-        while(!stop && !this.isDead() ){
-            System.out.println("position x de l'opposant : " + opponent.getPosition().currentX + " - ma vie : " + this.currentLife + " - mon x : " + this.position.currentX);
-            try{
-                this.communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,new PlayerActionMessage(KeyCode.F,PlayerAction.ATTACK)) );
-                Thread.sleep(1000);
-            }
-            catch(Exception e){
+        // attente de lancement du programme
+        try{ Thread.sleep(1000); }catch (Exception e){}
 
+        while(!this.stop && !this.isDead() ){
+            try{
+                // calcul du temps utilisé de calcul
+                long calculationStart = System.currentTimeMillis();
+
+                PlayerActionMessage toDo = this.manager.getBestActionToDo(this,this.opponent);
+
+                long delay = System.currentTimeMillis() - calculationStart;
+
+                // temps d'attente pour matcher la vitesse de jeux humaine
+                if(delay < AiPlayer.HUMAN_SPEED){
+                    // vitesse supérieur pour la course
+                    if(toDo.getAction() == PlayerAction.RUN)
+                        Thread.sleep(delay < AiPlayer.HUMAN_RUN_SPEED ? AiPlayer.HUMAN_RUN_SPEED - delay : 0);
+                    else
+                        Thread.sleep(AiPlayer.HUMAN_SPEED - delay);
+                }
+
+                if(toDo != null) this.communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,toDo) );
             }
+            catch(Exception e){}
         }
     }
 
@@ -111,5 +151,18 @@ public class AiPlayer extends Player implements Runnable{
         this.stop = true;
 
         return this;
+    }
+
+    /**
+     * interface d'ia pouvant gérer l'action du joueur ia
+     */
+    public static interface AiPlayerActionManager{
+        /**
+         * cherche la meilleure action à faire pour le joueur ia
+         * @param ai le joueur ia
+         * @param opponent l'opposant de l'ia
+         * @return la meilleure action à faire par rapport au contexte donnée
+         */
+        public PlayerActionMessage getBestActionToDo(Player ai,Player opponent);
     }
 }
