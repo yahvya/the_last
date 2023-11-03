@@ -11,7 +11,7 @@ import org.json.simple.parser.ParseException;
 import yahaya_rachelle.actor.AiPlayer;
 import yahaya_rachelle.actor.Character;
 import yahaya_rachelle.actor.Player;
-import yahaya_rachelle.algorithm.MiniMaxAiManager;
+import yahaya_rachelle.algorithm.minimax.MiniMaxAiManager;
 import yahaya_rachelle.communication.communication.AiCommunicator;
 import yahaya_rachelle.communication.communication.Communicator.MessageManager;
 import yahaya_rachelle.communication.message.Message;
@@ -29,7 +29,7 @@ public class AiGameSession extends GameSession{
     /**
      * joueur ia lié
      */
-    private AiPlayer aiPlayer;
+    protected AiPlayer aiPlayer;
 
     public AiGameSession(Game linkedGame, Character character, String pseudo, GameCallback toCallOnEnd) throws FileNotFoundException, ParseException, IOException, URISyntaxException {
         super(linkedGame, character, pseudo, toCallOnEnd);
@@ -61,8 +61,6 @@ public class AiGameSession extends GameSession{
                 new ConfigGetter<Long>(this.linkedGame).getValueOf(Config.App.WINDOW_HEIGHT.key).doubleValue() - 40 
             )
         );
-
-        this.gameSessionScene.getPage().getWidth();
 
         AiCommunicator linkedPlayerCommunicator = new AiCommunicator(actionsMap,this.linkedPlayer);
         AiCommunicator aiCommunicator = new AiCommunicator(this.createIaActionsMap(),this.aiPlayer);

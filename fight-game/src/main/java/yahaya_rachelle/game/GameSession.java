@@ -277,7 +277,8 @@ public class GameSession extends Configurable{
         catch(Exception e){}
 
         this.gameSessionScene.getPage().setOnKeyPressed(null);
-        this.toCallOnEnd.action();
+
+        if(this.toCallOnEnd != null) this.toCallOnEnd.action();
 
         return this;
     }

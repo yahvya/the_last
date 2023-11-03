@@ -53,6 +53,13 @@ public class AiPlayer extends Player implements Runnable{
     protected AiPlayerActionManager manager;
 
     /**
+     * constructeur de copie
+     */
+    protected AiPlayer(Character character,String pseudo){
+        super(character,pseudo);
+    }
+
+    /**
      *
      * @param linkedGameSession session de jeux
      * @param manager l'algorithme de calcul des actions à utilisé
@@ -139,7 +146,7 @@ public class AiPlayer extends Player implements Runnable{
 
                 if(toDo != null) this.communicator.propagateMessage(new Message(MessageType.RECEIVE_PLAYER_ACTION,toDo) );
             }
-            catch(Exception e){}
+            catch(Exception e){System.out.println(e);System.exit(0);}
         }
     }
 
@@ -151,6 +158,20 @@ public class AiPlayer extends Player implements Runnable{
         this.stop = true;
 
         return this;
+    }
+
+    synchronized public AiPlayer copy(){
+        AiPlayer copiedPlayer = new AiPlayer(this.character.copy(),this.pseudo);
+
+        copiedPlayer.width = this.width;
+        copiedPlayer.height = this.height;
+        copiedPlayer.currentLife = this.currentLife;
+        copiedPlayer.position = this.position.copy();
+        this.opponent = null;
+        this.manager = null;
+        this.stop = false;
+
+        return copiedPlayer;
     }
 
     /**

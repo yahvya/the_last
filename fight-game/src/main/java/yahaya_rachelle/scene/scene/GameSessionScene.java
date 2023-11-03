@@ -97,7 +97,18 @@ public class GameSessionScene extends GameScene{
      * @param action
      * @param toDoOnEnd
      */
-   synchronized public GameSessionScene updatePlayer(Player player,Config.PlayerAction action,GameCallback toDoOnEnd){
+    synchronized public GameSessionScene updatePlayer(Player player,Config.PlayerAction action,GameCallback toDoOnEnd){
+        return this.updatePlayer(player,action,toDoOnEnd,false);
+    }
+
+    /**
+     * met à jour la position et l'animation du joueur donnée
+     * @param player
+     * @param action
+     * @param toDoOnEnd
+     * @param goToEnd si true l'action sera faites directement sans animation
+     */
+   synchronized public GameSessionScene updatePlayer(Player player,Config.PlayerAction action,GameCallback toDoOnEnd,boolean goToEnd){
 
         try{
             PlayerManager manager = this.playersMap.get(player);
@@ -106,7 +117,7 @@ public class GameSessionScene extends GameScene{
                 .updateDirection()
                 .updateViewPosition()
                 .updateLifebar()
-                .newAction(action,toDoOnEnd);
+                .newAction(action,toDoOnEnd,goToEnd);
         }
         catch(Exception e){}
 
@@ -356,9 +367,11 @@ public class GameSessionScene extends GameScene{
         /**
          * met à jour l'action actuel
          * @param action
+         * @param toDoOnEnd
+         * @param goToEnd si true l'action est faites directement jusqu'au bout
          * @return this
          */
-        synchronized public void newAction(Config.PlayerAction action,GameCallback toDoOnEnd){
+        synchronized public void newAction(Config.PlayerAction action,GameCallback toDoOnEnd,boolean goToEnd){
             // actions pouvant être stoppé si elles sont en cours d'éxécution
             final List<Config.PlayerAction> stoppableActions = Arrays.asList(
                 Config.PlayerAction.RUN,
@@ -379,12 +392,14 @@ public class GameSessionScene extends GameScene{
                 Config.PlayerAction.FALL
             );
 
-            // cas spécial courir
-            if(action == Config.PlayerAction.RUN && this.currentAction == action) return;
-            // vérification du cas ignorer
-            if(this.currentTimeline != null && this.currentAction != null && ignoreActions.contains(this.currentAction) && action != Config.PlayerAction.FALL ) return;
-            // vérification du cas stoppable
-            if(stoppableActions.contains(action) && this.currentAction != null && this.currentAction == action && this.currentTimeline != null) this.currentTimeline.stop();
+            if(!goToEnd){
+                // cas spécial courir
+                if(action == Config.PlayerAction.RUN && this.currentAction == action) return;
+                // vérification du cas ignorer
+                if(this.currentTimeline != null && this.currentAction != null && ignoreActions.contains(this.currentAction) && action != Config.PlayerAction.FALL ) return;
+                // vérification du cas stoppable
+                if(stoppableActions.contains(action) && this.currentAction != null && this.currentAction == action && this.currentTimeline != null) this.currentTimeline.stop();
+            }
 
             // construction de la timeline de l'action
 
@@ -450,6 +465,11 @@ public class GameSessionScene extends GameScene{
             else
                 newTimeline.setCycleCount(Animation.INDEFINITE);
 
+            if(goToEnd){
+                newTimeline.jumpTo("endAnimation");
+                return;
+            }
+
             // si première timeline alors on lance
             if(this.currentTimeline == null){
                 this.currentAction = action;
@@ -465,7 +485,7 @@ public class GameSessionScene extends GameScene{
                         if(toDoOnEnd != null) Platform.runLater(() -> toDoOnEnd.action() );
                     }
                     else if(!Player.playerHitActions.contains(action) || !this.player.isDead() )
-                        Platform.runLater(() -> this.newAction(action, toDoOnEnd) );
+                        Platform.runLater(() -> this.newAction(action, toDoOnEnd,goToEnd) );
                 }
                 else{
                     // on écrase l'action actuelle

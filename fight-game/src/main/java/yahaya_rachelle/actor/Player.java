@@ -55,6 +55,17 @@ public class Player extends Configurable implements Serializable{
     }
 
     /**
+     * constructeur de copie
+     */
+    protected Player(Character character,String pseudo){
+        this.character = character;
+        this.pseudo = pseudo;
+        this.canDoSuperAttack = true;
+        this.canDoAction = true;
+        this.canMoveS = true;
+    }
+
+    /**
      * 
      * @param fromPlayer
      * @param attackType
@@ -108,10 +119,6 @@ public class Player extends Configurable implements Serializable{
         return this;
     }
 
-    synchronized public Position getposition() {
-        return this.position;
-    }
-
     public double getWidth(){
         return this.width;
     }
@@ -134,6 +141,21 @@ public class Player extends Configurable implements Serializable{
 
     public String getPseudo() {
         return this.pseudo;
+    }
+
+    /**
+     *
+     * @return une copie de cet objet
+     */
+    synchronized public Player copy(){
+        Player copiedPlayer = new Player(this.character.copy(),this.pseudo);
+
+        copiedPlayer.width = this.width;
+        copiedPlayer.height = this.height;
+        copiedPlayer.currentLife = this.currentLife;
+        copiedPlayer.position = this.position.copy();
+
+        return copiedPlayer;
     }
 
     synchronized public boolean getCanDoSuperAttack(){
@@ -172,6 +194,20 @@ public class Player extends Configurable implements Serializable{
             this.currentX = currentX;
             this.currentY = currentY;  
             this.currentDirection = Direction.RIGHT;
+        }
+
+        /**
+         *
+         * @return une copie de cet objet
+         */
+        synchronized public Position copy(){
+            Position position = new Position(this.currentX,this.currentY,this.containerWidth,this.containerHeight);
+
+            position.currentDirection = this.currentDirection;
+            position.linkedElementHeight = this.linkedElementHeight;
+            position.linkedElementWidth = this.linkedElementWidth;
+
+            return position;
         }
 
         /**

@@ -37,8 +37,11 @@ public class Character extends Configurable implements Serializable{
     private double force;
     private double superForce;
 
+    private double maxForce;
+
     public Character(String configFilePath,double maxForce,double superAttackAdding) throws FileNotFoundException, ParseException, IOException, URISyntaxException{
         this.configFilePath = configFilePath;
+        this.maxForce = maxForce;
         this.actionsMap = new HashMap<Config.PlayerAction,ArrayList<Image> >();
         this.serializableActionsMap = new HashMap<Config.PlayerAction,ArrayList<byte[]> >();
 
@@ -137,8 +140,34 @@ public class Character extends Configurable implements Serializable{
     }
 
     /**
+     * supprime les images de séquences
+     * @return this
+     */
+    public Character clearImageSequences(){
+        this.actionsMap.forEach((key,images) -> {
+            images.clear();
+            this.serializableActionsMap.get(key).clear();
+        });
+
+        return this;
+    }
+
+    /**
+     *
+     * @return une copie de cet objet ou null en cas d'erreur
+     */
+    public Character copy(){
+        try{
+            return new Character(this.configFilePath,this.maxForce,this.superForce - this.force);
+        }
+        catch(Exception e){
+            return null;
+        }
+    }
+
+    /**
      * 
-     * @param action
+     * @param action l'action
      * @return la liste des images décrivant l'action donnée
      */
     public ArrayList<Image> getActionSequence(Config.PlayerAction action){
